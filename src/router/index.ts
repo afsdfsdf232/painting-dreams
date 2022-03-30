@@ -49,6 +49,14 @@ const routes: Array<RouteRecordRaw> = [
           title: '公司项目'
         }
       },
+      {
+        name: 'Job',
+        path: 'job',
+        component: () => import(/* webpackChunkName: "Job" */ '@/views/Job.vue'),
+        meta: {
+          title: '在职人员'
+        }
+      },
       
       
 
