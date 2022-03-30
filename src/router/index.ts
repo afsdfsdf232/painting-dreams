@@ -6,7 +6,53 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: 'Layout',
-    component: Layout
+    redirect: '/shopCalendar',
+    component: Layout,
+    children: [
+      {
+        name: 'ShopCalendar',
+        path: 'shopCalendar',
+        component: () => import(/* webpackChunkName: "ShopCalendar" */ '@/views/ShopCalendar.vue'),
+        meta: {
+          title: '工作日历'
+        }
+      },
+      {
+        name: 'AllItems',
+        path: 'allItems',
+        component: () => import(/* webpackChunkName: "AllItems" */ '@/views/AllItems.vue'),
+        meta: {
+          title: '所有项目'
+        }
+      },
+      {
+        name: 'ArchivedItems',
+        path: 'archivedItems',
+        component: () => import(/* webpackChunkName: "ArchivedItems" */ '@/views/ArchivedItems.vue'),
+        meta: {
+          title: '归档项目'
+        }
+      },
+      {
+        name: 'ArchivedItems',
+        path: 'archivedItems',
+        component: () => import(/* webpackChunkName: "ArchivedItems" */ '@/views/ArchivedItems.vue'),
+        meta: {
+          title: '归档项目'
+        }
+      },
+      {
+        name: 'CompanyItems',
+        path: 'companyItems',
+        component: () => import(/* webpackChunkName: "CompanyItems" */ '@/views/CompanyItems.vue'),
+        meta: {
+          title: '公司项目'
+        }
+      },
+      
+      
+
+    ]
   },
   {
     path: '/login',

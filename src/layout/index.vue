@@ -7,7 +7,9 @@
       <div class="main-side-bar">
         <side-bar />
       </div>
-      <div class="main"><router-view /></div>
+      <div class="main">
+        <router-view />
+      </div>
     </div>
   </div>
 </template>
@@ -37,6 +39,29 @@ export default defineComponent({
     margin-top: 13px;
     display: flex;
     flex-wrap: nowrap;
+    overflow: hidden;
+    .main {
+      height: calc(100vh - 93px);
+      width: calc(100vw - 240px);
+      overflow: auto;
+      &::-webkit-scrollbar {
+        /*滚动条整体样式*/
+        width: 10px; /*高宽分别对应横竖滚动条的尺寸*/
+        height: 10px;
+      }
+      &::-webkit-scrollbar-thumb {
+        /*滚动条里面小方块*/
+        border-radius: 10px;
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        background-color: #c0c7cc;
+      }
+      &::-webkit-scrollbar-track {
+        /*滚动条里面轨道*/
+        box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        background-color: #ededed;
+      }
+    }
   }
 }
 </style>
