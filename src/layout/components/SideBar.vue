@@ -1,56 +1,81 @@
 <template>
   <div class="side-bar-container">
     <el-menu
-      active-text-color="#ffd04b"
-      background-color="#545c64"
+      active-text-color="#101010"
+      background-color="#F3F5F8"
       class="el-menu-vertical-demo"
-      default-active="2"
-      text-color="#fff"
-      @open="handleOpen"
-      @close="handleClose"
+      default-active="1"
+      :router="true"
+      text-color="#101010"
     >
-      <el-sub-menu index="1">
-        <template #title>
-          <el-icon><location /></el-icon>
-          <span>Navigator One</span>
-        </template>
-        <el-menu-item-group title="Group One">
-          <el-menu-item index="1-1">item one</el-menu-item>
-          <el-menu-item index="1-2">item one</el-menu-item>
-        </el-menu-item-group>
-        <el-menu-item-group title="Group Two">
-          <el-menu-item index="1-3">item three</el-menu-item>
-        </el-menu-item-group>
-        <el-sub-menu index="1-4">
-          <template #title>item four</template>
-          <el-menu-item index="1-4-1">item one</el-menu-item>
-        </el-sub-menu>
-      </el-sub-menu>
-      <el-menu-item index="2">
-        <el-icon><icon-menu /></el-icon>
-        <span>Navigator Two</span>
-      </el-menu-item>
-      <el-menu-item index="3" disabled>
-        <el-icon><document /></el-icon>
-        <span>Navigator Three</span>
-      </el-menu-item>
-      <el-menu-item index="4">
+      <el-menu-item
+        :class="{ 'is-active': route.name === currentPageName }"
+        v-for="route in routes.children"
+        :key="route.path"
+        :index="route.path"
+      >
         <el-icon><setting /></el-icon>
-        <span>Navigator Four</span>
+        <span> {{ route.meta.title }}</span>
       </el-menu-item>
     </el-menu>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
-export default defineComponent({})
+import { defineComponent, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { Setting } from '@element-plus/icons-vue'
+
+export default defineComponent({
+  components: {
+    setting: Setting
+  },
+  setup () {
+    const router = useRouter()
+    const route = useRoute()
+    const routes = computed(() =>
+      router.options.routes.find((route) => route.name === 'Layout')
+    )
+    const currentPageName = computed(() => route.name)
+
+    return {
+      routes,
+      currentPageName
+    }
+  }
+})
 </script>
 
 <style lang="less" scoped>
 .side-bar-container {
   width: 240px;
-  height: calc(100vh - 93px);
+  max-height: calc(100vh - 80px);
   background-color: rgba(243, 245, 248, 100);
+  overflow: auto;
+  .el-menu-item {
+    font-size: 14px;
+  }
+
+  .is-active {
+    background-color: #e0e7ec;
+  }
+  &::-webkit-scrollbar {
+    /*滚动条整体样式*/
+    width: 10px;
+    /*高宽分别对应横竖滚动条的尺寸*/
+    height: 10px;
+  }
+  &::-webkit-scrollbar-thumb {
+    /*滚动条里面小方块*/
+    border-radius: 10px;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background-color: #c0c7cc;
+  }
+  &::-webkit-scrollbar-track {
+    /*滚动条里面轨道*/
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    background-color: #ededed;
+  }
 }
 </style>
