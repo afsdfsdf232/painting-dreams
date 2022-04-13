@@ -15,7 +15,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'shopCalendar',
         component: () =>
           import(
-            /* webpackChunkName: "ShopCalendar" */ '@/views/ShopCalendar.vue'
+            /* webpackChunkName: "ShopCalendar" */ '@/views/ShopCalendar/index.vue'
           ),
         meta: {
           title: '工作日历'
@@ -132,7 +132,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Settings',
         path: 'settings',
         component: () =>
-          import(/* webpackChunkName: "Job" */ '@/views/Settings.vue'),
+          import(/* webpackChunkName: "Job" */ '@/views/Settings/index.vue'),
         meta: {
           title: '后台设置'
         }

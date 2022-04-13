@@ -6,8 +6,13 @@ export default createStore({
     userInfo: null
   },
   mutations: {
-    SET_USER (state, data) {
+    SET_USER (state, data): void {
       state.userInfo = data
+    },
+    REMOVE_STROE (state, stores: Array<string>): void {
+      stores.map((store) => {
+        state[store] = null
+      })
     }
   },
   actions: {},

@@ -38,14 +38,14 @@ export default defineComponent({
   .main-content {
     display: flex;
     flex-wrap: nowrap;
-    overflow: hidden;
-    // margin: 0 20px 0 0;
+    flex-shrink: 0;
     .main {
       height: calc(100vh - 80px);
       width: calc(100vw - 240px);
       overflow: auto;
       box-sizing: border-box;
       padding: 13px 20px 0 20px;
+      flex-shrink: 0;
       &::-webkit-scrollbar {
         /*滚动条整体样式*/
         width: 10px; /*高宽分别对应横竖滚动条的尺寸*/

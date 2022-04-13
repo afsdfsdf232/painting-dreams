@@ -7,7 +7,18 @@
         <el-avatar :size="40" :src="circleUrl" />
         <span class="name">张小红</span>
         <div class="line"></div>
-        <div class="logout">退出登录</div>
+        <el-popconfirm
+          confirm-button-text="确定"
+          cancel-button-text="取消"
+          :icon="InfoFilled"
+          icon-color="red"
+          title="确定退出登录吗?"
+          @confirm="logOutHandle"
+        >
+          <template #reference>
+            <div class="logout">退出登录</div>
+          </template>
+        </el-popconfirm>
       </div>
     </div>
   </div>
@@ -15,16 +26,23 @@
 
 <script>
 import { defineComponent, computed } from 'vue'
+import { InfoFilled } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
+import { logOut } from '@/utils/index'
 export default defineComponent({
   setup () {
     const circleUrl =
       'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
     const route = useRoute()
     const title = computed(() => route.meta.title)
+    const logOutHandle = () => {
+      logOut()
+    }
     return {
+      InfoFilled,
       title,
-      circleUrl
+      circleUrl,
+      logOutHandle
     }
   }
 })
