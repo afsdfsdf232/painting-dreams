@@ -111,7 +111,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'cooperativeCompany',
         component: () =>
           import(
-            /* webpackChunkName: "Job" */ '@/views/CooperativeCompany.vue'
+            /* webpackChunkName: "Job" */ '@/views/CooperativeCompany/index.vue'
           ),
         meta: {
           title: '合作甲方公司信息'
@@ -122,7 +122,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'administrationCost',
         component: () =>
           import(
-            /* webpackChunkName: "Job" */ '@/views/AdministrationCost.vue'
+            /* webpackChunkName: "Job" */ '@/views/AdministrationCost/index.vue'
           ),
         meta: {
           title: '管理成本'

@@ -17,75 +17,91 @@
         width="180"
       />
     </el-table>
-
-    <!-- 职位分工 -->
-    <div class="job-division">
-      <div class="job-division-header">
-        <div class="tab-item">职位分工</div>
-        <el-button size="large" :icon="CirclePlus">新增分工</el-button>
+    <div class="d-flex">
+      <!-- 职位分工 -->
+      <div class="job-division w50 mr40">
+        <div class="job-division-header">
+          <div class="tab-item">职位分工</div>
+          <el-button
+            size="large"
+            @click="addDivisionModal = true"
+            :icon="CirclePlus"
+            >新增分工</el-button
+          >
+        </div>
+        <el-table
+          border
+          :stripe="true"
+          height="250"
+          size="large"
+          :data="tableData"
+        >
+          <el-table-column
+            v-for="(head, index) in jobHeaderData"
+            :key="index"
+            :prop="head.key"
+            :label="head.name"
+            :width="head.width"
+          />
+          <el-table-column fixed="right" label="操作" width="100">
+            <template #default>
+              <el-button type="text" size="small" @click="handleClick"
+                >编辑</el-button
+              >
+              <el-button type="text" size="small">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
-      <el-table
-        border
-        :stripe="true"
-        height="250"
-        size="large"
-        :data="tableData"
-      >
-        <el-table-column
-          v-for="(head, index) in jobHeaderData"
-          :key="index"
-          :prop="head.key"
-          :label="head.name"
-          :width="head.width"
-        />
-        <el-table-column fixed="right" label="操作" width="180">
-          <template #default>
-            <el-button type="text" size="small" @click="handleClick"
-              >编辑</el-button
-            >
-            <el-button type="text" size="small">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-    </div>
 
-    <!-- 部门管理 -->
-    <div class="job-division">
-      <div class="job-division-header">
-        <div class="tab-item">部门管理</div>
-        <el-button size="large" :icon="CirclePlus">新建部门</el-button>
+      <!-- 部门管理 -->
+      <div class="job-division w50">
+        <div class="job-division-header">
+          <div class="tab-item">部门管理</div>
+          <el-button
+            size="large"
+            @click="addDepartmentModal = true"
+            :icon="CirclePlus"
+            >新建部门</el-button
+          >
+        </div>
+        <el-table
+          border
+          :stripe="true"
+          height="250"
+          size="large"
+          :data="tableData"
+          style="width: 100%"
+        >
+          <el-table-column
+            v-for="(head, index) in departmentHeaderData"
+            :key="index"
+            :prop="head.key"
+            :label="head.name"
+            :width="head.width"
+          />
+          <el-table-column fixed="right" label="操作" width="100">
+            <template #default>
+              <el-button type="text" size="small" @click="handleClick"
+                >编辑</el-button
+              >
+              <el-button type="text" size="small">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
       </div>
-      <el-table
-        border
-        :stripe="true"
-        height="250"
-        size="large"
-        :data="tableData"
-        style="width: 100%"
-      >
-        <el-table-column
-          v-for="(head, index) in departmentHeaderData"
-          :key="index"
-          :prop="head.key"
-          :label="head.name"
-          :width="head.width"
-        />
-        <el-table-column fixed="right" label="操作" width="180">
-          <template #default>
-            <el-button type="text" size="small" @click="handleClick"
-              >编辑</el-button
-            >
-            <el-button type="text" size="small">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
     </div>
 
     <!-- 后台人员 -->
     <div class="job-division">
       <div class="job-division-header">
         <div class="tab-item">后台人员</div>
-        <el-button size="large" :icon="CirclePlus">新建人员</el-button>
+        <el-button
+          size="large"
+          @click="addPersonnelModal = true"
+          :icon="CirclePlus"
+          >新建人员</el-button
+        >
       </div>
       <el-table
         border
@@ -184,7 +200,11 @@
             <el-input placeholder="请输入简称" v-model="form.name" />
           </el-form-item>
           <el-form-item label="公司全名">
-            <el-select v-model="form.region" placeholder="请选择公司全名">
+            <el-select
+              style="width: 100%"
+              v-model="form.region"
+              placeholder="请选择公司全名"
+            >
               <el-option label="Zone one" value="shanghai" />
               <el-option label="Zone two" value="beijing" />
             </el-select>
@@ -211,14 +231,150 @@
         </el-form>
       </div>
       <template #footer>
-        <span class="dialog-footer">
+        <div class="dialog-footer">
           <el-button
+            class="btn"
             type="primary"
+            style="width: 200px"
             size="large"
             @click="addCompanyModal = false"
             >保存</el-button
           >
-        </span>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 新增分工弹窗 -->
+    <el-dialog
+      v-model="addDivisionModal"
+      top="55px"
+      title="新增岗位"
+      width="35%"
+      center
+    >
+      <div class="rule-modal modal scrollbar">
+        <el-form size="large" :model="form" label-width="120px">
+          <el-form-item label="岗位名称">
+            <el-input placeholder="请输入岗位名称" v-model="form.name" />
+          </el-form-item>
+          <el-form-item label="所属部门">
+            <el-select
+              style="width: 100%"
+              v-model="form.region"
+              placeholder="请选择所属部门"
+            >
+              <el-option label="Zone one" value="shanghai" />
+              <el-option label="Zone two" value="beijing" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="提成点数">
+            <el-select
+              style="width: 100%"
+              v-model="form.region"
+              placeholder="请选择提成点数"
+            >
+              <el-option label="Zone one" value="shanghai" />
+              <el-option label="Zone two" value="beijing" />
+            </el-select>
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="addCompanyModal = false"
+            >保存</el-button
+          >
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 新建部门弹窗 -->
+    <el-dialog
+      v-model="addDepartmentModal"
+      top="55px"
+      title="新建部门"
+      width="35%"
+      center
+    >
+      <div class="rule-modal modal scrollbar">
+        <el-form size="large" :model="form" label-width="120px">
+          <el-form-item label="部门名称">
+            <el-input placeholder="请输入部门名称" v-model="form.name" />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="addCompanyModal = false"
+            >保存</el-button
+          >
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 新建后台人员弹窗 -->
+    <el-dialog
+      v-model="addPersonnelModal"
+      top="55px"
+      title="新建部门"
+      width="35%"
+      center
+    >
+      <div class="rule-modal modal scrollbar">
+        <el-form size="large" :model="form" label-width="120px">
+          <el-form-item label="姓名">
+            <el-input placeholder="请输入姓名" v-model="form.name" />
+          </el-form-item>
+          <el-form-item label="岗位">
+            <el-select
+              style="width: 100%"
+              v-model="form.region"
+              placeholder="请选择岗位"
+            >
+              <el-option label="Zone one" value="shanghai" />
+              <el-option label="Zone two" value="beijing" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="提成点数">
+            <el-input
+              disabled
+              placeholder="和岗位绑定(岗位改变点数也改变)"
+              v-model="form.name"
+            />
+          </el-form-item>
+          <el-form-item label="联系电话">
+            <el-input placeholder="请输入联系电话" v-model="form.name" />
+          </el-form-item>
+          <el-form-item label="设置密码">
+            <el-input placeholder="请输入密码" v-model="form.name" />
+          </el-form-item>
+          <el-form-item label="确定密码">
+            <el-input placeholder="请输入确定密码" v-model="form.name" />
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="addCompanyModal = false"
+            >保存</el-button
+          >
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -258,7 +414,10 @@ const departmentHeaderData = [
 ]
 
 const peopleHeaderData = [
-  { name: '姓名', key: 'name' },
+  {
+    name: '姓名',
+    key: 'name'
+  },
   { name: '岗位', key: 'name' },
   { name: '提成点数', key: 'name' },
   { name: '联系电话', key: 'name' },
@@ -280,6 +439,9 @@ export default defineComponent({
     }
     const showRuleModal = ref(false) // 后台配置说明
     const addCompanyModal = ref(false) // 新增公司弹窗
+    const addDivisionModal = ref(false) // 新增分工弹窗
+    const addDepartmentModal = ref(false) // 新建部门弹窗
+    const addPersonnelModal = ref(false) // 新增后台人员弹窗
     const form = reactive({
       name: '',
       region: '',
@@ -301,7 +463,10 @@ export default defineComponent({
       CirclePlus,
       showRuleModal,
       addCompanyModal,
-      form
+      form,
+      addDivisionModal,
+      addDepartmentModal,
+      addPersonnelModal
     }
   }
 })
@@ -348,5 +513,13 @@ export default defineComponent({
   .el-form-item {
     margin: 10px 0 0 0;
   }
+  .dialog-footer {
+    .btn {
+      width: 200px;
+    }
+  }
+}
+.mr40 {
+  margin-right: 40px;
 }
 </style>

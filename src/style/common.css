@@ -15,3 +15,23 @@
   border-radius: 10px;
   background-color: #ededed;
 }
+
+.d-flex {
+  display: flex;
+}
+
+.d-f-row-center {
+  justify-content: center;
+}
+
+.d-f-row-bet {
+  justify-content: space-between;
+}
+
+.d-f-col-center {
+  align-items: center;
+}
+
+.w50 {
+  width: 50%;
+}

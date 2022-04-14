@@ -1,19 +1,9 @@
 <template>
   <div class="cooperative-company-container">
-    <div class="filtter-box">
-      <div class="left-filter">
-        <div class="painter">
-          <div class="item active">全部公司</div>
-        </div>
-        <div class="2d-painter">
-          <div class="item">合作中公司</div>
-        </div>
-        <div class="2d-painter">
-          <div class="item">待合作公司</div>
-        </div>
-      </div>
-      <div class="right-filter">
-        <el-button size="large" :icon="CirclePlus">添加公司 </el-button>
+    <div class="filter-header d-flex d-f-row-bet">
+      <div class="filter-left"></div>
+      <div class="filter-right">
+        <d-add text="添加公司" />
       </div>
     </div>
   </div>
@@ -21,13 +11,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue'
-import { CirclePlus } from '@element-plus/icons-vue'
 
 export default defineComponent({
   setup () {
-    return {
-      CirclePlus
-    }
+    return {}
   }
 })
 </script>
