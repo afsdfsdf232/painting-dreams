@@ -15,7 +15,8 @@ const app = createApp(App)
   .use(store)
   .use(router)
   .use(ElementPlus, {
-    locale: zhCn
+    locale: zhCn,
+    size: 'large'
   })
   .use(VXETable)
 registerGlobalComponents(app)

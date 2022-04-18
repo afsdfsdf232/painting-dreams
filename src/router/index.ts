@@ -65,7 +65,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Painter',
         path: 'painter',
         component: () =>
-          import(/* webpackChunkName: "Job" */ '@/views/Painter.vue'),
+          import(/* webpackChunkName: "Job" */ '@/views/Painter/index.vue'),
         meta: {
           title: '外发画师安排'
         }
@@ -74,7 +74,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Receipt',
         path: 'receipt',
         component: () =>
-          import(/* webpackChunkName: "Job" */ '@/views/Receipt.vue'),
+          import(/* webpackChunkName: "Job" */ '@/views/Receipt/index.vue'),
         meta: {
           title: '发票和收据'
         }
@@ -83,7 +83,9 @@ const routes: Array<RouteRecordRaw> = [
         name: 'EmployeeInfo',
         path: 'employeeInfo',
         component: () =>
-          import(/* webpackChunkName: "Job" */ '@/views/EmployeeInfo.vue'),
+          import(
+            /* webpackChunkName: "Job" */ '@/views/EmployeeInfo/index.vue'
+          ),
         meta: {
           title: '员工资料'
         }
@@ -92,7 +94,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'PainterInfo',
         path: 'painterInfo',
         component: () =>
-          import(/* webpackChunkName: "Job" */ '@/views/PainterInfo.vue'),
+          import(/* webpackChunkName: "Job" */ '@/views/PainterInfo/index.vue'),
         meta: {
           title: '外发画师资料'
         }
@@ -101,7 +103,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Payroll',
         path: 'payroll',
         component: () =>
-          import(/* webpackChunkName: "Job" */ '@/views/Payroll.vue'),
+          import(/* webpackChunkName: "Job" */ '@/views/Payroll/index.vue'),
         meta: {
           title: '工资表'
         }
