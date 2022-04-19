@@ -1,5 +1,5 @@
 <template>
-  <div class="painter-container">
+  <div class="company-items-container">
     <div class="fillter-content d-flex d-f-row-bet">
       <div class="fillter-content-left d-flex">
         <el-date-picker
@@ -7,18 +7,12 @@
           type="month"
           placeholder="请选择年月"
         />
-        <d-tab
-          v-for="tab in tabs"
-          :key="tab.id"
-          :text="tab.text"
-          :mr="10"
-          :width="120"
-          :active="tab.id === activeTabIndex"
-          @click="changeTab(tab.id)"
-        />
+        <el-select style="width: 160px" placeholder="请选择公司">
+          <el-option label="Zone one" value="shanghai" />
+          <el-option label="Zone two" value="beijing" />
+        </el-select>
       </div>
       <div class="fillter-content-right d-flex">
-        <!-- <div class="rule-btn">查看规则</div> -->
         <el-popover
           placement="left"
           title="Title"
@@ -27,18 +21,7 @@
           content="this is content, this is content, this is content"
         >
           <template #reference>
-            <el-button size="large">状态颜色说明</el-button>
-          </template>
-        </el-popover>
-        <el-popover
-          placement="left"
-          title="Title"
-          :width="200"
-          trigger="hover"
-          content="this is content, this is content, this is content"
-        >
-          <template #reference>
-            <el-button size="large">效率颜色说明</el-button>
+            <el-button size="large">颜色状态说明</el-button>
           </template>
         </el-popover>
       </div>
@@ -56,10 +39,6 @@
         <template v-for="(head, index) in tableHeaderData" :key="index">
           <vxe-column :field="head.prop" :title="head.name"></vxe-column>
         </template>
-
-        <!-- <vxe-column field="key" title="Key"></vxe-column>
-        <vxe-column field="content" title="Translate"></vxe-column>
-        <vxe-column field="language" title="Language"></vxe-column> -->
       </vxe-table>
     </div>
   </div>
@@ -69,32 +48,28 @@
 import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
 const tableHeaderData = [
-  { name: '画师', prop: 'name', width: 100 },
-  { name: '职位', prop: 'zw', width: 100 },
-  { name: '公司-项目', prop: 'gs', width: 120 },
-  { name: '缩略图', prop: 'img', width: 120 },
-  { name: '分工', prop: 'fg', width: 120 },
-  { name: '开始时间', prop: 'startdate', width: 120 },
-  { name: '结束时间', prop: 'enddate', width: 120 },
-  { name: '状态', prop: 'state', width: 120 },
-  { name: '工作量（天）', prop: 'count', width: 120 },
-  { name: '外发价格', prop: 'price', width: 120 },
-  { name: '完成量', prop: 'endcount', width: 120 },
-  { name: '备注/效率指数', prop: 'bz', width: 160 }
+  { name: '编号', prop: 'name', width: 100 },
+  { name: '合作公司', prop: 'zw', width: 100 },
+  { name: '项目名', prop: 'gs', width: 120 },
+  { name: '项目类型', prop: 'img', width: 120 },
+  { name: '参考图', prop: 'fg', width: 120 },
+  { name: '需求文档', prop: 'startdate', width: 120 },
+  { name: '需求地址', prop: 'enddate', width: 120 },
+  { name: '项目群组（甲方/设计师）', prop: 'state', width: 120 },
+  { name: '分工/天', prop: 'count', width: 120 },
+  { name: '总价', prop: 'price', width: 120 },
+  { name: '单价', prop: 'endcount', width: 120 },
+  { name: '排期', prop: 'bz', width: 160 },
+  { name: '设计师', prop: 'sjs', width: 160 },
+  { name: '状态', prop: 'zt', width: 160 },
+  { name: '收款状态', prop: 'skzt', width: 160 },
+  { name: '发票状态', prop: 'skzt', width: 160 },
+  { name: '备注', prop: 'bzs', width: 160 }
 ]
 
 export default defineComponent({
   setup () {
-    const activeTabIndex: Ref<number> = ref(0)
     const height: Ref<number> = ref(300)
-    const tabs = ref([
-      { text: '全部画师', id: 0 },
-      { text: 'UI组', id: 1 },
-      { text: '场景原画组', id: 2 },
-      { text: '3D建模组', id: 3 },
-      { text: '次世代建模组', id: 4 },
-      { text: '角色原画组', id: 5 }
-    ])
     const demo3 = reactive({
       tableData: [
         {
@@ -268,11 +243,6 @@ export default defineComponent({
       }
     }
 
-    const changeTab = (id: number): void => {
-      if (id !== activeTabIndex.value) {
-        activeTabIndex.value = id
-      }
-    }
     onMounted(() => {
       nextTick(() => {
         height.value = document.documentElement.clientHeight - 160
@@ -280,9 +250,6 @@ export default defineComponent({
     })
 
     return {
-      tabs,
-      activeTabIndex,
-      changeTab,
       demo3,
       mergeRowMethod,
       height,
@@ -293,7 +260,7 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.painter-container {
+.company-items-container {
   .fillter-content {
     margin-bottom: 20px;
     .rule-btn {

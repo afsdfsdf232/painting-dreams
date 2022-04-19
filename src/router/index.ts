@@ -25,7 +25,9 @@ const routes: Array<RouteRecordRaw> = [
         name: 'AllItems',
         path: 'allItems',
         component: () =>
-          import(/* webpackChunkName: "AllItems" */ '@/views/AllItems.vue'),
+          import(
+            /* webpackChunkName: "AllItems" */ '@/views/AllItems/index.vue'
+          ),
         meta: {
           title: '所有项目'
         }
@@ -35,7 +37,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'archivedItems',
         component: () =>
           import(
-            /* webpackChunkName: "ArchivedItems" */ '@/views/ArchivedItems.vue'
+            /* webpackChunkName: "ArchivedItems" */ '@/views/ArchivedItems/index.vue'
           ),
         meta: {
           title: '归档项目'
@@ -46,7 +48,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'companyItems',
         component: () =>
           import(
-            /* webpackChunkName: "CompanyItems" */ '@/views/CompanyItems.vue'
+            /* webpackChunkName: "CompanyItems" */ '@/views/CompanyItems/index.vue'
           ),
         meta: {
           title: '公司项目'
@@ -56,7 +58,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Job',
         path: 'job',
         component: () =>
-          import(/* webpackChunkName: "Job" */ '@/views/Job.vue'),
+          import(/* webpackChunkName: "Job" */ '@/views/Job/index.vue'),
         meta: {
           title: '在职人员安排'
         }

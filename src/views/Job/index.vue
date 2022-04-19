@@ -1,5 +1,5 @@
 <template>
-  <div class="painter-container">
+  <div class="job-container">
     <div class="fillter-content d-flex d-f-row-bet">
       <div class="fillter-content-left d-flex">
         <el-date-picker
@@ -27,18 +27,7 @@
           content="this is content, this is content, this is content"
         >
           <template #reference>
-            <el-button size="large">状态颜色说明</el-button>
-          </template>
-        </el-popover>
-        <el-popover
-          placement="left"
-          title="Title"
-          :width="200"
-          trigger="hover"
-          content="this is content, this is content, this is content"
-        >
-          <template #reference>
-            <el-button size="large">效率颜色说明</el-button>
+            <el-button size="large">颜色状态说明</el-button>
           </template>
         </el-popover>
       </div>
@@ -56,10 +45,6 @@
         <template v-for="(head, index) in tableHeaderData" :key="index">
           <vxe-column :field="head.prop" :title="head.name"></vxe-column>
         </template>
-
-        <!-- <vxe-column field="key" title="Key"></vxe-column>
-        <vxe-column field="content" title="Translate"></vxe-column>
-        <vxe-column field="language" title="Language"></vxe-column> -->
       </vxe-table>
     </div>
   </div>
@@ -293,7 +278,7 @@ export default defineComponent({
 </script>
 
 <style lang="less" scoped>
-.painter-container {
+.job-container {
   .fillter-content {
     margin-bottom: 20px;
     .rule-btn {
