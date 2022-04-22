@@ -5,7 +5,7 @@
       <div class="left">{{ title }}</div>
       <div class="user-info">
         <el-avatar :size="40" :src="circleUrl" />
-        <span class="name">张小红</span>
+        <span class="name">{{ userInfo.name }}</span>
         <div class="line"></div>
         <el-popconfirm
           confirm-button-text="确定"
@@ -29,8 +29,10 @@ import { defineComponent, computed } from 'vue'
 import { InfoFilled } from '@element-plus/icons-vue'
 import { useRoute } from 'vue-router'
 import { logOut } from '@/utils/index'
+import { useStore } from 'vuex'
 export default defineComponent({
   setup () {
+    const store = useStore()
     const circleUrl =
       'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
     const route = useRoute()
@@ -38,10 +40,12 @@ export default defineComponent({
     const logOutHandle = () => {
       logOut()
     }
+    const userInfo = store.state.userInfo
     return {
       InfoFilled,
       title,
       circleUrl,
+      userInfo,
       logOutHandle
     }
   }

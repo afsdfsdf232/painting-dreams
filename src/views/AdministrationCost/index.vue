@@ -49,7 +49,10 @@
           <el-date-picker size="large" type="month" placeholder="请选择年月" />
         </div>
         <div class="filter-right">
-          <d-add @click="add" text="添加成本" />
+          <d-add
+            @click="management.addManagementModal = true"
+            text="添加成本"
+          />
         </div>
       </div>
       <div class="table-content">
@@ -84,7 +87,10 @@
           />
         </div>
         <div class="filter-right">
-          <d-add @click="add" text="添加成本" />
+          <d-add
+            @click="reimbursements.addReimbursementModal = true"
+            text="添加报销"
+          />
         </div>
       </div>
       <div class="table-content">
@@ -106,11 +112,157 @@
         </el-table>
       </div>
     </div>
+    <!-- 新增管理人员弹窗 -->
+    <el-dialog
+      v-model="management.addManagementModal"
+      top="55px"
+      title="新增成本"
+      width="35%"
+      center
+    >
+      <div class="rule-modal modal scrollbar">
+        <el-form size="large" :model="form" label-width="120px">
+          <el-form-item label="姓名">
+            <el-input placeholder="请输入姓名" v-model="form.name" />
+          </el-form-item>
+          <el-form-item label="职位">
+            <el-select
+              style="width: 100%"
+              v-model="form.region"
+              placeholder="请选择职位"
+            >
+              <el-option label="Zone one" value="shanghai" />
+              <el-option label="Zone two" value="beijing" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="身份证">
+            <el-input placeholder="请输入身份证号码" v-model="form.name" />
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="addCompanyModal = false"
+            >保存</el-button
+          >
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 新增报销弹窗 -->
+    <el-drawer
+      size="50%"
+      v-model="reimbursements.addReimbursementModal"
+      title="新增报销"
+      :with-header="true"
+    >
+      <template #title>
+        <p class="t-c t-main-color f20">新增报销</p>
+      </template>
+      <div class="drawer-content d-flex d-f-row-bet">
+        <div class="drawer-content-left">
+          <el-form size="large" :model="form" label-width="110px">
+            <el-form-item label="报销人">
+              <el-input placeholder="请输入报销人姓名" v-model="form.name" />
+            </el-form-item>
+            <el-form-item label="订单">
+              <el-input placeholder="请输入订单号" v-model="form.name" />
+            </el-form-item>
+            <el-form-item label="购买渠道">
+              <el-input placeholder="请输入购买渠道" v-model="form.name" />
+            </el-form-item>
+            <el-form-item label="发票">
+              <el-upload
+                class="avatar-uploader"
+                action="https://jsonplaceholder.typicode.com/posts/"
+                :show-file-list="false"
+                :on-success="handleAvatarSuccess"
+                :before-upload="beforeAvatarUpload"
+              >
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+              </el-upload>
+            </el-form-item>
+            <el-form-item label="审核">
+              <el-select
+                style="width: 100%"
+                v-model="form.region"
+                placeholder="请选择审核状态"
+              >
+                <el-option label="Zone one" value="shanghai" />
+                <el-option label="Zone two" value="beijing" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="备注">
+              <el-input
+                type="textarea"
+                placeholder="请输入备注"
+                v-model="form.name"
+              />
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="drawer-content-right">
+          <el-form size="large" :model="form" label-width="100px">
+            <el-form-item label="时间">
+              <el-date-picker
+                style="width: 100%"
+                type="dates"
+                placeholder="请选择时间"
+              />
+            </el-form-item>
+            <el-form-item label="商品明细">
+              <el-input placeholder="请输入商品明细" v-model="form.name" />
+            </el-form-item>
+            <el-form-item label="价格">
+              <el-input placeholder="请输入商品价格" v-model="form.name" />
+            </el-form-item>
+            <el-form-item label="录入">
+              <el-select
+                style="width: 100%"
+                v-model="form.region"
+                placeholder="请选择状态"
+              >
+                <el-option label="Zone one" value="shanghai" />
+                <el-option label="Zone two" value="beijing" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="报销状态">
+              <el-select
+                style="width: 100%"
+                v-model="form.region"
+                placeholder="请选择状态"
+              >
+                <el-option label="Zone one" value="shanghai" />
+                <el-option label="Zone two" value="beijing" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+      <template #footer>
+        <div class="t-c">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="addCompanyModal = false"
+            >保存</el-button
+          >
+        </div>
+      </template>
+    </el-drawer>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, reactive } from 'vue'
+import { Plus } from '@element-plus/icons-vue'
 const tableData = [
   { name: '测试数据' },
   { name: '测试数据' },
@@ -121,6 +273,8 @@ const tableData = [
   }
 ]
 export default defineComponent({
+  components: { Plus },
+
   setup () {
     const active = ref(false)
 
@@ -154,7 +308,8 @@ export default defineComponent({
           { field: 'name', name: '职位' },
           { field: 'name', name: '实际成本' }
         ]
-      }
+      },
+      addManagementModal: false
     })
 
     // 报销数据
@@ -173,6 +328,7 @@ export default defineComponent({
         { name: '备注', prop: 'name' }
       ],
       tabIndex: 0, // 默认全部
+      addReimbursementModal: false,
       tabs: [
         {
           state: 0,
@@ -191,6 +347,16 @@ export default defineComponent({
     const changeTab = () => {
       active.value = !active.value
     }
+    const form = reactive({
+      name: '',
+      region: '',
+      date1: '',
+      date2: '',
+      delivery: false,
+      type: [],
+      resource: '',
+      desc: ''
+    })
 
     const changEreimbursementsTab = ({ state }: { state: number }) => {
       if (reimbursements.tabIndex !== state) {
@@ -204,7 +370,8 @@ export default defineComponent({
       fixedCosts,
       changEreimbursementsTab,
       tableData,
-      management
+      management,
+      form
     }
   }
 })
@@ -220,6 +387,40 @@ export default defineComponent({
   }
   .filter-header {
     margin-bottom: 20px;
+  }
+  .drawer-content {
+    width: 100%;
+    &-left {
+      width: 50%;
+      margin-right: 20px;
+    }
+    &-right {
+      width: 50%;
+    }
+  }
+  .avatar-uploader {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px dashed #d9d9d9;
+  }
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--el-transition-duration-fast);
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: var(--el-color-primary);
+  }
+  .el-icon.avatar-uploader-icon {
+    font-size: 26px;
+    color: #8c939d;
+    text-align: center;
   }
 }
 /*滚动条整体部分*/

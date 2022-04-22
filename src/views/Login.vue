@@ -76,15 +76,19 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue'
+import { defineComponent, reactive, ref, Ref } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import type { FormInstance } from 'element-plus'
+import { login, getUserInfo } from '@/request/index'
+import { base64Encode, md5Encode } from '@/utils/index'
+
 export default defineComponent({
   setup () {
     const store = useStore()
     const router = useRouter()
     const ruleFormRef = ref<FormInstance>()
+    const loading: Ref<boolean> = ref(false)
     const ruleForm = reactive({
       username: 'admin',
       password: ''
@@ -99,8 +103,22 @@ export default defineComponent({
       if (formEl) {
         await (formEl as any).validate(async (valid: boolean) => {
           if (valid) {
-            await store.commit('SET_USER', { ...ruleForm })
-            await router.push({ name: 'Layout' })
+            loading.value = true
+            const res = await login({
+              account: base64Encode(ruleForm.username),
+              password: md5Encode(ruleForm.password)
+            })
+            if (res.code === 200) {
+              // set Token
+              await store.commit('SET_TOKEN', { token: res.data.token })
+              // 获取用户信息
+              const { code, data } = await getUserInfo()
+              if (code === 200) {
+                await store.commit('SET_USER', { ...data })
+                await router.push({ name: 'Layout' })
+                loading.value = false
+              }
+            }
           }
         })
       }
