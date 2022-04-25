@@ -2,31 +2,25 @@
   <div class="settings-content">
     <view class="header-content">
       <div class="tabs-content">
-        <div
-          class="tab-item"
-          @click="changeTab(1)"
-          :class="[tabIndex === 1 && 'active-tab']"
-        >
-          营运中公司
-        </div>
-        <div
-          class="tab-item"
-          @click="changeTab(2)"
-          :class="[tabIndex === 2 && 'active-tab']"
-        >
-          已注销公司
-        </div>
+        <d-tab
+          v-for="tab in tabs"
+          @click="changeTab(tab.id)"
+          :key="tab.id"
+          :text="tab.text"
+          :active="tab.id === tabIndex"
+          :mr="10"
+        />
       </div>
       <div class="right-bts">
-        <div class="rule-btn" @click="openRule">查看规则</div>
+        <d-tab @click="openRule" text="查看规则" :width="100" :mr="10" />
         <el-button size="large" @click="addCompany" :icon="CirclePlus"
           >新建公司</el-button
         >
       </div>
     </view>
     <div class="content">
-      <operating-company ref="operating" v-show="tabIndex === 1" />
-      <company-cancelled ref="cancelled" v-show="tabIndex === 2" />
+      <operating-company ref="operating" v-show="tabIndex === 0" />
+      <company-cancelled ref="cancelled" v-show="tabIndex === 1" />
     </div>
   </div>
 </template>
@@ -43,9 +37,19 @@ export default defineComponent({
     'operating-company': OperatingCompany
   },
   setup () {
-    const tabIndex: Ref<number> = ref(1)
+    const tabIndex: Ref<number> = ref(0)
     const operating: Ref<HTMLElement | null> = ref(null)
     const cancelled = ref(null)
+    const tabs = ref([
+      {
+        text: '营运中公司',
+        id: 0
+      },
+      {
+        text: '已注销公司',
+        id: 1
+      }
+    ])
     const changeTab = (index: number): void => {
       if (tabIndex.value === index) return
       tabIndex.value = index
@@ -67,6 +71,7 @@ export default defineComponent({
       changeTab,
       operating,
       cancelled,
+      tabs,
       addCompany
     }
   }
@@ -85,25 +90,6 @@ export default defineComponent({
     .right-bts {
       display: flex;
       align-items: center;
-      .active-tab {
-        background-color: rgba(224, 231, 236, 100);
-      }
-      .rule-btn {
-        width: 100px;
-        margin-right: 20px;
-      }
-      & > div {
-        height: 40px;
-        line-height: 40px;
-        text-align: center;
-        width: 160px;
-        border-radius: 6px;
-        background-color: rgba(243, 245, 248, 100);
-        cursor: pointer;
-      }
-      & > div:nth-child(2) {
-        margin-left: 10px;
-      }
     }
   }
   .content {

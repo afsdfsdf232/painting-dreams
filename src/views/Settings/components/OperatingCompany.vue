@@ -96,19 +96,17 @@
     <div class="job-division">
       <div class="job-division-header">
         <div class="tab-item">后台人员</div>
-        <el-button
-          size="large"
-          @click="addPersonnelModal = true"
-          :icon="CirclePlus"
+        <el-button size="large" @click="addPersonnelClick" :icon="CirclePlus"
           >新建人员</el-button
         >
       </div>
       <el-table
         border
+        v-loading="peopleTable.loading"
         :stripe="true"
         height="250"
         size="large"
-        :data="tableData"
+        :data="peopleTable.data"
         style="width: 100%"
       >
         <el-table-column
@@ -324,42 +322,67 @@
 
     <!-- 新建后台人员弹窗 -->
     <el-dialog
-      v-model="addPersonnelModal"
+      v-model="peopleTable.addPersonnelModal"
       top="55px"
-      title="新建部门"
+      :title="peopleTable.addModal.id ? '编辑后台人员信息' : '新建后台人员'"
       width="35%"
       center
     >
       <div class="rule-modal modal scrollbar">
-        <el-form size="large" :model="form" label-width="120px">
-          <el-form-item label="姓名">
-            <el-input placeholder="请输入姓名" v-model="form.name" />
+        <el-form
+          size="large"
+          ref="peopleTableFormRef"
+          :rules="peopleTable.addModalRules"
+          :model="peopleTable.addModal"
+          label-width="120px"
+        >
+          <el-form-item label="姓名" prop="name">
+            <el-input
+              placeholder="请输入姓名"
+              v-model="peopleTable.addModal.name"
+            />
           </el-form-item>
-          <el-form-item label="岗位">
+          <el-form-item label="岗位" prop="managePostId">
             <el-select
               style="width: 100%"
-              v-model="form.region"
+              v-model="peopleTable.addModal.managePostId"
               placeholder="请选择岗位"
             >
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
+              <el-option
+                v-for="manage in peopleTable.managerPosts"
+                :key="manage.id"
+                :label="manage.name"
+                :value="manage.id"
+              />
             </el-select>
           </el-form-item>
           <el-form-item label="提成点数">
             <el-input
               disabled
               placeholder="和岗位绑定(岗位改变点数也改变)"
-              v-model="form.name"
+              :value="modalPostPoints"
             />
           </el-form-item>
-          <el-form-item label="联系电话">
-            <el-input placeholder="请输入联系电话" v-model="form.name" />
+          <el-form-item label="联系电话" prop="phone">
+            <el-input
+              type="number"
+              placeholder="请输入联系电话"
+              v-model="peopleTable.addModal.phone"
+            />
           </el-form-item>
-          <el-form-item label="设置密码">
-            <el-input placeholder="请输入密码" v-model="form.name" />
+          <el-form-item label="设置密码" prop="password">
+            <el-input
+              placeholder="请输入密码"
+              type="password"
+              v-model="peopleTable.addModal.password"
+            />
           </el-form-item>
-          <el-form-item label="确定密码">
-            <el-input placeholder="请输入确定密码" v-model="form.name" />
+          <el-form-item label="确定密码" prop="password2">
+            <el-input
+              placeholder="请输入确定密码"
+              type="password"
+              v-model="peopleTable.addModal.password2"
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -367,11 +390,12 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button
+            :loading="loading"
             class="btn"
             type="primary"
             style="width: 200px"
             size="large"
-            @click="addCompanyModal = false"
+            @click="submitAddPersonnelModal(peopleTableFormRef)"
             >保存</el-button
           >
         </div>
@@ -381,8 +405,23 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive } from 'vue'
+import { defineComponent, ref, reactive, onMounted, computed } from 'vue'
 import { CirclePlus } from '@element-plus/icons-vue'
+import type { FormInstance } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { getSysUser, getManagerPost, addAddSysUser } from '@/request/index'
+import {
+  SysUserRequestProps,
+  UersssyListItemProps
+} from '@/request/requestProps'
+import { md5Encode } from '@/utils/index'
+interface peopleTableProps {
+  data: Array<UersssyListItemProps>
+  managerPosts: Array<any>
+  addModal: any
+  addPersonnelModal: boolean
+  loading: boolean
+}
 const headerData = [
   { name: '简称', key: 'name' },
   { name: '公司全名', key: 'name' },
@@ -414,17 +453,66 @@ const departmentHeaderData = [
 ]
 
 const peopleHeaderData = [
-  {
-    name: '姓名',
-    key: 'name'
-  },
-  { name: '岗位', key: 'name' },
-  { name: '提成点数', key: 'name' },
-  { name: '联系电话', key: 'name' },
-  { name: '添加时间', key: 'name' }
+  { name: '姓名', key: 'name' },
+  { name: '岗位', key: 'managePostName' },
+  { name: '提成点数', key: 'percentagePoints' },
+  { name: '联系电话', key: 'phone' },
+  { name: '添加时间', key: 'createTime' }
 ]
 export default defineComponent({
   setup () {
+    // 验证2次密码输入
+    const validatorPassword2 = (rule: any, value: any, callback: any) => {
+      if (!value) {
+        callback('请输入确认密码')
+      } else {
+        if (value !== peopleTable.addModal.password) {
+          callback('2次密码不一致')
+        } else {
+          callback()
+        }
+      }
+    }
+    const peopleTable: peopleTableProps = reactive({
+      data: [], // 后台人员列表
+      managerPosts: [], // 岗位列表
+      loading: false, // loading
+      addPersonnelModal: false, // 新增编辑弹窗
+      addModalRules: {
+        name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+        managePostId: [
+          { required: true, message: '请输选择岗位', trigger: 'change' }
+        ],
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+        password2: [
+          { required: true, message: '请输入确认密码', trigger: 'blur' },
+          { validator: validatorPassword2, trigger: 'blur' }
+        ],
+        phone: [{ required: true, message: '请输入电话号码', trigger: 'blur' }]
+      },
+      addModal: {
+        loading: false,
+        // 弹窗数据
+        id: '', // 新增为空，编辑需要携带
+        managePostId: '', // 管理岗位的id
+        name: '', // 姓名
+        password: '', // 密码，需要 MD5加密
+        password2: '', // 再次确认密码
+        phone: '' // 电话号码
+      }
+    })
+    const peopleTableFormRef = ref<FormInstance>()
+    // 弹窗岗位点数
+    const modalPostPoints = computed(() => {
+      if (peopleTable.managerPosts && peopleTable.addModal.managePostId) {
+        const item = peopleTable.managerPosts.find(
+          (pe) => pe.id === peopleTable.addModal.managePostId
+        )
+        return item?.percentagePoints
+      }
+
+      return ''
+    })
     const tableData = ref([
       {
         name: '测试数据'
@@ -437,11 +525,93 @@ export default defineComponent({
     const setRowStyle = () => {
       return { backgroundColor: 'rgba(255, 255, 255, 100)' }
     }
+
+    // 获取后台管理人员列表
+    const getSysUsers = async () => {
+      peopleTable.loading = true
+      const { code, data } = await getSysUser()
+      if (code === 200 && data) {
+        peopleTable.data = data.list || []
+      } else {
+        peopleTable.data = []
+      }
+      peopleTable.loading = false
+    }
+
+    // 获取管理岗位列表
+    const getManagerPosts = async () => {
+      const { code, data } = await getManagerPost()
+      if (code === 200) {
+        peopleTable.managerPosts = data || []
+      }
+    }
+
+    // 新建后台管理人员打开弹窗
+    const addPersonnelClick = async () => {
+      await getManagerPosts()
+      peopleTable.addPersonnelModal = true
+    }
+
+    // 新增后台管理人员
+    const addAddSysUsers = async (query: SysUserRequestProps) => {
+      const { code, data } = await addAddSysUser(query)
+      if (code === 200) {
+        ElMessage({
+          type: 'success',
+          message: '新增成功'
+        })
+        getSysUsers()
+        peopleTable.addModal.loading = false
+        peopleTable.addPersonnelModal = false
+      }
+      console.log('code:', code)
+      console.log('data:', data)
+    }
+    // 新增/编辑后台管理人员弹窗提交
+    const submitAddPersonnelModal = async (
+      peopleTableFormRef: FormInstance | undefined
+    ) => {
+      if (!peopleTableFormRef) return
+      peopleTableFormRef.validate(async (valid) => {
+        if (valid) {
+          console.log('submit!')
+          const {
+            // id = 0,
+            name,
+            phone,
+            managePostId,
+            password
+          } = peopleTable.addModal
+          peopleTable.addModal.loading = true
+          const query = {
+            id: 0,
+            name,
+            phone,
+            managePostId,
+            password: md5Encode(password)
+          }
+          // 新增
+          console.log('peopleTable.addModal.id:', peopleTable.addModal.id)
+          if (!peopleTable.addModal.id) {
+            console.log('add')
+            addAddSysUsers(query)
+          }
+        } else {
+          console.log('error submit!')
+          return false
+        }
+      })
+    }
+
+    onMounted(() => {
+      getSysUsers()
+    })
+
     const showRuleModal = ref(false) // 后台配置说明
     const addCompanyModal = ref(false) // 新增公司弹窗
     const addDivisionModal = ref(false) // 新增分工弹窗
     const addDepartmentModal = ref(false) // 新建部门弹窗
-    const addPersonnelModal = ref(false) // 新增后台人员弹窗
+
     const form = reactive({
       name: '',
       region: '',
@@ -466,7 +636,11 @@ export default defineComponent({
       form,
       addDivisionModal,
       addDepartmentModal,
-      addPersonnelModal
+      peopleTable,
+      addPersonnelClick,
+      submitAddPersonnelModal,
+      modalPostPoints,
+      peopleTableFormRef
     }
   }
 })
@@ -511,7 +685,7 @@ export default defineComponent({
 }
 .modal {
   .el-form-item {
-    margin: 10px 0 0 0;
+    margin: 20px 0 0 0;
   }
   .dialog-footer {
     .btn {

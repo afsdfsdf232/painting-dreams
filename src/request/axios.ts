@@ -1,4 +1,5 @@
 import axios from 'axios'
+import qs from 'qs'
 import { ElMessage } from 'element-plus'
 import { getToken, logOut } from '@/utils/index'
 const service = axios.create({
@@ -24,6 +25,9 @@ service.interceptors.request.use((config) => {
         ...config.headers,
         'Content-Type': 'application/json'
       }
+    } else {
+      config.data = qs.stringify(config.data)
+      console.log('config.data:', config.data)
     }
     delete config.data.json
   }

@@ -54,6 +54,9 @@ export default defineComponent({
   font-family: HarmonyOS_Sans_SC-regular;
   color: rgba(16, 16, 16, 100);
   cursor: pointer;
+  &:hover {
+    background-color: rgba(224, 231, 236, 100);
+  }
 }
 .active {
   background-color: rgba(224, 231, 236, 100);
