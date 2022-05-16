@@ -15,17 +15,24 @@
         :key="index"
         :prop="head.key"
         :label="head.name"
-        width="180"
       />
+                <el-table-column fixed="right" label="操作" width="160">
+            <template #default="scope">
+              <el-button type="text" size="small" @click="openOperatingCompany(scope.row)"
+                >编辑</el-button
+              >
+              <el-button type="text" @click="deleteOperatingCompany(scope.row.id)" size="small">删除</el-button>
+            </template>
+          </el-table-column>
     </el-table>
     <div class="d-flex">
       <!-- 职位分工 -->
-      <div class="job-division w50 mr40">
+      <div class="job-division w100 mr40">
         <div class="job-division-header">
           <div class="tab-item">职位分工</div>
           <el-button
             size="large"
-            @click="addDivisionModal = true"
+            @click="openDesignPostsModal"
             :icon="CirclePlus"
             >新增分工</el-button
           >
@@ -46,18 +53,18 @@
             :width="head.width"
           />
           <el-table-column fixed="right" label="操作" width="100">
-            <template #default>
-              <el-button type="text" size="small" @click="handleClick"
+            <template  #default="scope">
+              <el-button type="text" size="small" @click="openDesignPostsModal(scope.row)"
                 >编辑</el-button
               >
-              <el-button type="text" size="small">删除</el-button>
+              <el-button type="text" size="small" @click="deleteDesignPosts(scope.row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
 
       <!-- 部门管理 -->
-      <div class="job-division w50">
+      <div class="job-division w50" v-if="false">
         <div class="job-division-header">
           <div class="tab-item">部门管理</div>
           <el-button
@@ -201,44 +208,38 @@
 
     <!-- 新增运营公司弹窗 -->
     <el-dialog
-      v-model="addCompanyModal"
+      v-model="operatingCompany.addModal"
       top="55px"
-      title="新增运营公司"
+      :title="operatingCompany.modal.id?'编辑运营公司':'新增运营公司'"
       width="35%"
+      @close="closeModal"
       center
     >
       <div class="rule-modal modal scrollbar">
-        <el-form size="large" :model="form" label-width="120px">
-          <el-form-item label="简称">
-            <el-input placeholder="请输入简称" v-model="form.name" />
+        <el-form ref="operatingCompanyFormRef" size="large" :model="operatingCompany.modal" :rules="operatingCompany.addmodalRule" label-width="120px">
+          <el-form-item label="简称" prop="shortName">
+            <el-input placeholder="请输入简称"  v-model="operatingCompany.modal.shortName" />
           </el-form-item>
-          <el-form-item label="公司全名">
-            <el-select
-              style="width: 100%"
-              v-model="form.region"
-              placeholder="请选择公司全名"
-            >
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
-            </el-select>
+          <el-form-item label="公司全名" prop="fullName">
+             <el-input placeholder="请输入公司全名" v-model="operatingCompany.modal.fullName" />
           </el-form-item>
-          <el-form-item label="邮寄合同地址">
-            <el-input placeholder="请输入邮寄合同地址" v-model="form.name" />
+          <el-form-item label="邮寄合同地址" prop="contractAddress">
+            <el-input placeholder="请输入邮寄合同地址" v-model="operatingCompany.modal.contractAddress" />
           </el-form-item>
-          <el-form-item label="税号">
-            <el-input placeholder="请输入税号" v-model="form.name" />
+          <el-form-item label="税号"  prop="taxId">
+            <el-input placeholder="请输入税号" v-model="operatingCompany.modal.taxId" />
           </el-form-item>
-          <el-form-item label="联系电话">
-            <el-input placeholder="请输入联系电话" v-model="form.name" />
+          <el-form-item label="联系电话" prop="phone">
+            <el-input placeholder="请输入联系电话" type="number" v-model="operatingCompany.modal.phone" />
           </el-form-item>
-          <el-form-item label="银行账号/名称">
-            <el-input placeholder="请输入银行账号/名称" v-model="form.name" />
+          <el-form-item label="银行账号/名称" prop="blank">
+            <el-input placeholder="请输入银行账号/名称" v-model="operatingCompany.modal.blank" />
           </el-form-item>
-          <el-form-item label="备注">
+          <el-form-item label="备注" prop="remark">
             <el-input
               placeholder="请输入备注"
               type="textarea"
-              v-model="form.name"
+              v-model="operatingCompany.modal.remark"
             />
           </el-form-item>
         </el-form>
@@ -250,7 +251,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="addCompanyModal = false"
+            @click="operatingCompanySubmit(operatingCompanyFormRef)"
             >保存</el-button
           >
         </div>
@@ -259,35 +260,31 @@
 
     <!-- 新增分工弹窗 -->
     <el-dialog
-      v-model="addDivisionModal"
+      v-model="designPosts.addModal"
       top="55px"
       title="新增岗位"
       width="35%"
       center
     >
       <div class="rule-modal modal scrollbar">
-        <el-form size="large" :model="form" label-width="120px">
-          <el-form-item label="岗位名称">
-            <el-input placeholder="请输入岗位名称" v-model="form.name" />
+        <el-form size="large"
+          ref="designPostsFormRef"
+          :rules="designPosts.modals.addModalRules"
+          :model="designPosts.modals"
+          label-width="120px">
+          <el-form-item label="岗位名称" prop="name">
+            <el-input placeholder="请输入岗位名称" v-model="designPosts.modals.name" />
           </el-form-item>
-          <el-form-item label="所属部门">
+          <el-form-item label="提成点数" prop="percentagePoints">
             <el-select
               style="width: 100%"
-              v-model="form.region"
-              placeholder="请选择所属部门"
-            >
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="提成点数">
-            <el-select
-              style="width: 100%"
-              v-model="form.region"
+              v-model="designPosts.modals.percentagePoints"
               placeholder="请选择提成点数"
             >
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
+              <el-option v-for="item in percentagePointss"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value" />
             </el-select>
           </el-form-item>
         </el-form>
@@ -299,7 +296,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="addCompanyModal = false"
+            @click="submitDesignPosts(designPostsFormRef)"
             >保存</el-button
           >
         </div>
@@ -484,13 +481,57 @@ import {
   updateSysUserPassword,
   deleteSysUser,
   getOperatingCompanyList,
-  getDesignPost
+  getDesignPost,
+  designPostSave,
+  designPostUpdate,
+  designPostDelete,
+  operatingCompanySave,
+  operatingCompanyUpdate,
+  operatingCompanyDelete
 } from '@/request/index'
 import {
   SysUserRequestProps,
   UersssyListItemProps
 } from '@/request/requestProps'
 import { md5Encode } from '@/utils/index'
+const percentagePointss = [
+  {
+    label: '0.1',
+    value: 0.1
+  },
+  {
+    label: '0.2',
+    value: 0.2
+  },
+  {
+    label: '0.3',
+    value: 0.3
+  },
+  {
+    label: '0.4',
+    value: 0.4
+  },
+  {
+    label: '0.5',
+    value: 0.5
+  },
+  {
+    label: '0.6',
+    value: 0.6
+  },
+  {
+    label: '0.7',
+    value: 0.7
+  },
+  {
+    label: '0.8',
+    value: 0.8
+  },
+  {
+    label: '0.9',
+    value: 0.9
+  }
+]
 interface peopleTableProps {
   data: Array<UersssyListItemProps>
   managerPosts: Array<any>
@@ -515,8 +556,7 @@ const jobHeaderData = [
     name: '名称',
     key: 'name'
   },
-  { name: '返点', key: 'percentagePoints' },
-  { name: '所属部门', key: 'name' }
+  { name: '返点', key: 'percentagePoints' }
 ]
 
 const departmentHeaderData = [
@@ -610,6 +650,8 @@ export default defineComponent({
     })
     const peopleTableFormRef = ref<FormInstance>()
     const peopleTableUpdatePwdFormRef = ref<FormInstance>()
+    const designPostsFormRef = ref<FormInstance>()
+    const operatingCompanyFormRef = ref<FormInstance>()
     // 弹窗岗位点数
     const modalPostPoints = computed(() => {
       if (peopleTable.managerPosts && peopleTable.addModal.managePostId) {
@@ -621,15 +663,6 @@ export default defineComponent({
 
       return ''
     })
-    const tableData = ref([
-      {
-        name: '测试数据'
-      },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' }
-    ])
     const setRowStyle = () => {
       return { backgroundColor: 'rgba(255, 255, 255, 100)' }
     }
@@ -637,11 +670,94 @@ export default defineComponent({
     interface OperatingCompanyProps {
       tableData: Array<any>
       tableLoading: boolean
+      addModal: boolean
+      modal: any
+      addmodalRule: any
     }
+
     const operatingCompany: OperatingCompanyProps = reactive({
       tableData: [],
-      tableLoading: false
+      tableLoading: false,
+      addModal: false,
+      addmodalRule: {
+        contractAddress: [{ required: true, message: '请输入合同地址', trigger: 'blur' }],
+        fullName: [{ required: true, message: '请输入公司全称', trigger: 'blur' }],
+        operatingStatus: [{ required: true, message: '请选择提成点数', trigger: 'blur' }],
+        phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
+        remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
+        shortName: [{ required: true, message: '请输入简称', trigger: 'blur' }],
+        taxId: [{ required: true, message: '请输入税号', trigger: 'blur' }],
+        blank: [{ required: true, message: '请输入银行卡账号名称', trigger: 'blur' }]
+      },
+      modal: {
+        id: '',
+        contractAddress: '', // 合同地址
+        fullName: '', // 公司全称
+        operatingStatus: 0, // 运营中状态，营运状态(0营运中 1已注销)
+        phone: '', // 联系电话
+        remark: '', // 备注(限200字符)
+        shortName: '', // 简称
+        taxId: '', // 税号
+        blank: ''// 银行卡账号名称
+      }
     })
+    // 编辑打开弹窗
+    const openOperatingCompany = (row: any) => {
+      const { id, contractAddress, fullName, phone, remark, shortName, taxId, blank } = row
+      operatingCompany.modal.id = id
+      operatingCompany.modal.contractAddress = contractAddress
+      operatingCompany.modal.fullName = fullName
+      operatingCompany.modal.phone = phone
+      operatingCompany.modal.remark = remark
+      operatingCompany.modal.shortName = shortName
+      operatingCompany.modal.taxId = taxId
+      operatingCompany.modal.blank = blank
+      operatingCompany.addModal = true
+    }
+    // 弹窗关闭
+    const closeModal = () => {
+      // 清空数据
+      operatingCompany.modal.id = ''
+      operatingCompany.modal.contractAddress = '' // 合同地址
+      operatingCompany.modal.fullName = '' // 公司全称
+      operatingCompany.modal.operatingStatus = 0 // 运营中状态，营运状态(0营运中 1已注销)
+      operatingCompany.modal.phone = '' // 联系电话
+      operatingCompany.modal.remark = '' // 备注(限200字符)
+      operatingCompany.modal.shortName = '' // 简称
+      operatingCompany.modal.taxId = '' // 税号
+      operatingCompany.modal.blank = ''// 银行卡账号名称
+    }
+    // 新增
+    const operatingCompanySubmit = async (FormRef: FormInstance | undefined) => {
+      if (!FormRef) return
+      FormRef.validate(async (valid) => {
+        if (valid) {
+          const sucess = (code: number) => {
+            if (code === 200) {
+              ElMessage({
+                type: 'success',
+                message: '操作成功'
+              })
+              // 获取新的列表
+              getOperatingCompanyLists()
+              // 关闭弹窗
+              operatingCompany.addModal = false
+            }
+          }
+          if (operatingCompany.modal.id) {
+            const { code } = await operatingCompanyUpdate({
+              ...operatingCompany.modal
+            })
+            sucess(code)
+          } else {
+            const { code } = await operatingCompanySave({
+              ...operatingCompany.modal
+            })
+            sucess(code)
+          }
+        }
+      })
+    }
     const getOperatingCompanyLists = async () => {
       operatingCompany.tableLoading = true
       const { code, data } = await getOperatingCompanyList({
@@ -654,12 +770,98 @@ export default defineComponent({
       }
       operatingCompany.tableLoading = false
     }
+
+    // 删除
+    const deleteOperatingCompany = async (id: string) => {
+      ElMessageBox.confirm('确定删除该项吗?', '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await operatingCompanyDelete(id)
+        if (code === 200) {
+          getOperatingCompanyLists()
+        }
+      })
+    }
     // ====================================================
 
     // ====================职位分工=========================
+
+    const openDesignPostsModal = (row:any) => { // 新增编辑打开弹窗
+      if (row && row.id) {
+        const { id, name, percentagePoints } = row
+        designPosts.modals.id = id
+        designPosts.modals.name = name
+        designPosts.modals.percentagePoints = percentagePoints
+      } else {
+        designPosts.modals.id = ''
+        designPosts.modals.name = ''
+        designPosts.modals.percentagePoints = ''
+      }
+      designPosts.addModal = true
+    }
+
+    // 新增编辑保存
+    const submitDesignPosts = async (FormRef: FormInstance | undefined) => {
+      if (!FormRef) return
+      FormRef.validate(async (valid) => {
+        if (valid) {
+          const { name, percentagePoints, id } = designPosts.modals
+          const sucess = (code: number) => {
+            if (code === 200) {
+              ElMessage({
+                type: 'success',
+                message: '操作成功'
+              })
+              // 获取新的列表
+              getDesignPosts()
+              // 关闭弹窗
+              designPosts.addModal = false
+            }
+          }
+          if (!id) {
+            const { code } = await designPostSave({
+              name, percentagePoints, id
+            })
+            sucess(code)
+          } else {
+            const { code } = await designPostUpdate({
+              name, percentagePoints, id
+            })
+            sucess(code)
+          }
+        }
+      })
+    }
+
+    // 职位分工-删除
+    const deleteDesignPosts = async (id: string) => {
+      ElMessageBox.confirm('确定删除该项吗?', '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await designPostDelete(id)
+        if (code === 200) {
+          getDesignPosts()
+        }
+      })
+    }
     const designPosts = reactive({
       tableLoading: false,
-      tableData: []
+      addModal: false,
+      tableData: [],
+      modals: {
+        loading: false,
+        name: '',
+        id: '',
+        percentagePoints: '',
+        addModalRules: {
+          name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+          percentagePoints: [{ required: true, message: '请选择提成点数', trigger: 'change' }]
+        }
+      }
     })
     const getDesignPosts = async () => {
       designPosts.tableLoading = true
@@ -847,10 +1049,11 @@ export default defineComponent({
     })
 
     return {
+      percentagePointss,
+      designPostsFormRef,
       setRowStyle,
       headerData,
       jobHeaderData,
-      tableData,
       departmentHeaderData,
       peopleHeaderData,
       CirclePlus,
@@ -870,7 +1073,15 @@ export default defineComponent({
       peopleTableUpdatePwdFormRef,
       handlePeopleDeletelick,
       operatingCompany,
-      designPosts
+      designPosts,
+      openDesignPostsModal,
+      submitDesignPosts,
+      deleteDesignPosts,
+      operatingCompanyFormRef,
+      operatingCompanySubmit,
+      openOperatingCompany,
+      closeModal,
+      deleteOperatingCompany
     }
   }
 })
@@ -925,5 +1136,8 @@ export default defineComponent({
 }
 .mr40 {
   margin-right: 40px;
+}
+.w100 {
+  width: 100%
 }
 </style>

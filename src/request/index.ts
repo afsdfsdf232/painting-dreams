@@ -81,3 +81,33 @@ export const getManagerPost = (): HttpPromise<Array<ManagerPostProps>> =>
  * @description 后台人员设置-职位分工列表 /api/Pdeginosst / list
  * */
 export const getDesignPost = () => get('/api/designPost/list')
+
+/**
+ * @description 后台设置-新增分工
+ * */
+export const designPostSave = (data: any) => post('/api/designPost/save', data)
+
+/**
+ * 后台设置-编辑职位分工
+ * */
+export const designPostUpdate = (data:any) => post('/api/designPost/update', data)
+
+/**
+ * @description 后台设置-删除新增分工
+ * */
+export const designPostDelete = (id: string) => post('/api/designPost/logicDelete', { id })
+
+/**
+ * @description 后台设置-新增运营公司
+ * */
+export const operatingCompanySave = (data: any) => post('/api/operatingCompany/save', data)
+
+/**
+ * @description 后台设置-编辑运营公司
+ * */
+export const operatingCompanyUpdate = (data: any) => post('/api/operatingCompany/update', data)
+
+/**
+ * @description 后台设置-删除运营公司
+ * */
+export const operatingCompanyDelete = (id: string) => post('/api/operatingCompany/logicDelete', { id })

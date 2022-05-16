@@ -61,7 +61,7 @@ export default defineComponent({
     }
     const addCompany = () => {
       if (operating.value !== null) {
-        (operating.value as any).addCompanyModal = true
+        (operating.value as any).operatingCompany.addModal = true
       }
     }
     return {
