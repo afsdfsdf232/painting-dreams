@@ -6,8 +6,7 @@ const service = axios.create({
   baseURL: process.env.VUE_APP_BASE_URL,
   timeout: Infinity,
   headers: {
-    // 'Content-Type': 'application/json'
-    'Content-Type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/json'
   }
 })
 // http://42.193.39.158:8812/api/homeArticleList
@@ -20,14 +19,12 @@ service.interceptors.request.use((config) => {
 
   // 处理headers 为json
   if (config.data && typeof config.data === 'object') {
-    if (config.data.json) {
+    if (config.data.form) {
       config.headers = {
         ...config.headers,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
-    } else {
       config.data = qs.stringify(config.data)
-      console.log('config.data:', config.data)
     }
     delete config.data.json
   }

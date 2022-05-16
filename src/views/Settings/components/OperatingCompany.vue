@@ -3,9 +3,10 @@
     <el-table
       border
       :stripe="true"
+      v-loading="operatingCompany.tableLoading"
       height="250"
       size="large"
-      :data="tableData"
+      :data="operatingCompany.tableData"
       style="width: 100%"
     >
       <el-table-column
@@ -34,7 +35,8 @@
           :stripe="true"
           height="250"
           size="large"
-          :data="tableData"
+          v-loading="designPosts.tableLoading"
+          :data="designPosts.tableData"
         >
           <el-table-column
             v-for="(head, index) in jobHeaderData"
@@ -117,12 +119,25 @@
           :width="head.width"
         />
         <el-table-column fixed="right" label="操作" width="220">
-          <template #default>
-            <el-button type="text" size="small" @click="handleClick"
+          <template #default="scope">
+            <el-button
+              type="text"
+              size="small"
+              @click="handlePeopleEditClick(scope.row)"
               >编辑</el-button
             >
-            <el-button type="text" size="small">修改密码</el-button>
-            <el-button type="text" size="small">删除人员</el-button>
+            <el-button
+              @click="handlePeopleUpdatePwdlick(scope.row)"
+              type="text"
+              size="small"
+              >修改密码</el-button
+            >
+            <el-button
+              @click="handlePeopleDeletelick(scope.row)"
+              type="text"
+              size="small"
+              >删除人员</el-button
+            >
           </template>
         </el-table-column>
       </el-table>
@@ -322,6 +337,7 @@
 
     <!-- 新建后台人员弹窗 -->
     <el-dialog
+      v-loading="peopleTable.addModal.loading"
       v-model="peopleTable.addPersonnelModal"
       top="55px"
       :title="peopleTable.addModal.id ? '编辑后台人员信息' : '新建后台人员'"
@@ -372,6 +388,7 @@
           </el-form-item>
           <el-form-item label="设置密码" prop="password">
             <el-input
+              auto-complete="on"
               placeholder="请输入密码"
               type="password"
               v-model="peopleTable.addModal.password"
@@ -379,6 +396,7 @@
           </el-form-item>
           <el-form-item label="确定密码" prop="password2">
             <el-input
+              auto-complete="on"
               placeholder="请输入确定密码"
               type="password"
               v-model="peopleTable.addModal.password2"
@@ -401,6 +419,55 @@
         </div>
       </template>
     </el-dialog>
+    <!-- 修改密码 -->
+    <el-dialog
+      v-loading="peopleTable.updatePwdModals.loading"
+      v-model="peopleTable.updatePwdModal"
+      top="55px"
+      title="修改密码"
+      width="35%"
+      center
+    >
+      <div class="rule-modal modal scrollbar">
+        <el-form
+          size="large"
+          ref="peopleTableUpdatePwdFormRef"
+          :rules="peopleTable.updatePwdModalRules"
+          :model="peopleTable.updatePwdModals"
+          label-width="120px"
+        >
+          <el-form-item label="设置密码" prop="password">
+            <el-input
+              auto-complete="on"
+              placeholder="请输入密码"
+              type="password"
+              v-model="peopleTable.updatePwdModals.password"
+            />
+          </el-form-item>
+          <el-form-item label="确定密码" prop="password2">
+            <el-input
+              auto-complete="on"
+              placeholder="请输入确定密码"
+              type="password"
+              v-model="peopleTable.updatePwdModals.password2"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="submitUpdatePersonnelPwdModal(peopleTableUpdatePwdFormRef)"
+            >保存</el-button
+          >
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -408,8 +475,17 @@
 import { defineComponent, ref, reactive, onMounted, computed } from 'vue'
 import { CirclePlus } from '@element-plus/icons-vue'
 import type { FormInstance } from 'element-plus'
-import { ElMessage } from 'element-plus'
-import { getSysUser, getManagerPost, addAddSysUser } from '@/request/index'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  getSysUser,
+  getManagerPost,
+  addAddSysUser,
+  updateAddSysUser,
+  updateSysUserPassword,
+  deleteSysUser,
+  getOperatingCompanyList,
+  getDesignPost
+} from '@/request/index'
 import {
   SysUserRequestProps,
   UersssyListItemProps
@@ -421,15 +497,17 @@ interface peopleTableProps {
   addModal: any
   addPersonnelModal: boolean
   loading: boolean
+  updatePwdModal: boolean
+  updatePwdModals: any
 }
 const headerData = [
-  { name: '简称', key: 'name' },
-  { name: '公司全名', key: 'name' },
-  { name: '邮寄合同地址', key: 'name' },
-  { name: '税号', key: 'name' },
-  { name: '联系电话', key: 'name' },
+  { name: '简称', key: 'shortName' },
+  { name: '公司全名', key: 'fullName' },
+  { name: '邮寄合同地址', key: 'contractAddress' },
+  { name: '税号', key: 'taxId' },
+  { name: '联系电话', key: 'phone' },
   { name: '银行账号/名称', key: 'name' },
-  { name: '备注', key: 'name' }
+  { name: '备注', key: 'remark' }
 ]
 
 const jobHeaderData = [
@@ -437,7 +515,7 @@ const jobHeaderData = [
     name: '名称',
     key: 'name'
   },
-  { name: '返点', key: 'name' },
+  { name: '返点', key: 'percentagePoints' },
   { name: '所属部门', key: 'name' }
 ]
 
@@ -463,13 +541,23 @@ export default defineComponent({
   setup () {
     // 验证2次密码输入
     const validatorPassword2 = (rule: any, value: any, callback: any) => {
+      console.log(rule)
       if (!value) {
         callback('请输入确认密码')
       } else {
-        if (value !== peopleTable.addModal.password) {
-          callback('2次密码不一致')
+        if (rule.t === 'updatePwd') {
+          // 修改密码
+          if (value !== peopleTable.updatePwdModals.password) {
+            callback('2次密码不一致')
+          } else {
+            callback()
+          }
         } else {
-          callback()
+          if (value !== peopleTable.addModal.password) {
+            callback('2次密码不一致')
+          } else {
+            callback()
+          }
         }
       }
     }
@@ -478,6 +566,14 @@ export default defineComponent({
       managerPosts: [], // 岗位列表
       loading: false, // loading
       addPersonnelModal: false, // 新增编辑弹窗
+      updatePwdModal: false,
+      updatePwdModals: {
+        updatePwdRef: null,
+        loading: false,
+        id: '',
+        password: '',
+        password2: ''
+      },
       addModalRules: {
         name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
         managePostId: [
@@ -489,6 +585,17 @@ export default defineComponent({
           { validator: validatorPassword2, trigger: 'blur' }
         ],
         phone: [{ required: true, message: '请输入电话号码', trigger: 'blur' }]
+      },
+      updatePwdModalRules: {
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
+        password2: [
+          { required: true, message: '请输入确认密码', trigger: 'blur' },
+          {
+            validator: validatorPassword2,
+            trigger: 'blur',
+            t: 'updatePwd'
+          }
+        ]
       },
       addModal: {
         loading: false,
@@ -502,6 +609,7 @@ export default defineComponent({
       }
     })
     const peopleTableFormRef = ref<FormInstance>()
+    const peopleTableUpdatePwdFormRef = ref<FormInstance>()
     // 弹窗岗位点数
     const modalPostPoints = computed(() => {
       if (peopleTable.managerPosts && peopleTable.addModal.managePostId) {
@@ -525,6 +633,45 @@ export default defineComponent({
     const setRowStyle = () => {
       return { backgroundColor: 'rgba(255, 255, 255, 100)' }
     }
+    // ====================运营中的公司数据===================
+    interface OperatingCompanyProps {
+      tableData: Array<any>
+      tableLoading: boolean
+    }
+    const operatingCompany: OperatingCompanyProps = reactive({
+      tableData: [],
+      tableLoading: false
+    })
+    const getOperatingCompanyLists = async () => {
+      operatingCompany.tableLoading = true
+      const { code, data } = await getOperatingCompanyList({
+        limit: -1,
+        page: 1,
+        operatingStatus: 0
+      })
+      if (code === 200 && data) {
+        operatingCompany.tableData = data.list || []
+      }
+      operatingCompany.tableLoading = false
+    }
+    // ====================================================
+
+    // ====================职位分工=========================
+    const designPosts = reactive({
+      tableLoading: false,
+      tableData: []
+    })
+    const getDesignPosts = async () => {
+      designPosts.tableLoading = true
+      const { code, data } = await getDesignPost()
+      if (code === 200) {
+        designPosts.tableData = data || []
+        console.log('职位分工列表:', data)
+      }
+      designPosts.tableLoading = false
+    }
+
+    // ====================后台管理人员交互==================
 
     // 获取后台管理人员列表
     const getSysUsers = async () => {
@@ -548,13 +695,22 @@ export default defineComponent({
 
     // 新建后台管理人员打开弹窗
     const addPersonnelClick = async () => {
-      await getManagerPosts()
       peopleTable.addPersonnelModal = true
+      peopleTable.addModal.loading = true
+      await getManagerPosts()
+      // 初始化弹窗状态
+      peopleTable.addModal.managePostId = ''
+      peopleTable.addModal.id = ''
+      peopleTable.addModal.name = ''
+      peopleTable.addModal.phone = ''
+      peopleTable.addModal.password = ''
+      peopleTable.addModal.password2 = ''
+      peopleTable.addModal.loading = false
     }
 
     // 新增后台管理人员
     const addAddSysUsers = async (query: SysUserRequestProps) => {
-      const { code, data } = await addAddSysUser(query)
+      const { code } = await addAddSysUser(query)
       if (code === 200) {
         ElMessage({
           type: 'success',
@@ -564,8 +720,17 @@ export default defineComponent({
         peopleTable.addModal.loading = false
         peopleTable.addPersonnelModal = false
       }
-      console.log('code:', code)
-      console.log('data:', data)
+    }
+
+    // 编辑后台人员
+    const updateAddSysUsers = async (query: SysUserRequestProps) => {
+      const { code } = await updateAddSysUser(query)
+      if (code === 200) {
+        ElMessage({ type: 'success', message: '编辑成功' })
+        getSysUsers()
+        peopleTable.addModal.loading = false
+        peopleTable.addPersonnelModal = false
+      }
     }
     // 新增/编辑后台管理人员弹窗提交
     const submitAddPersonnelModal = async (
@@ -575,35 +740,93 @@ export default defineComponent({
       peopleTableFormRef.validate(async (valid) => {
         if (valid) {
           console.log('submit!')
-          const {
-            // id = 0,
-            name,
-            phone,
-            managePostId,
-            password
-          } = peopleTable.addModal
+          const { id, name, phone, managePostId, password } =
+            peopleTable.addModal
           peopleTable.addModal.loading = true
           const query = {
-            id: 0,
+            id,
             name,
             phone,
             managePostId,
             password: md5Encode(password)
           }
           // 新增
-          console.log('peopleTable.addModal.id:', peopleTable.addModal.id)
           if (!peopleTable.addModal.id) {
-            console.log('add')
             addAddSysUsers(query)
+          } else {
+            updateAddSysUsers(query)
           }
-        } else {
-          console.log('error submit!')
-          return false
+        }
+      })
+    }
+    // 编辑后台人员弹窗，初始化元数据
+    const handlePeopleEditClick = async (row: any) => {
+      const { id, managePostId, name, phone } = row
+      peopleTable.addPersonnelModal = true
+      peopleTable.addModal.loading = true
+      peopleTable.addModal.id = id
+      peopleTable.addModal.managePostId = managePostId
+      peopleTable.addModal.name = name
+      peopleTable.addModal.phone = phone
+      peopleTable.addModal.password = ''
+      peopleTable.addModal.password2 = ''
+      if (peopleTable.managerPosts.length === 0) {
+        await getManagerPosts()
+      }
+      peopleTable.addModal.loading = false
+    }
+
+    // 修改后台人员密码
+    const handlePeopleUpdatePwdlick = (row: any) => {
+      const { id } = row
+      peopleTable.updatePwdModals.id = id
+      peopleTable.updatePwdModal = true
+    }
+
+    // 修改密码提交
+    const submitUpdatePersonnelPwdModal = async (
+      FormRef: FormInstance | undefined
+    ) => {
+      if (!FormRef) return
+      FormRef.validate(async (valid) => {
+        if (valid) {
+          console.log('submit!')
+          const { code } = await updateSysUserPassword({
+            id: peopleTable.updatePwdModals.id,
+            newPassword: md5Encode(peopleTable.updatePwdModals.password)
+          })
+          if (code === 200) {
+            peopleTable.updatePwdModal = false
+            ElMessage({ type: 'success', message: '密码修改成功' })
+          }
         }
       })
     }
 
+    // 删除后台人员
+    const handlePeopleDeletelick = async (row: any) => {
+      ElMessageBox.confirm(`确定删除${row.name}?`, '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await deleteSysUser({ id: row.id })
+        if (code === 200) {
+          // 删除改成员
+          const index = peopleTable.data.findIndex((item) => item.id === row.id)
+          if (index > -1) {
+            peopleTable.data.splice(index, 1)
+            ElMessage({ type: 'success', message: '删除成功' })
+          }
+        }
+      })
+    }
+
+    // ==================================================
+
     onMounted(() => {
+      getOperatingCompanyLists()
+      getDesignPosts()
       getSysUsers()
     })
 
@@ -640,7 +863,14 @@ export default defineComponent({
       addPersonnelClick,
       submitAddPersonnelModal,
       modalPostPoints,
-      peopleTableFormRef
+      peopleTableFormRef,
+      handlePeopleEditClick,
+      handlePeopleUpdatePwdlick,
+      submitUpdatePersonnelPwdModal,
+      peopleTableUpdatePwdFormRef,
+      handlePeopleDeletelick,
+      operatingCompany,
+      designPosts
     }
   }
 })
@@ -674,7 +904,7 @@ export default defineComponent({
 }
 .rule-modal {
   max-height: calc(100vh - 300px);
-  overflow-y: auto;
+  // overflow-y: auto;
   div {
     margin: 0;
     padding: 0;

@@ -6,7 +6,10 @@ import {
   UserInfoProps,
   UersssyListProps,
   ManagerPostProps,
-  SysUserRequestProps
+  SysUserRequestProps,
+  PasswordRequestProps,
+  OperatingCompanyRequestProps,
+  OperatingCompanyResponseProps
 } from './requestProps'
 /**
  *  @description 登录-Login
@@ -14,7 +17,7 @@ import {
 export const login = (
   query: LoginRequestProps
 ): HttpPromise<LoginResponseProps> => {
-  return post('/api/login', Object.assign({}, query, { json: true }))
+  return post('/api/login', query)
 }
 
 /**
@@ -22,6 +25,14 @@ export const login = (
  * */
 export const getUserInfo = (): HttpPromise<UserInfoProps> =>
   get('/api/getUserInfo')
+
+/**
+ * @description 后台设置-获取运营中的公司和已经注销公司列表
+ * */
+export const getOperatingCompanyList = (
+  data: OperatingCompanyRequestProps
+): HttpPromise<OperatingCompanyResponseProps> =>
+  get('/api/operatingCompany/list', data)
 
 /**
  * @description 后台设置-获取后台人员列表
@@ -34,7 +45,30 @@ export const getSysUser = (): HttpPromise<UersssyListProps> =>
  * */
 export const addAddSysUser = (
   data: SysUserRequestProps
-): HttpPromise<SysUserRequestProps> => post('/api/sysUser/save', Object.assign({}, { json: true }, data))
+): HttpPromise<SysUserRequestProps> => post('/api/sysUser/save', data)
+
+/**
+ * @description 后台人员设置-编辑后台管理人员
+ */
+export const updateAddSysUser = (
+  data: SysUserRequestProps
+): HttpPromise<SysUserRequestProps> => post('/api/sysUser/update', data)
+
+/**
+ * @description 后台人员设置-修改管理人员密码
+ * */
+export const updateSysUserPassword = (
+  data: PasswordRequestProps
+): HttpPromise<PasswordRequestProps> =>
+  post('/api/sysUser/updatePassword', data)
+
+/**
+ * @description 后台人员设置-删除后台人员
+ * */
+
+export const deleteSysUser = (data: {
+  id: string
+}): HttpPromise<{ id: string }> => post('/api/sysUser/logicDelete', data)
 
 /**
  * @description 【后台设置】-获取岗位列表
@@ -42,3 +76,8 @@ export const addAddSysUser = (
 
 export const getManagerPost = (): HttpPromise<Array<ManagerPostProps>> =>
   get('/api/managePost/list')
+
+/**
+ * @description 后台人员设置-职位分工列表 /api/Pdeginosst / list
+ * */
+export const getDesignPost = () => get('/api/designPost/list')

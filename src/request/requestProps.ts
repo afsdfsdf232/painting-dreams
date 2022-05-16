@@ -52,3 +52,30 @@ export interface SysUserRequestProps {
   password: string
   phone: string
 }
+
+export interface PasswordRequestProps {
+  newPassword: string
+  id: string
+}
+
+export interface OperatingCompanyRequestProps {
+  operatingStatus: 0 | 1
+  limit: -1
+  page?: number
+}
+
+export interface OperatingCompanyListItemProps {
+  contractAddress: string
+  fullName: string
+  id: string
+  operatingStatus: string | number
+  phone: string
+  remark: string
+  shortName: string
+  taxId: string
+}
+
+export interface OperatingCompanyResponseProps {
+  list: Array<OperatingCompanyListItemProps>
+  total: number
+}
