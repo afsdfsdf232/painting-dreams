@@ -232,8 +232,11 @@
           <el-form-item label="联系电话" prop="phone">
             <el-input placeholder="请输入联系电话" type="number" v-model="operatingCompany.modal.phone" />
           </el-form-item>
-          <el-form-item label="银行账号/名称" prop="blank">
-            <el-input placeholder="请输入银行账号/名称" v-model="operatingCompany.modal.blank" />
+          <el-form-item label="银行名称" prop="name">
+            <el-input placeholder="请输入银行名称" v-model="operatingCompany.modal.name" />
+          </el-form-item>
+          <el-form-item label="银行账号" prop="account">
+            <el-input placeholder="请输入银行账号" v-model="operatingCompany.modal.account" />
           </el-form-item>
           <el-form-item label="备注" prop="remark">
             <el-input
@@ -687,7 +690,8 @@ export default defineComponent({
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
         shortName: [{ required: true, message: '请输入简称', trigger: 'blur' }],
         taxId: [{ required: true, message: '请输入税号', trigger: 'blur' }],
-        blank: [{ required: true, message: '请输入银行卡账号名称', trigger: 'blur' }]
+        account: [{ required: true, message: '请输入银行卡账号', trigger: 'blur' }],
+        name: [{ required: true, message: '请输入银行卡名称', trigger: 'blur' }]
       },
       modal: {
         id: '',
@@ -698,7 +702,8 @@ export default defineComponent({
         remark: '', // 备注(限200字符)
         shortName: '', // 简称
         taxId: '', // 税号
-        blank: ''// 银行卡账号名称
+        account: '', // 银行卡账号名称
+        name: '' // 名称
       }
     })
     // 编辑打开弹窗
@@ -725,7 +730,8 @@ export default defineComponent({
       operatingCompany.modal.remark = '' // 备注(限200字符)
       operatingCompany.modal.shortName = '' // 简称
       operatingCompany.modal.taxId = '' // 税号
-      operatingCompany.modal.blank = ''// 银行卡账号名称
+      operatingCompany.modal.account = ''// 银行卡账号
+      operatingCompany.modal.name = '' // 银行卡名称
     }
     // 新增
     const operatingCompanySubmit = async (FormRef: FormInstance | undefined) => {
@@ -746,12 +752,24 @@ export default defineComponent({
           }
           if (operatingCompany.modal.id) {
             const { code } = await operatingCompanyUpdate({
-              ...operatingCompany.modal
+              ...operatingCompany.modal,
+              bankList: [
+                {
+                  name: operatingCompany.modal.name,
+                  account: operatingCompany.modal.account
+                }
+              ]
             })
             sucess(code)
           } else {
             const { code } = await operatingCompanySave({
-              ...operatingCompany.modal
+              ...operatingCompany.modal,
+              bankList: [
+                {
+                  name: operatingCompany.modal.name,
+                  account: operatingCompany.modal.account
+                }
+              ]
             })
             sucess(code)
           }

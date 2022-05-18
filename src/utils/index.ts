@@ -1,4 +1,5 @@
 import { Base64 } from 'js-base64'
+import { uploadFileRequest } from '@/request/index'
 import md5 from 'js-md5'
 import store from '@/store'
 import router from '@/router'
@@ -49,4 +50,13 @@ export const getToken = (): string | undefined => {
   if (store.state.userInfo) {
     return (store.state.userInfo as any).token
   }
+}
+
+/**
+ * @description 文件上传
+ * */
+export const uploadFile = (data: any) => {
+  const from = new FormData()
+  from.append('file', data)
+  return uploadFileRequest(from)
 }

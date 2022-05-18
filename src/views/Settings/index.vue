@@ -13,7 +13,7 @@
       </div>
       <div class="right-bts">
         <d-tab @click="openRule" text="查看规则" :width="100" :mr="10" />
-        <el-button size="large" @click="addCompany" :icon="CirclePlus"
+        <el-button size="large" v-if="tabIndex === 0" @click="addCompany" :icon="CirclePlus"
           >新建公司</el-button
         >
       </div>

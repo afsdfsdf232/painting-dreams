@@ -34,6 +34,7 @@ service.interceptors.request.use((config) => {
 // 响应拦截
 service.interceptors.response.use(
   (config) => {
+    console.log('config:', config)
     if (config.data.code && config.data.code !== 200) {
       ElMessage.error(config.data.msg)
     }
@@ -77,5 +78,17 @@ export const getDownloadFile = (url: string, params?: any): any => {
     },
     url,
     params
+  })
+}
+
+export const upload = (url: string, data: File): any => {
+  return service({
+    method: 'post',
+    responseType: 'json',
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    url,
+    data
   })
 }

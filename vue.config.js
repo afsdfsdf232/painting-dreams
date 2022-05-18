@@ -12,6 +12,13 @@ module.exports = {
         pathRewrite: {
           '^/api': ''
         }
+      },
+      '/sys': {
+        target: 'http://8.136.156.163:8890/sys',
+        changOrigin: true, // 开启代理
+        pathRewrite: {
+          '^/sys': ''
+        }
       }
     }
   }

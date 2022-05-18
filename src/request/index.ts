@@ -1,4 +1,4 @@
-import { get, post } from '@/request/axios'
+import { get, post, upload } from '@/request/axios'
 import {
   HttpPromise,
   LoginRequestProps,
@@ -111,3 +111,23 @@ export const operatingCompanyUpdate = (data: any) => post('/api/operatingCompany
  * @description 后台设置-删除运营公司
  * */
 export const operatingCompanyDelete = (id: string) => post('/api/operatingCompany/logicDelete', { id })
+
+/**
+ * @description 管理成本-固定成本列表
+ * */
+export const getFixedCostsList = (data: any) => get('/api/fixedCosts/list', data)
+
+/**
+ * @description 管理成本-管理员成本列表
+ * */
+export const getManagerCostsList = (data: any) => get('/api/managerCosts/list', { ...data })
+
+/**
+ * @description 管理成本-报销列表
+ * */
+export const getReimbursementCostsList = (data: any) => get('/api/reimbursementCosts/list', data)
+
+/**
+ *  @description common-文件上传
+ * */
+export const uploadFileRequest = (data: any) => upload('/api/common/upload', data)
