@@ -128,6 +128,21 @@ export const getManagerCostsList = (data: any) => get('/api/managerCosts/list', 
 export const getReimbursementCostsList = (data: any) => get('/api/reimbursementCosts/list', data)
 
 /**
+ * @description 管理成本-新增报销
+ * */
+export const reimbursementCostsSave = (data: any) => post('/api/reimbursementCosts/save', data)
+
+/**
+ * @description 管理成本-编辑报销
+ * */
+export const reimbursementCostsUpdate = (data: any) => post('/api/reimbursementCosts/update', data)
+
+/**
+ * @description 管理成本-删除报销
+ * */
+export const logicDeleteReimbursementCosts = (id: string) => post('/api/reimbursementCosts/logicDelete', { id })
+
+/**
  *  @description common-文件上传
  * */
 export const uploadFileRequest = (data: any) => upload('/api/common/upload', data)

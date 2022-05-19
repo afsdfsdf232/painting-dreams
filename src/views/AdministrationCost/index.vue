@@ -95,7 +95,7 @@
         </div>
         <div class="filter-right">
           <d-add
-            @click="reimbursements.addReimbursementModal = true"
+            @click="openEreimbursementsModal"
             text="添加报销"
           />
         </div>
@@ -106,7 +106,7 @@
           :stripe="true"
           height="250"
           size="large"
-          :data="tableData"
+          :data="reimbursements.tableData"
           style="width: 100%"
         >
           <el-table-column
@@ -115,7 +115,32 @@
             :prop="head.prop"
             :label="head.name"
             :width="head.width"
-          />
+          >
+            <template #default="scope">
+              <template v-if="scope.column.property === 'invoiceFileUrl'">
+                <img style="max-width: 160px; max-height: 160px" :src="scope.row.invoiceFileUrl" alt="" />
+              </template>
+              <template v-if="scope.column.property === 'auditStatus'">
+                {{scope.row[scope.column.property] === '0'? '未审核': '已审核'}}
+              </template>
+              <template v-if="scope.column.property === 'isInput'">
+                {{scope.row[scope.column.property] === '0'? '否': '是'}}
+              </template>
+              <template v-if="scope.column.property === 'reimbursementStatus'">
+                {{scope.row[scope.column.property] === '0'? '未报销': '已报销'}}
+              </template>
+              <!-- 默认展示内容 -->
+              <!-- <template v-else>{{ scope.row[scope.column.property] }}</template> -->
+            </template>
+          </el-table-column>
+          <el-table-column fixed="right" label="操作" width="100">
+            <template  #default="scope">
+              <el-button type="text" size="small" @click="openEreimbursementsModal(scope.row)"
+                >编辑</el-button
+              >
+              <el-button type="text" size="small" @click="deleteReimbursements(scope.row.id)">删除</el-button>
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </div>
@@ -218,7 +243,9 @@
             <el-form-item label="时间" prop="reimbursementDate">
               <el-date-picker
                 style="width: 100%"
-                type="dates"
+                type="date"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
                 v-model="reimbursements.modal.reimbursementDate"
                 placeholder="请选择时间"
               />
@@ -272,8 +299,10 @@
 import { defineComponent, ref, reactive, onMounted } from 'vue'
 import { uploadFile } from '@/utils/index'
 import { Plus, CircleCloseFilled } from '@element-plus/icons-vue'
-import { getFixedCostsList, getManagerCostsList, getReimbursementCostsList } from '@/request/index'
+import { getFixedCostsList, getManagerCostsList, getReimbursementCostsList, reimbursementCostsSave, reimbursementCostsUpdate, logicDeleteReimbursementCosts } from '@/request/index'
 import type { FormInstance } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
 const tableData = [
   { name: '测试数据' },
   { name: '测试数据' },
@@ -283,7 +312,7 @@ const tableData = [
     img: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
   }
 ]
-// import { ElMessage, ElMessageBox } from 'element-plus'
+
 export default defineComponent({
   components: { Plus, CircleCloseFilled },
 
@@ -391,23 +420,24 @@ export default defineComponent({
     const reimbursementsRightRef = ref<FormInstance>()
     const reimbursements = reactive({
       tabHeader: [
-        { name: '报销人', prop: 'name' },
-        { name: '时间', prop: 'name' },
-        { name: '订单', prop: 'name' },
-        { name: '商品', prop: 'name' },
-        { name: '购买渠道', prop: 'name' },
-        { name: '价格', prop: 'name' },
-        { name: '发票', prop: 'name' },
-        { name: '录入', prop: 'name' },
-        { name: '审核', prop: 'name' },
-        { name: '报销状态', prop: 'name' },
-        { name: '备注', prop: 'name' }
+        { name: '报销人', prop: 'reimburser' },
+        { name: '时间', prop: 'reimbursementDate' },
+        { name: '订单', prop: 'orderNumber' },
+        { name: '商品', prop: 'commodity' },
+        { name: '购买渠道', prop: 'buyWay' },
+        { name: '价格', prop: 'amount' },
+        { name: '发票', width: 180, prop: 'invoiceFileUrl' },
+        { name: '录入', prop: 'isInput' },
+        { name: '审核', prop: 'auditStatus' },
+        { name: '报销状态', prop: 'reimbursementStatus' },
+        { name: '备注', prop: 'remark' }
       ],
       tabIndex: 2, // 默认全部
       addReimbursementModal: false,
       query: {
         date: new Date()
       },
+      tableData: [],
       tabs: [
         {
           state: 2,
@@ -450,6 +480,20 @@ export default defineComponent({
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }]
       }
     })
+    const openEreimbursementsModal = (row: any) => {
+      if (row && row.id) {
+        // 编辑
+        for (const key in reimbursements.modal) {
+          reimbursements.modal[key] = row[key]
+        }
+      } else {
+        // 新增
+        for (const key in reimbursements.modal) {
+          reimbursements.modal[key] = ''
+        }
+      }
+      reimbursements.addReimbursementModal = true
+    }
     const uploadFileChange = async (e: any) => {
       if (e.target.files && e.target.files[0]) {
         const { code, data } = await uploadFile(e.target.files[0])
@@ -494,6 +538,7 @@ export default defineComponent({
       })
       if (code === 200) {
         console.log('报销list：', data)
+        reimbursements.tableData = data.list
       }
     }
     const changEreimbursementsTab = ({ state }: { state: number }) => {
@@ -506,15 +551,52 @@ export default defineComponent({
       // 新增编辑提交
       if (!FormLeftRef) return
       if (!FormRightRef) return
+      const sucess = (code: number) => {
+        if (code === 200) {
+          ElMessage({
+            type: 'success',
+            message: '操作成功'
+          })
+          // 获取新的列表
+          getReimbursementCostsLists()
+          // 关闭弹窗
+          reimbursements.addReimbursementModal = false
+        }
+      }
       FormLeftRef.validate(async valid => {
         if (valid) {
           FormRightRef.validate(async rightValid => {
             if (rightValid) {
-              alert('验证通过')
+              if (reimbursements.modal.id) {
+                // 新增
+                const { code } = await reimbursementCostsUpdate(reimbursements.modal)
+                if (code === 200) {
+                  sucess(code)
+                }
+              } else {
+                // 编辑
+                const { code } = await reimbursementCostsSave(reimbursements.modal)
+                if (code === 200) {
+                  sucess(code)
+                }
+              }
             }
           })
         } else {
           FormRightRef.validate()
+        }
+      })
+    }
+
+    const deleteReimbursements = async (id: string) => {
+      ElMessageBox.confirm('确定删除该项吗?', '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await logicDeleteReimbursementCosts(id)
+        if (code === 200) {
+          getReimbursementCostsLists()
         }
       })
     }
@@ -538,7 +620,9 @@ export default defineComponent({
       deleteImg,
       reimbursementsRightRef,
       reimbursementsLeftRef,
-      submitReimbursements
+      submitReimbursements,
+      openEreimbursementsModal,
+      deleteReimbursements
     }
   }
 })
