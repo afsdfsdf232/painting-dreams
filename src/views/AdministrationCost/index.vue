@@ -55,18 +55,44 @@
         </div>
         <div class="filter-right">
           <d-add
-            @click="management.addManagementModal = true"
+            @click="openManagementModal"
             text="添加成本"
           />
         </div>
       </div>
       <div class="table-content">
-        <vxe-grid
-          stripe
-          :row-config="{ isCurrent: true, isHover: true }"
-          class="reverse-table"
-          v-bind="management.tables"
-        ></vxe-grid>
+       <el-table
+        border
+        v-loading="management.tables.loading"
+        :stripe="true"
+        height="250"
+        size="large"
+        :data="management.tables.data"
+        style="width: 100%"
+      >
+        <el-table-column
+          v-for="(head, index) in management.tables.columns"
+          :key="index"
+          :prop="head.key"
+          :label="head.name"
+        />
+        <el-table-column fixed="right" label="操作" width="220">
+          <template #default="scope">
+            <el-button
+              type="text"
+              size="small"
+              @click="openManagementModal(scope.row)"
+              >编辑</el-button
+            >
+            <el-button
+              @click="managementRowDelete(scope.row.id)"
+              type="text"
+              size="small"
+              >删除</el-button
+            >
+          </template>
+        </el-table-column>
+      </el-table>
       </div>
     </div>
 
@@ -105,6 +131,7 @@
           border
           :stripe="true"
           height="250"
+          :cell-class-name="cellClass"
           size="large"
           :data="reimbursements.tableData"
           style="width: 100%"
@@ -143,6 +170,7 @@
           </el-table-column>
         </el-table>
       </div>
+      <p>本月累计报销金额：{{reimbursementsAmount || 0}} 元</p>
     </div>
     <!-- 新增管理人员弹窗 -->
     <el-dialog
@@ -153,23 +181,34 @@
       center
     >
       <div class="rule-modal modal scrollbar">
-        <el-form size="large" :model="form" label-width="120px">
-          <el-form-item label="姓名">
-            <el-input placeholder="请输入姓名" v-model="form.name" />
-          </el-form-item>
-          <el-form-item label="职位">
+        <el-form size="large" ref="managementModalRef" :model="management.modal" :rules="management.rules" label-width="120px">
+          <el-form-item label="姓名" prop="managerId">
             <el-select
               style="width: 100%"
-              v-model="form.region"
-              placeholder="请选择职位"
+              v-model="management.modal.managerId"
+              @change="changeManagement"
+              placeholder="请选择姓名"
             >
-              <el-option label="Zone one" value="shanghai" />
-              <el-option label="Zone two" value="beijing" />
+              <el-option v-for="user in userLists" :key="user.id" :label="user.name" :value="user.id" />
             </el-select>
           </el-form-item>
-          <el-form-item label="身份证">
-            <el-input placeholder="请输入身份证号码" v-model="form.name" />
+          <el-form-item label="职位" prop="managePostName">
+            <el-input  placeholder="请选择姓名" disabled v-model="management.modal.managePostName" />
           </el-form-item>
+          <el-form-item label="费用" prop="amount">
+            <el-input placeholder="请输入成本费用" v-model="management.modal.amount" />
+          </el-form-item>
+          <el-form-item label="日期" prop="costsDate">
+          <el-date-picker
+            style="width: 100%"
+            type="date"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            v-model="management.modal.costsDate"
+            placeholder="请选择时间"
+          />
+          </el-form-item>
+
         </el-form>
       </div>
       <template #footer>
@@ -179,7 +218,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="addCompanyModal = false"
+            @click="saveManagementModal(managementModalRef)"
             >保存</el-button
           >
         </div>
@@ -296,10 +335,10 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, reactive, onMounted } from 'vue'
+import { defineComponent, ref, reactive, onMounted, Ref } from 'vue'
 import { uploadFile } from '@/utils/index'
 import { Plus, CircleCloseFilled } from '@element-plus/icons-vue'
-import { getFixedCostsList, getManagerCostsList, getReimbursementCostsList, reimbursementCostsSave, reimbursementCostsUpdate, logicDeleteReimbursementCosts } from '@/request/index'
+import { getFixedCostsList, getManagerCostsList, getReimbursementCostsList, reimbursementCostsSave, reimbursementCostsUpdate, logicDeleteReimbursementCosts, getSysUserList, saveManagerCosts, logicDeleteManagerCosts, updateManagerCosts, getThisMonthReimbursementCosts } from '@/request/index'
 import type { FormInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
@@ -318,6 +357,8 @@ export default defineComponent({
 
   setup () {
     const active = ref(false)
+
+    const userLists:Ref<any> = ref([])
 
     // 固定成本数据
     const fixedCosts = reactive({
@@ -370,33 +411,110 @@ export default defineComponent({
     }
     // ==============================================
     // 管理人员成本
+    const managementModalRef = ref<FormInstance>()
     const management = reactive({
       tables: {
-        border: true,
-        showOverflow: true,
-        height: 150,
-        showHeader: false,
+        loading: false,
         columns: [
-          { field: 'field1', width: 100 },
-          { field: 'field2' },
-          { field: 'field3' },
-          { field: 'field4' },
-          { field: 'field5' },
-          { field: 'field6' }
+          {
+            name: '姓名',
+            key: 'managerName'
+          }, {
+            name: '职位',
+            key: 'managePostName'
+          },
+          {
+            name: '实际成本',
+            key: 'amount'
+          }
         ],
-        data: [
-          { field1: '姓名', field2: '张三', field3: '李四', field4: 'Test', field5: 'Test2', field6: 'Test3', col5: 'Test4', col6: 'Test5', col7: 'Test6' },
-          { field1: '职位', field2: '职位2', field3: '职位3', field4: '职位四', field5: '职位5', field6: '职位6', col7: 'Develop' },
-          { field1: '实际成本', name: '王五', job: '测试工作3', col4: 'Man', col5: 'Women', col6: 'Man', col7: 'Women' }
-        ]
+        data: []
       },
       query: {
         date: new Date()
       },
-      addManagementModal: false
+      addManagementModal: false,
+      rules: {
+        amount: [{ required: true, message: '请输入成本费用', trigger: 'blur' }],
+        costsDate: [{ required: true, message: '请选择日期', trigger: 'change' }],
+        managerId: [{ required: true, message: '请选择姓名', trigger: 'change' }],
+        managePostName: [{ required: true, message: '请选择姓名', trigger: 'change' }]
+      },
+      modal: {
+        id: '', // id
+        amount: '', // 费用
+        costsDate: '', // 成本日期
+        managerId: '',
+        managePostName: '' // 职位
+      }
     })
-
+    const openManagementModal = async (row: any) => {
+      console.log(row)
+      // 新增
+      management.addManagementModal = true
+      if (row && row.id) {
+        // 编辑
+        for (const key in management.modal) {
+          management.modal[key] = row[key]
+          changeManagement()
+        }
+      } else {
+        // 新增
+        for (const key in management.modal) {
+          management.modal[key] = ''
+        }
+      }
+    }
+    const saveManagementModal = async (FormRef: FormInstance | undefined) => {
+      const sucess = (code: number) => {
+        if (code === 200) {
+          ElMessage({
+            type: 'success',
+            message: '操作成功'
+          })
+          // 获取新的列表
+          getManagerCostsLists()
+          // 关闭弹窗
+          management.addManagementModal = false
+        }
+      }
+      if (!FormRef) return
+      FormRef.validate(async valid => {
+        if (valid) {
+        // 验证成功
+          if (management.modal.id) {
+          // 编辑
+            const { code } = await updateManagerCosts(management.modal)
+            sucess(code)
+          } else {
+          // 新增
+            const { code } = await saveManagerCosts(management.modal)
+            sucess(code)
+          }
+        }
+      })
+    }
+    // 删除
+    const managementRowDelete = async (id: string) => {
+      ElMessageBox.confirm('确定删除该项吗?', '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await logicDeleteManagerCosts(id)
+        if (code === 200) {
+          getManagerCostsLists()
+        }
+      })
+    }
+    const changeManagement = () => {
+      const item = userLists.value.find((item: any) => item.id === management.modal.managerId)
+      if (item && item.managePostName) {
+        management.modal.managePostName = item.managePostName
+      }
+    }
     const getManagerCostsLists = async () => {
+      management.tables.loading = true
       const query = {
         month: new Date().getMonth() + 1,
         limit: -1,
@@ -408,9 +526,38 @@ export default defineComponent({
         query.month = dates.getMonth() + 1
         query.year = dates.getFullYear()
       }
-      const { code, data } = await getManagerCostsList({ ...query })
+      try {
+        const { code, data } = await getManagerCostsList({ ...query })
+        if (code === 200) {
+        // const columns: any = [{ field: 'field', width: 140, fixed: 'left' }]
+        // const tableData: any = [{ field: '姓名' }, { field: '职位' }, { field: '实际成本' }]
+        // data.list.map((item: any, index: number) => {
+        //   columns.push({
+        //     field: 'field' + (index + 1),
+        //     minWidth: 120
+        //   })
+        //   tableData[0]['field' + (index + 1)] = item.managerName || 'null'
+        //   tableData[1]['field' + (index + 1)] = item.managePostName || '--'
+        //   tableData[2]['field' + (index + 1)] = item.amount || '--'
+        // })
+        // columns[data.list.length - 1].fixed = 'right'
+        // management.tables.columns = columns
+          management.tables.data = data.list
+        }
+      } finally {
+        management.tables.loading = false
+      }
+    }
+    // 获取人员列表
+    const getSysUserLists = async () => {
+      const { code, data } = await getSysUserList({
+        limit: -1,
+        page: 1
+      })
       if (code === 200) {
-        console.log('管理人员成本-data:', data)
+        if (data.list) {
+          userLists.value = data.list
+        }
       }
     }
 
@@ -418,6 +565,7 @@ export default defineComponent({
     // 报销数据
     const reimbursementsLeftRef = ref<FormInstance>()
     const reimbursementsRightRef = ref<FormInstance>()
+    const reimbursementsAmount = ref(0) // 报销累计
     const reimbursements = reactive({
       tabHeader: [
         { name: '报销人', prop: 'reimburser' },
@@ -539,6 +687,7 @@ export default defineComponent({
       if (code === 200) {
         console.log('报销list：', data)
         reimbursements.tableData = data.list
+        getThisMonthReimbursementCostss(query)
       }
     }
     const changEreimbursementsTab = ({ state }: { state: number }) => {
@@ -600,10 +749,28 @@ export default defineComponent({
         }
       })
     }
+
+    // 报销累计
+    const getThisMonthReimbursementCostss = async (query: any) => {
+      const { code, data } = await getThisMonthReimbursementCosts({
+        ...query
+      })
+      if (code === 200) {
+        console.log('data:', data)
+        reimbursementsAmount.value = data.amount
+      }
+    }
+
+    const cellClass = (row:any):any => {
+      if (row.column.property === 'invoiceFileUrl') {
+        return 'invoice-img'
+      }
+    }
     onMounted(() => {
       getFixedCostsLists()
       getManagerCostsLists()
       getReimbursementCostsLists()
+      getSysUserLists()
     })
     return {
       changeTab,
@@ -622,7 +789,15 @@ export default defineComponent({
       reimbursementsLeftRef,
       submitReimbursements,
       openEreimbursementsModal,
-      deleteReimbursements
+      deleteReimbursements,
+      cellClass,
+      userLists,
+      changeManagement,
+      managementModalRef,
+      openManagementModal,
+      saveManagementModal,
+      managementRowDelete,
+      reimbursementsAmount
     }
   }
 })
@@ -724,5 +899,11 @@ export default defineComponent({
 } /*边角，即两个滚动条的交汇处*/
 .reverse-table ::-webkit-scrollbar-corner {
   background-color: #ffffff;
+}
+
+::v-deep(.invoice-img > div){
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

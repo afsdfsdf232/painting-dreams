@@ -27,7 +27,8 @@ const headerData = [
   { name: '邮寄合同地址', key: 'contractAddress' },
   { name: '税号', key: 'taxId' },
   { name: '联系电话', key: 'phone' },
-  { name: '银行账号/名称', key: 'name' },
+  { name: '银行名称', key: 'bankName' },
+  { name: '银行账号', key: 'bankAccount' },
   { name: '备注', key: 'remark' }
 ]
 export default defineComponent({
@@ -48,7 +49,13 @@ export default defineComponent({
       })
 
       if (code === 200 && data) {
-        operatingCompany.tableData = data.list || []
+        operatingCompany.tableData = (data.list || []).map((item: any) => {
+          const { name = '', account = '', id = '' } = item.bankList ? item.bankList[0] ? item.bankList[0] : {} : {}
+          item.bankName = name
+          item.bankAccount = account
+          item.bankId = id
+          return item
+        })
       }
       operatingCompany.tableLoading = false
     }

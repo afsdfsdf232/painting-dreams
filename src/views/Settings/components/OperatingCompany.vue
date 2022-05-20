@@ -50,7 +50,6 @@
             :key="index"
             :prop="head.key"
             :label="head.name"
-            :width="head.width"
           />
           <el-table-column fixed="right" label="操作" width="100">
             <template  #default="scope">
@@ -58,43 +57,6 @@
                 >编辑</el-button
               >
               <el-button type="text" size="small" @click="deleteDesignPosts(scope.row.id)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </div>
-
-      <!-- 部门管理 -->
-      <div class="job-division w50" v-if="false">
-        <div class="job-division-header">
-          <div class="tab-item">部门管理</div>
-          <el-button
-            size="large"
-            @click="addDepartmentModal = true"
-            :icon="CirclePlus"
-            >新建部门</el-button
-          >
-        </div>
-        <el-table
-          border
-          :stripe="true"
-          height="250"
-          size="large"
-          :data="tableData"
-          style="width: 100%"
-        >
-          <el-table-column
-            v-for="(head, index) in departmentHeaderData"
-            :key="index"
-            :prop="head.key"
-            :label="head.name"
-            :width="head.width"
-          />
-          <el-table-column fixed="right" label="操作" width="100">
-            <template #default>
-              <el-button type="text" size="small" @click="handleClick"
-                >编辑</el-button
-              >
-              <el-button type="text" size="small">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -123,7 +85,6 @@
           :key="index"
           :prop="head.key"
           :label="head.name"
-          :width="head.width"
         />
         <el-table-column fixed="right" label="操作" width="220">
           <template #default="scope">
@@ -306,35 +267,6 @@
       </template>
     </el-dialog>
 
-    <!-- 新建部门弹窗 -->
-    <el-dialog
-      v-model="addDepartmentModal"
-      top="55px"
-      title="新建部门"
-      width="35%"
-      center
-    >
-      <div class="rule-modal modal scrollbar">
-        <el-form size="large" :model="form" label-width="120px">
-          <el-form-item label="部门名称">
-            <el-input placeholder="请输入部门名称" v-model="form.name" />
-          </el-form-item>
-        </el-form>
-      </div>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button
-            class="btn"
-            type="primary"
-            style="width: 200px"
-            size="large"
-            @click="addCompanyModal = false"
-            >保存</el-button
-          >
-        </div>
-      </template>
-    </el-dialog>
-
     <!-- 新建后台人员弹窗 -->
     <el-dialog
       v-loading="peopleTable.addModal.loading"
@@ -408,7 +340,6 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button
-            :loading="loading"
             class="btn"
             type="primary"
             style="width: 200px"
@@ -543,6 +474,8 @@ interface peopleTableProps {
   loading: boolean
   updatePwdModal: boolean
   updatePwdModals: any
+  addModalRules: any
+  updatePwdModalRules: any
 }
 const headerData = [
   { name: '简称', key: 'shortName' },
@@ -550,7 +483,8 @@ const headerData = [
   { name: '邮寄合同地址', key: 'contractAddress' },
   { name: '税号', key: 'taxId' },
   { name: '联系电话', key: 'phone' },
-  { name: '银行账号/名称', key: 'name' },
+  { name: '银行名称', key: 'bankName' },
+  { name: '银行账号', key: 'bankAccount' },
   { name: '备注', key: 'remark' }
 ]
 
@@ -708,7 +642,7 @@ export default defineComponent({
     })
     // 编辑打开弹窗
     const openOperatingCompany = (row: any) => {
-      const { id, contractAddress, fullName, phone, remark, shortName, taxId, blank } = row
+      const { id, contractAddress, fullName, phone, remark, shortName, taxId, bankName, bankAccount } = row
       operatingCompany.modal.id = id
       operatingCompany.modal.contractAddress = contractAddress
       operatingCompany.modal.fullName = fullName
@@ -716,7 +650,8 @@ export default defineComponent({
       operatingCompany.modal.remark = remark
       operatingCompany.modal.shortName = shortName
       operatingCompany.modal.taxId = taxId
-      operatingCompany.modal.blank = blank
+      operatingCompany.modal.name = bankName
+      operatingCompany.modal.account = bankAccount
       operatingCompany.addModal = true
     }
     // 弹窗关闭
@@ -784,7 +719,13 @@ export default defineComponent({
         operatingStatus: 0
       })
       if (code === 200 && data) {
-        operatingCompany.tableData = data.list || []
+        operatingCompany.tableData = data.list.map((item: any) => {
+          const { name = '', account = '', id = '' } = item.bankList ? item.bankList[0] ? item.bankList[0] : {} : {}
+          item.bankName = name
+          item.bankAccount = account
+          item.bankId = id
+          return item
+        })
       }
       operatingCompany.tableLoading = false
     }
@@ -1055,17 +996,6 @@ export default defineComponent({
     const addDivisionModal = ref(false) // 新增分工弹窗
     const addDepartmentModal = ref(false) // 新建部门弹窗
 
-    const form = reactive({
-      name: '',
-      region: '',
-      date1: '',
-      date2: '',
-      delivery: false,
-      type: [],
-      resource: '',
-      desc: ''
-    })
-
     return {
       percentagePointss,
       designPostsFormRef,
@@ -1077,7 +1007,6 @@ export default defineComponent({
       CirclePlus,
       showRuleModal,
       addCompanyModal,
-      form,
       addDivisionModal,
       addDepartmentModal,
       peopleTable,

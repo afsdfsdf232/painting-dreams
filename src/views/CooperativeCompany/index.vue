@@ -21,6 +21,7 @@
         border
         :stripe="true"
         :height="height"
+        v-loading="tableLoading"
         size="large"
         :data="tableData"
         style="width: 100%"
@@ -31,7 +32,14 @@
           :prop="head.prop"
           :label="head.name"
           :width="head.width"
-        />
+        >
+          <template #default="scope">
+            <template v-if="scope.column.property === 'status'">
+              {{scope.row[scope.column.property] === '0'? '待合作': '合作中'}}
+            </template>
+          </template>
+        </el-table-column>
+
         <el-table-column fixed="right" label="操作" width="120">
           <template #default>
             <el-button type="text" size="small" @click="handleClick"
@@ -118,57 +126,59 @@
 
 <script lang="ts">
 import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
+import { getPartyACompanyList } from '@/request/index'
 const tableHeaderData = [
-  { name: '简称', prop: 'name' },
-  { name: '公司全名', prop: 'name' },
-  { name: '合作状态', prop: 'name' },
-  { name: '邮寄合同地址', prop: 'name', width: 160 },
-  { name: '联系电话', prop: 'name' },
-  { name: '税号', prop: 'name' },
-  { name: '银行账号/名称', prop: 'name', width: 160 },
-  { name: '客户联系方式', prop: 'name', width: 160 },
-  { name: '备注', prop: 'name' }
+  { name: '简称', prop: 'shortName' },
+  { name: '公司全名', prop: 'fullName' },
+  { name: '合作状态', prop: 'status' },
+  { name: '邮寄合同地址', prop: 'contractAddress', width: 160 },
+  { name: '联系电话', prop: 'phone' },
+  { name: '税号', prop: 'taxId' },
+  { name: '银行账号/名称', prop: '', width: 160 },
+  { name: '客户联系方式', prop: 'customerContactInfo', width: 160 },
+  { name: '备注', prop: 'remark' }
 ]
 export default defineComponent({
   setup () {
     const tabs = reactive([
-      { text: '全部公司', id: 0 },
+      { text: '全部公司', id: 2 },
       { text: '合作中公司', id: 1 },
-      { text: '待合作公司', id: 2 }
+      { text: '待合作公司', id: 0 }
     ])
-    const activeTab: Ref<number> = ref(0)
+    const activeTab: Ref<number> = ref(2)
+    const tableLoading: Ref<boolean> = ref(false)
     const addCompanyModal: Ref<boolean> = ref(false)
     const changeTab = (id: number): void => {
       if (activeTab.value !== id) {
         activeTab.value = id
+        getPartyACompanyLists()
       }
     }
     const height: Ref<number> = ref(500)
+    const getPartyACompanyLists = async () => {
+      tableLoading.value = true
+      try {
+        const query = {
+          limit: -1,
+          page: 1,
+          status: activeTab.value === 2 ? '' : activeTab.value
+        }
+        const { code, data } = await getPartyACompanyList(query)
+        if (code === 200) {
+          console.log('表格-list:', data)
+          tableData.value = data.list
+        }
+      } finally {
+        tableLoading.value = false
+      }
+    }
     onMounted(() => {
+      getPartyACompanyLists()
       nextTick(() => {
         height.value = document.documentElement.clientHeight - 160
       })
     })
-    const tableData = ref([
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' },
-      { name: '测试数据' }
-    ])
+    const tableData = ref([])
     const form = reactive({
       name: '',
       region: '',
@@ -188,7 +198,8 @@ export default defineComponent({
       tableHeaderData,
       height,
       addCompanyModal,
-      form
+      form,
+      tableLoading
     }
   }
 })

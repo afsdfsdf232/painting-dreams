@@ -88,6 +88,11 @@ export const getDesignPost = () => get('/api/designPost/list')
 export const designPostSave = (data: any) => post('/api/designPost/save', data)
 
 /**
+ * @description 后台设置-人员列表
+ * */
+export const getSysUserList = (data: any) => get('/api/sysUser/list', data)
+
+/**
  * 后台设置-编辑职位分工
  * */
 export const designPostUpdate = (data:any) => post('/api/designPost/update', data)
@@ -123,6 +128,20 @@ export const getFixedCostsList = (data: any) => get('/api/fixedCosts/list', data
 export const getManagerCostsList = (data: any) => get('/api/managerCosts/list', { ...data })
 
 /**
+ * @description 管理人员成本-新增
+ * */
+export const saveManagerCosts = (data: any) => post('/api/managerCosts/save', data)
+
+/**
+ * @description 管理人员成本-删除
+ * */
+export const logicDeleteManagerCosts = (id: string) => post('/api/managerCosts/logicDelete', { id })
+
+/**
+ * @description 管理人员成本-编辑
+ * */
+export const updateManagerCosts = (data: any) => post('/api/managerCosts/update', data)
+/**
  * @description 管理成本-报销列表
  * */
 export const getReimbursementCostsList = (data: any) => get('/api/reimbursementCosts/list', data)
@@ -138,6 +157,10 @@ export const reimbursementCostsSave = (data: any) => post('/api/reimbursementCos
 export const reimbursementCostsUpdate = (data: any) => post('/api/reimbursementCosts/update', data)
 
 /**
+ * @description 管理成本-报销累计
+ * */
+export const getThisMonthReimbursementCosts = (data: any) => get('/api/reimbursementCosts/thisMonthReimbursementCosts', data)
+/**
  * @description 管理成本-删除报销
  * */
 export const logicDeleteReimbursementCosts = (id: string) => post('/api/reimbursementCosts/logicDelete', { id })
@@ -146,3 +169,8 @@ export const logicDeleteReimbursementCosts = (id: string) => post('/api/reimburs
  *  @description common-文件上传
  * */
 export const uploadFileRequest = (data: any) => upload('/api/common/upload', data)
+
+/**
+ * @description 合作甲方公司信息
+ * */
+export const getPartyACompanyList = (data: any) => get('/api/partyACompany/list', data)
