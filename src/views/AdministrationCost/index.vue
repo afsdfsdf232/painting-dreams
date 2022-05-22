@@ -13,7 +13,7 @@
             placeholder="请选择年月" />
         </div>
         <div class="filter-right">
-          <d-add @click="add" text="添加成本" />
+          <d-add @click="openFixedCostsModal" text="添加成本" />
         </div>
       </div>
       <div class="table-content">
@@ -23,6 +23,7 @@
           height="250"
           size="large"
           :data="fixedCosts.tableData"
+          v-loading="fixedCosts.tableLoading"
           style="width: 100%"
         >
           <el-table-column
@@ -30,20 +31,23 @@
             :key="index"
             :prop="head.prop"
             :label="head.name"
-            :width="head.width"
           >
             <template #default="scope">
-              <!-- 最后一行展示图片 -->
-              <template v-if="scope.row.payFileUrl">
-                <div>
-                  <img :src="scope.row.payFileUrl" alt="" />
-                </div>
+             <template v-if="scope.column.property === 'payFileUrl'">
+                <img style="max-width: 160px; max-height: 160px" :src="scope.row.payFileUrl" alt="" />
               </template>
-              <!-- 默认展示内容 -->
-              <template v-else>{{ scope.row[scope.column.property] }}</template>
+            </template>
+          </el-table-column>
+          <el-table-column fixed="right" label="操作" width="150">
+            <template  #default="scope">
+              <el-button type="text" size="small" @click="openFixedCostsModal(scope.row)"
+                >编辑</el-button
+              >
+              <el-button type="text" size="small" @click="deleteFixedCosts(scope.row.id)">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
+        <p>总计费用：{{fixedCosts.totalCount}}</p>
       </div>
     </div>
     <!-- 管理人员成本 -->
@@ -93,6 +97,7 @@
           </template>
         </el-table-column>
       </el-table>
+      <p>总计费用：{{management.totalCount}}</p>
       </div>
     </div>
 
@@ -172,11 +177,71 @@
       </div>
       <p>本月累计报销金额：{{reimbursementsAmount || 0}} 元</p>
     </div>
+    <!-- 新增固定成本弹窗 -->
+    <el-dialog
+      v-model="fixedCosts.showModal"
+      top="55px"
+      v-loading="fixedCosts.modalLoading"
+      :title="fixedCosts.modal.id?'编辑成本':'新增成本'"
+      width="35%"
+      center
+    >
+      <div class="rule-modal modal scrollbar">
+        <el-form size="large" ref="fixedCostsModalRef" :model="fixedCosts.modal" :rules="fixedCosts.rules" label-width="120px">
+          <el-form-item label="名称" prop="name">
+            <el-select
+              style="width: 100%"
+              v-model="fixedCosts.modal.name"
+              @change="changeFixedCostsSelectList"
+              placeholder="请选择费用名称"
+            >
+              <el-option v-for="item in fixedCosts.fixedCostsSelectList" :key="item.id" :label="item.name" :value="item.name" />
+            </el-select>
+          </el-form-item>
+           <el-form-item label="费用" prop="amount">
+            <el-input placeholder="请输入费用"  v-model="fixedCosts.modal.amount" />
+          </el-form-item>
+          <el-form-item label="日期" prop="costsDate">
+          <el-date-picker
+            style="width: 100%"
+            type="date"
+            format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
+            v-model="fixedCosts.modal.costsDate"
+            placeholder="请选择时间"
+          />
+          </el-form-item>
+          <!-- 图片上传 -->
+          <el-form-item label="截图" prop="payFileUrl">
+            <div class="upload-content" v-if="!fixedCosts.modal.payFileUrl">
+              <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+              <input class="file-input" type="file" @change="uploadFileChange2">
+            </div>
+            <div v-else class="invoice-file">
+              <img :src="fixedCosts.modal.payFileUrl" alt="" srcset="">
+              <el-icon :size="24" @click="deleteImg2" class="delete"><CircleCloseFilled color="#F56C6C"/></el-icon>
+            </div>
+          </el-form-item>
+        </el-form>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="saveFixedCostsModal(fixedCostsModalRef)"
+            >保存</el-button
+          >
+        </div>
+      </template>
+    </el-dialog>
     <!-- 新增管理人员弹窗 -->
     <el-dialog
       v-model="management.addManagementModal"
       top="55px"
-      title="新增成本"
+      :title="management.modal.id?'编辑成本':'新增成本'"
       width="35%"
       center
     >
@@ -229,11 +294,11 @@
     <el-drawer
       size="50%"
       v-model="reimbursements.addReimbursementModal"
-      title="新增报销"
+      :title="reimbursements.modal.id?'编辑报销':'新增报销'"
       :with-header="true"
     >
       <template #title>
-        <p class="t-c t-main-color f20">新增报销</p>
+        <p class="t-c t-main-color f20">{{reimbursements.modal.id?'编辑报销':'新增报销'}}</p>
       </template>
       <div class="drawer-content d-flex d-f-row-bet">
         <div class="drawer-content-left">
@@ -338,19 +403,27 @@
 import { defineComponent, ref, reactive, onMounted, Ref } from 'vue'
 import { uploadFile } from '@/utils/index'
 import { Plus, CircleCloseFilled } from '@element-plus/icons-vue'
-import { getFixedCostsList, getManagerCostsList, getReimbursementCostsList, reimbursementCostsSave, reimbursementCostsUpdate, logicDeleteReimbursementCosts, getSysUserList, saveManagerCosts, logicDeleteManagerCosts, updateManagerCosts, getThisMonthReimbursementCosts } from '@/request/index'
+import {
+  getFixedCostsList,
+  getManagerCostsList,
+  getReimbursementCostsList,
+  reimbursementCostsSave,
+  reimbursementCostsUpdate,
+  logicDeleteReimbursementCosts,
+  getSysUserList,
+  saveManagerCosts,
+  logicDeleteManagerCosts,
+  updateManagerCosts,
+  getThisMonthReimbursementCosts,
+  getFixedCostsSelectList,
+  saveFixedCosts,
+  logicDeleteFixedCosts,
+  updateFixedCosts,
+  getTotalFixedCosts,
+  getTotalManagerCosts
+} from '@/request/index'
 import type { FormInstance } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
-
-const tableData = [
-  { name: '测试数据' },
-  { name: '测试数据' },
-  { name: '测试数据ja' },
-  {
-    name: '测试数据',
-    img: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg'
-  }
-]
 
 export default defineComponent({
   components: { Plus, CircleCloseFilled },
@@ -358,23 +431,118 @@ export default defineComponent({
   setup () {
     const active = ref(false)
 
-    const userLists:Ref<any> = ref([])
+    const userLists:Ref<Array<{
+      id: string,
+      name: string,
+      managePostName: string
+      [key:string]: any
+    }>> = ref([])
 
     // 固定成本数据
-    const fixedCosts = reactive({
+    const fixedCostsModalRef = ref<FormInstance>()
+    interface fixedCostsProps {
+      fixedCostsSelectList: Array<{
+        name: string,
+        id: string,
+        amount: string,
+        costsDate: string,
+        payFileUrl: string
+      }>
+      tabHeader: Array<{
+        name: string,
+        prop: string
+      }>
+      [key: string]: any
+    }
+    const fixedCosts:fixedCostsProps = reactive({
       query: {
         date: new Date()
       },
       tableData: [],
+      totalCount: 0,
+      fixedCostsSelectList: [],
+      showModal: false,
+      tableLoading: false,
+      modalLoading: false,
       tabHeader: [
-        { name: '房租', prop: 'name' },
-        { name: '水电费', prop: 'name' },
-        { name: '耗材费', prop: 'name' },
-        { name: '网络费', prop: 'name' },
-        { name: '维修费', prop: 'name' },
-        { name: '汽车租赁费', prop: 'name' }
-      ]
+        { name: '费用名称', prop: 'name' },
+        { name: '费用金额', prop: 'amount' },
+        { name: '付费截图', prop: 'payFileUrl' }
+      ],
+      modal: {
+        id: '', // id
+        amount: '', // 费用
+        costsDate: '', // 成本日期
+        name: '', // 名称
+        payFileUrl: '' // 付费截图
+      },
+      rules: {
+        amount: [{ required: true, message: '请输入成本费用', trigger: 'blur' }],
+        costsDate: [{ required: true, message: '请选择日期', trigger: 'change' }],
+        name: [{ required: true, message: '请选择名称', trigger: 'change' }],
+        payFileUrl: [{ required: true, message: '请上传截图', trigger: 'change' }]
+      }
     })
+    const openFixedCostsModal = async (row: any) => {
+      try {
+        fixedCosts.showModal = true
+        fixedCosts.modalLoading = true
+        if (row && row.id) {
+          for (const key in fixedCosts.modal) {
+            fixedCosts.modal[key] = row[key]
+          }
+        } else {
+          for (const key in fixedCosts.modal) {
+            fixedCosts.modal[key] = ''
+          }
+        }
+        await getFixedCostsSelectLists()
+        await changeFixedCostsSelectList()
+      } finally {
+        fixedCosts.modalLoading = false
+      }
+    }
+    const saveFixedCostsModal = async (FormRef: FormInstance | undefined) => {
+      const sucess = (code: number) => {
+        if (code === 200) {
+          ElMessage({
+            type: 'success',
+            message: '操作成功'
+          })
+          // 获取新的列表
+          getFixedCostsLists()
+          // 关闭弹窗
+          fixedCosts.showModal = false
+        }
+      }
+      if (!FormRef) return
+      FormRef.validate(async valid => {
+        if (valid) {
+        // 验证成功
+          if (fixedCosts.modal.id) {
+          // 编辑
+            const { code } = await updateFixedCosts(fixedCosts.modal)
+            sucess(code)
+          } else {
+          // 新增
+            const { code } = await saveFixedCosts(fixedCosts.modal)
+            sucess(code)
+          }
+        }
+      })
+    }
+    const deleteFixedCosts = async (id: string) => {
+      ElMessageBox.confirm('确定删除该项吗?', '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await logicDeleteFixedCosts(id)
+        if (code === 200) {
+          getFixedCostsLists()
+        }
+      })
+    }
     const getFixedCostsLists = async () => {
       const query = {
         month: new Date().getMonth() + 1,
@@ -387,32 +555,67 @@ export default defineComponent({
         query.month = dates.getMonth() + 1
         query.year = dates.getFullYear()
       }
-      const { code, data } = await getFixedCostsList({
-        ...query
-      })
-      if (code === 200) {
-        console.log(data, '固定成本list')
-        // 处理头部
-        const headers: any = []
-        data.list.map((item: any) => {
-          headers.push({
-            name: item.name || 'test',
-            prop: 'amount'
-          })
+      try {
+        fixedCosts.tableLoading = true
+        const { code, data } = await getFixedCostsList({
+          ...query
         })
-        fixedCosts.tabHeader = headers
-        fixedCosts.tableData = data.list
+        if (code === 200) {
+        // 处理头部
+          fixedCosts.tableData = data.list
+        }
+      } finally {
+        fixedCosts.tableLoading = false
+        getTotalFixedCostss(query)
       }
     }
     const changeFixedCostsList = () => {
       // 改变时间
-      console.log(fixedCosts.query)
       getFixedCostsLists()
+    }
+    const getFixedCostsSelectLists = async () => {
+      const { code, data } = await getFixedCostsSelectList()
+      if (code === 200) {
+        fixedCosts.fixedCostsSelectList = data
+      }
+    }
+    const uploadFileChange2 = async (e: any) => {
+      if (e.target.files && e.target.files[0]) {
+        const { code, data } = await uploadFile(e.target.files[0])
+        if (code === 200) {
+          fixedCosts.modal.payFileUrl = data[0].url;
+          (fixedCostsModalRef.value as any).validateField(['payFileUrl'])
+        }
+      }
+    }
+    const deleteImg2 = () => {
+      fixedCosts.modal.payFileUrl = '';
+      (fixedCostsModalRef.value as any).validateField(['payFileUrl'])
+    }
+    const changeFixedCostsSelectList = () => {
+      if (!fixedCosts.modal.name) return
+      const idx = fixedCosts.fixedCostsSelectList.findIndex((item: any) => item.name === fixedCosts.modal.name)
+      if (idx > -1) {
+        const { amount, payFileUrl } = fixedCosts.fixedCostsSelectList[idx]
+        if (amount) {
+          fixedCosts.modal.amount = amount
+        }
+        if (payFileUrl) {
+          fixedCosts.modal.payFileUrl = payFileUrl
+        }
+      }
+    }
+    const getTotalFixedCostss = async (query: any) => {
+      const { code, data } = await getTotalFixedCosts(query)
+      if (code === 200) {
+        fixedCosts.totalCount = data?.totalAmount
+      }
     }
     // ==============================================
     // 管理人员成本
     const managementModalRef = ref<FormInstance>()
     const management = reactive({
+      totalCount: 0,
       tables: {
         loading: false,
         columns: [
@@ -448,8 +651,14 @@ export default defineComponent({
         managePostName: '' // 职位
       }
     })
+    // 统计费用
+    const getTotalManagerCostss = async (query: any) => {
+      const { code, data } = await getTotalManagerCosts(query)
+      if (code === 200) {
+        management.totalCount = data.totalAmount
+      }
+    }
     const openManagementModal = async (row: any) => {
-      console.log(row)
       // 新增
       management.addManagementModal = true
       if (row && row.id) {
@@ -546,6 +755,7 @@ export default defineComponent({
         }
       } finally {
         management.tables.loading = false
+        getTotalManagerCostss(query)
       }
     }
     // 获取人员列表
@@ -658,16 +868,6 @@ export default defineComponent({
     const changeTab = () => {
       active.value = !active.value
     }
-    const form = reactive({
-      name: '',
-      region: '',
-      date1: '',
-      date2: '',
-      delivery: false,
-      type: [],
-      resource: '',
-      desc: ''
-    })
     const getReimbursementCostsLists = async () => {
       const query = {
         month: new Date().getMonth() + 1,
@@ -685,7 +885,6 @@ export default defineComponent({
         ...query
       })
       if (code === 200) {
-        console.log('报销list：', data)
         reimbursements.tableData = data.list
         getThisMonthReimbursementCostss(query)
       }
@@ -756,8 +955,7 @@ export default defineComponent({
         ...query
       })
       if (code === 200) {
-        console.log('data:', data)
-        reimbursementsAmount.value = data.amount
+        reimbursementsAmount.value = data?.amount || 0
       }
     }
 
@@ -777,9 +975,7 @@ export default defineComponent({
       reimbursements,
       fixedCosts,
       changEreimbursementsTab,
-      tableData,
       management,
-      form,
       changeFixedCostsList,
       getManagerCostsLists,
       getReimbursementCostsLists,
@@ -797,7 +993,14 @@ export default defineComponent({
       openManagementModal,
       saveManagementModal,
       managementRowDelete,
-      reimbursementsAmount
+      reimbursementsAmount,
+      openFixedCostsModal,
+      saveFixedCostsModal,
+      fixedCostsModalRef,
+      uploadFileChange2,
+      deleteImg2,
+      changeFixedCostsSelectList,
+      deleteFixedCosts
     }
   }
 })

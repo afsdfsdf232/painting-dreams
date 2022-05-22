@@ -123,6 +123,30 @@ export const operatingCompanyDelete = (id: string) => post('/api/operatingCompan
 export const getFixedCostsList = (data: any) => get('/api/fixedCosts/list', data)
 
 /**
+ * @description 管理成本-新增固定成本下拉列表
+ * */
+export const getFixedCostsSelectList = () => get('/api/fixedCosts/selectList')
+
+/**
+ * @description 管理成本-新增固定成本
+ * */
+export const saveFixedCosts = (data: any) => post('/api/fixedCosts/save', data)
+
+/**
+ * @description 管理成本-编辑固定成本
+ * */
+export const updateFixedCosts = (data: any) => post('/api/fixedCosts/update', data)
+
+/**
+ * @description 管理成本-固定成本总计
+ * */
+export const getTotalFixedCosts = (data: any) => get('/api/fixedCosts/totalFixedCosts', data)
+
+/**
+ * @description 管理成本-删除固定成本
+ * */
+export const logicDeleteFixedCosts = (id: string) => post('/api/fixedCosts/logicDelete', { id })
+/**
  * @description 管理成本-管理员成本列表
  * */
 export const getManagerCostsList = (data: any) => get('/api/managerCosts/list', { ...data })
@@ -141,6 +165,10 @@ export const logicDeleteManagerCosts = (id: string) => post('/api/managerCosts/l
  * @description 管理人员成本-编辑
  * */
 export const updateManagerCosts = (data: any) => post('/api/managerCosts/update', data)
+/**
+ * @description 管理成本-管理人员成本统计
+ * */
+export const getTotalManagerCosts = (data: any) => get('/api/managerCosts/totalManagerCosts', data)
 /**
  * @description 管理成本-报销列表
  * */
@@ -171,6 +199,76 @@ export const logicDeleteReimbursementCosts = (id: string) => post('/api/reimburs
 export const uploadFileRequest = (data: any) => upload('/api/common/upload', data)
 
 /**
- * @description 合作甲方公司信息
+ * @description 合作甲方公司信息-列表
  * */
 export const getPartyACompanyList = (data: any) => get('/api/partyACompany/list', data)
+
+/**
+ * @description 合作甲方公司信息-新增
+ * */
+export const savePartyACompany = (data: any) => post('/api/partyACompany/save', data)
+
+/**
+ * @descriotion 合作甲方公司-下拉列表-选择公司
+ * */
+export const getPartyACompanySelectList = () => get('/api/partyACompany/selectList')
+
+/**
+ * @description 合作甲方公司-编辑
+ * */
+export const updatePartyACompany = (data: any) => post('/api/partyACompany/update', data)
+
+/**
+ * @description 合作甲方公司-删除
+ * */
+export const logicDeletePartyACompany = (id: string) => post('/api/partyACompany/logicDelete', { id })
+
+/**
+ *  @description 工资表-列表
+ * */
+export const getWageList = (data: any) => get('/api/wage/list', data)
+
+/**
+ * @description 工资表-改月份是否更新状态
+ * */
+export const getWageThisMonthUpdateStatus = (data: any) => get('/api/wage/thisMonthUpdateStatus', data)
+
+/**
+ * @description 工资表-新增
+ * */
+export const saveWage = (data: any) => post('/api/wage/save', data)
+
+/**
+ * @description 工资表-编辑
+ * */
+export const updateWage = (data: any) => post('/api/wage/update', data)
+
+/**
+ * @description 工资表-删除
+ * */
+export const logicDeleteWage = (id: string) => post('/api/wage/logicDelete', { id })
+
+/**
+ * @description commom-员工列表
+ * */
+export const getEmployeeList = (data: any) => get('/api/employee/list', data)
+
+/**
+ * @description 外发画师资料-列表
+ **/
+export const getOutgoingPainterList = (data: any) => get('/api/outgoingPainter/list', data)
+
+/**
+ * @description 外发画师资料-新增
+ * */
+export const saveOutgoingPainter = (data: any) => post('/api/outgoingPainter/save', data)
+
+/**
+ * @description 外发画师资料-编辑
+ * */
+export const updateOutgoingPainter = (data: any) => post('/api/outgoingPainter/update', data)
+
+/**
+ * @description 外发画师资料-删除
+ * */
+export const logicDeleteOutgoingPainter = (id: string) => post('/api/outgoingPainter/logicDelete', { id })

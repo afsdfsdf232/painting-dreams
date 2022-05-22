@@ -34,7 +34,6 @@ service.interceptors.request.use((config) => {
 // 响应拦截
 service.interceptors.response.use(
   (config) => {
-    console.log('config:', config)
     if (config.data.code && config.data.code !== 200) {
       ElMessage.error(config.data.msg)
     }
