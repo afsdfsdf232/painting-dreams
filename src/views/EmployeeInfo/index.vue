@@ -370,7 +370,7 @@ export default defineComponent({
       if (row && row.id) {
         for (const key in form.value) {
           if (key === 'historyWageList') {
-            form.value[key] = row[key] || []
+            form.value[key] = JSON.parse(JSON.stringify(row[key] || []))
           } else {
             form.value[key] = row[key]
           }
@@ -426,6 +426,7 @@ export default defineComponent({
       }
       leftModalRef.validate(async valid => {
         if (valid) {
+          form.value.historyWageList = form.value.historyWageList.filter((his:any) => his.changeTime && his.wage)
           const query = {
             ...form.value
           }
