@@ -272,3 +272,18 @@ export const updateOutgoingPainter = (data: any) => post('/api/outgoingPainter/u
  * @description 外发画师资料-删除
  * */
 export const logicDeleteOutgoingPainter = (id: string) => post('/api/outgoingPainter/logicDelete', { id })
+
+/**
+ * @description 员工资料-新增
+ * */
+export const saveEmployee = (data: any) => post('/api/employee/save', data)
+
+/**
+ * @description 员工资料-编辑
+ * */
+export const updateEmployee = (data:any) => post('/api/employee/update', data)
+
+/**
+ * @description 员工资料-删除
+ * */
+export const logicDeleteEmployee = (id: string) => post('/api/employee/logicDelete', { id })
