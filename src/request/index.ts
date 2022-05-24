@@ -95,32 +95,38 @@ export const getSysUserList = (data: any) => get('/api/sysUser/list', data)
 /**
  * 后台设置-编辑职位分工
  * */
-export const designPostUpdate = (data:any) => post('/api/designPost/update', data)
+export const designPostUpdate = (data: any) =>
+  post('/api/designPost/update', data)
 
 /**
  * @description 后台设置-删除新增分工
  * */
-export const designPostDelete = (id: string) => post('/api/designPost/logicDelete', { id })
+export const designPostDelete = (id: string) =>
+  post('/api/designPost/logicDelete', { id })
 
 /**
  * @description 后台设置-新增运营公司
  * */
-export const operatingCompanySave = (data: any) => post('/api/operatingCompany/save', data)
+export const operatingCompanySave = (data: any) =>
+  post('/api/operatingCompany/save', data)
 
 /**
  * @description 后台设置-编辑运营公司
  * */
-export const operatingCompanyUpdate = (data: any) => post('/api/operatingCompany/update', data)
+export const operatingCompanyUpdate = (data: any) =>
+  post('/api/operatingCompany/update', data)
 
 /**
  * @description 后台设置-删除运营公司
  * */
-export const operatingCompanyDelete = (id: string) => post('/api/operatingCompany/logicDelete', { id })
+export const operatingCompanyDelete = (id: string) =>
+  post('/api/operatingCompany/logicDelete', { id })
 
 /**
  * @description 管理成本-固定成本列表
  * */
-export const getFixedCostsList = (data: any) => get('/api/fixedCosts/list', data)
+export const getFixedCostsList = (data: any) =>
+  get('/api/fixedCosts/list', data)
 
 /**
  * @description 管理成本-新增固定成本下拉列表
@@ -135,93 +141,112 @@ export const saveFixedCosts = (data: any) => post('/api/fixedCosts/save', data)
 /**
  * @description 管理成本-编辑固定成本
  * */
-export const updateFixedCosts = (data: any) => post('/api/fixedCosts/update', data)
+export const updateFixedCosts = (data: any) =>
+  post('/api/fixedCosts/update', data)
 
 /**
  * @description 管理成本-固定成本总计
  * */
-export const getTotalFixedCosts = (data: any) => get('/api/fixedCosts/totalFixedCosts', data)
+export const getTotalFixedCosts = (data: any) =>
+  get('/api/fixedCosts/totalFixedCosts', data)
 
 /**
  * @description 管理成本-删除固定成本
  * */
-export const logicDeleteFixedCosts = (id: string) => post('/api/fixedCosts/logicDelete', { id })
+export const logicDeleteFixedCosts = (id: string) =>
+  post('/api/fixedCosts/logicDelete', { id })
 /**
  * @description 管理成本-管理员成本列表
  * */
-export const getManagerCostsList = (data: any) => get('/api/managerCosts/list', { ...data })
+export const getManagerCostsList = (data: any) =>
+  get('/api/managerCosts/list', { ...data })
 
 /**
  * @description 管理人员成本-新增
  * */
-export const saveManagerCosts = (data: any) => post('/api/managerCosts/save', data)
+export const saveManagerCosts = (data: any) =>
+  post('/api/managerCosts/save', data)
 
 /**
  * @description 管理人员成本-删除
  * */
-export const logicDeleteManagerCosts = (id: string) => post('/api/managerCosts/logicDelete', { id })
+export const logicDeleteManagerCosts = (id: string) =>
+  post('/api/managerCosts/logicDelete', { id })
 
 /**
  * @description 管理人员成本-编辑
  * */
-export const updateManagerCosts = (data: any) => post('/api/managerCosts/update', data)
+export const updateManagerCosts = (data: any) =>
+  post('/api/managerCosts/update', data)
 /**
  * @description 管理成本-管理人员成本统计
  * */
-export const getTotalManagerCosts = (data: any) => get('/api/managerCosts/totalManagerCosts', data)
+export const getTotalManagerCosts = (data: any) =>
+  get('/api/managerCosts/totalManagerCosts', data)
 /**
  * @description 管理成本-报销列表
  * */
-export const getReimbursementCostsList = (data: any) => get('/api/reimbursementCosts/list', data)
+export const getReimbursementCostsList = (data: any) =>
+  get('/api/reimbursementCosts/list', data)
 
 /**
  * @description 管理成本-新增报销
  * */
-export const reimbursementCostsSave = (data: any) => post('/api/reimbursementCosts/save', data)
+export const reimbursementCostsSave = (data: any) =>
+  post('/api/reimbursementCosts/save', data)
 
 /**
  * @description 管理成本-编辑报销
  * */
-export const reimbursementCostsUpdate = (data: any) => post('/api/reimbursementCosts/update', data)
+export const reimbursementCostsUpdate = (data: any) =>
+  post('/api/reimbursementCosts/update', data)
 
 /**
  * @description 管理成本-报销累计
  * */
-export const getThisMonthReimbursementCosts = (data: any) => get('/api/reimbursementCosts/thisMonthReimbursementCosts', data)
+export const getThisMonthReimbursementCosts = (data: any) =>
+  get('/api/reimbursementCosts/thisMonthReimbursementCosts', data)
 /**
  * @description 管理成本-删除报销
  * */
-export const logicDeleteReimbursementCosts = (id: string) => post('/api/reimbursementCosts/logicDelete', { id })
+export const logicDeleteReimbursementCosts = (id: string) =>
+  post('/api/reimbursementCosts/logicDelete', { id })
 
 /**
  *  @description common-文件上传
  * */
-export const uploadFileRequest = (data: any) => upload('/api/common/upload', data)
+export const uploadFileRequest = (data: any) =>
+  upload('/api/common/upload', data)
 
 /**
  * @description 合作甲方公司信息-列表
  * */
-export const getPartyACompanyList = (data: any) => get('/api/partyACompany/list', data)
+export const getPartyACompanyList = (data: any) =>
+  get('/api/partyACompany/list', data)
 
 /**
  * @description 合作甲方公司信息-新增
  * */
-export const savePartyACompany = (data: any) => post('/api/partyACompany/save', data)
+export const savePartyACompany = (data: any) =>
+  post('/api/partyACompany/save', data)
 
 /**
  * @descriotion 合作甲方公司-下拉列表-选择公司
  * */
-export const getPartyACompanySelectList = () => get('/api/partyACompany/selectList')
+export const getPartyACompanySelectList = () =>
+  get('/api/partyACompany/selectList')
 
 /**
  * @description 合作甲方公司-编辑
  * */
-export const updatePartyACompany = (data: any) => post('/api/partyACompany/update', data)
+export const updatePartyACompany = (data: any) =>
+  post('/api/partyACompany/update', data)
 
 /**
  * @description 合作甲方公司-删除
  * */
-export const logicDeletePartyACompany = (id: string) => post('/api/partyACompany/logicDelete', { id })
+export const logicDeletePartyACompany = (id: string) =>
+  post('/api/partyACompany/logicDelete', { id })
 
 /**
  *  @description 工资表-列表
@@ -231,7 +256,8 @@ export const getWageList = (data: any) => get('/api/wage/list', data)
 /**
  * @description 工资表-改月份是否更新状态
  * */
-export const getWageThisMonthUpdateStatus = (data: any) => get('/api/wage/thisMonthUpdateStatus', data)
+export const getWageThisMonthUpdateStatus = (data: any) =>
+  get('/api/wage/thisMonthUpdateStatus', data)
 
 /**
  * @description 工资表-新增
@@ -246,7 +272,8 @@ export const updateWage = (data: any) => post('/api/wage/update', data)
 /**
  * @description 工资表-删除
  * */
-export const logicDeleteWage = (id: string) => post('/api/wage/logicDelete', { id })
+export const logicDeleteWage = (id: string) =>
+  post('/api/wage/logicDelete', { id })
 
 /**
  * @description commom-员工列表
@@ -256,22 +283,26 @@ export const getEmployeeList = (data: any) => get('/api/employee/list', data)
 /**
  * @description 外发画师资料-列表
  **/
-export const getOutgoingPainterList = (data: any) => get('/api/outgoingPainter/list', data)
+export const getOutgoingPainterList = (data: any) =>
+  get('/api/outgoingPainter/list', data)
 
 /**
  * @description 外发画师资料-新增
  * */
-export const saveOutgoingPainter = (data: any) => post('/api/outgoingPainter/save', data)
+export const saveOutgoingPainter = (data: any) =>
+  post('/api/outgoingPainter/save', data)
 
 /**
  * @description 外发画师资料-编辑
  * */
-export const updateOutgoingPainter = (data: any) => post('/api/outgoingPainter/update', data)
+export const updateOutgoingPainter = (data: any) =>
+  post('/api/outgoingPainter/update', data)
 
 /**
  * @description 外发画师资料-删除
  * */
-export const logicDeleteOutgoingPainter = (id: string) => post('/api/outgoingPainter/logicDelete', { id })
+export const logicDeleteOutgoingPainter = (id: string) =>
+  post('/api/outgoingPainter/logicDelete', { id })
 
 /**
  * @description 员工资料-新增
@@ -281,9 +312,16 @@ export const saveEmployee = (data: any) => post('/api/employee/save', data)
 /**
  * @description 员工资料-编辑
  * */
-export const updateEmployee = (data:any) => post('/api/employee/update', data)
+export const updateEmployee = (data: any) => post('/api/employee/update', data)
 
 /**
  * @description 员工资料-删除
  * */
-export const logicDeleteEmployee = (id: string) => post('/api/employee/logicDelete', { id })
+export const logicDeleteEmployee = (id: string) =>
+  post('/api/employee/logicDelete', { id })
+
+/**
+ * @description 发票和收据-列表
+ * */
+export const getInvoiceReceiptList = (data: any) =>
+  get('/api/invoiceReceipt/list', data)
