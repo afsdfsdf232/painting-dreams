@@ -511,7 +511,7 @@ export default defineComponent({
       }
     }
   }
-    .drawer-content {
+  .drawer-content {
     width: 100%;
     &-left {
       width: 50%;

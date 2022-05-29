@@ -5,7 +5,9 @@
         <el-date-picker
           style="margin-right: 10px; width: 160px"
           type="month"
+          v-model="year"
           placeholder="请选择年月"
+          @change="getplanProjectLists"
         />
         <d-tab
           v-for="tab in tabs"
@@ -46,6 +48,7 @@
     <div class="table-content">
       <vxe-table
         border
+        :loading="tableLoading"
         :height="height"
         :column-config="{ resizable: true }"
         :scroll-y="{ enabled: true }"
@@ -54,12 +57,24 @@
         class="reverse-table"
       >
         <template v-for="(head, index) in tableHeaderData" :key="index">
-          <vxe-column :field="head.prop" :title="head.name"></vxe-column>
+          <vxe-column :field="head.prop" :title="head.name">
+             <template #default="{ row }">
+              <span v-if="head.prop === 'status'">
+                {{row.status=== '0'? '未安排': row.status === '1'?'进行中':row.status === '2'?'已完成':row.status==='3'?'未通过':'--'}}
+              </span>
+              <div v-else-if="head.prop === 'projectFileList'">
+                <p v-for="file in row.projectFileList" :key="file.id">
+                   <el-button
+                    @click="showFile(file.url)"
+                      type="text"
+                      link
+                    >{{file.type === '1'? '需求文档': '参考图'}}</el-button>
+                </p>
+              </div>
+              <span v-else>{{ row[head.prop] }} </span>
+            </template>
+          </vxe-column>
         </template>
-
-        <!-- <vxe-column field="key" title="Key"></vxe-column>
-        <vxe-column field="content" title="Translate"></vxe-column>
-        <vxe-column field="language" title="Language"></vxe-column> -->
       </vxe-table>
     </div>
   </div>
@@ -68,178 +83,35 @@
 <script lang="ts">
 import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
+import { getplanProjectList, getDesignPost } from '@/request/index'
 const tableHeaderData = [
-  { name: '画师', prop: 'name', width: 100 },
-  { name: '职位', prop: 'zw', width: 100 },
-  { name: '公司-项目', prop: 'gs', width: 120 },
-  { name: '缩略图', prop: 'img', width: 120 },
-  { name: '分工', prop: 'fg', width: 120 },
-  { name: '开始时间', prop: 'startdate', width: 120 },
-  { name: '结束时间', prop: 'enddate', width: 120 },
-  { name: '状态', prop: 'state', width: 120 },
-  { name: '工作量（天）', prop: 'count', width: 120 },
-  { name: '外发价格', prop: 'price', width: 120 },
-  { name: '完成量', prop: 'endcount', width: 120 },
-  { name: '备注/效率指数', prop: 'bz', width: 160 }
+  { name: '画师', prop: 'staffName', width: 100 },
+  { name: '职位', prop: 'designPostName', width: 100 },
+  { name: '公司-项目', prop: 'projectName', width: 120 },
+  { name: '缩略图', prop: 'projectFileList', width: 120 },
+  { name: '分工', prop: 'name', width: 120 },
+  { name: '开始时间', prop: 'startDate', width: 120 },
+  { name: '结束时间', prop: 'endDate', width: 120 },
+  { name: '状态', prop: 'status', width: 120 },
+  { name: '工作量（天）', prop: 'days', width: 120 },
+  { name: '外发价格', prop: 'amount', width: 120 },
+  { name: '完成量', prop: 'unitPrice', width: 120 },
+  { name: '工作总量', prop: 'totalDays', width: 120 },
+  { name: '完成总量', prop: 'totalUnitPrice', width: 120 },
+  { name: '备注/效率指数', prop: 'remark', width: 160 }
 ]
 
 export default defineComponent({
   setup () {
-    const activeTabIndex: Ref<number> = ref(0)
+    const activeTabIndex: Ref<number> = ref(-1)
     const height: Ref<number> = ref(300)
-    const tabs = ref([
-      { text: '全部画师', id: 0 },
-      { text: 'UI组', id: 1 },
-      { text: '场景原画组', id: 2 },
-      { text: '3D建模组', id: 3 },
-      { text: '次世代建模组', id: 4 },
-      { text: '角色原画组', id: 5 }
+    const tableLoading = ref(false)
+    const tabs:any = ref([
+      { text: '全部画师', id: -1 }
     ])
-    const demo3 = reactive({
-      tableData: [
-        {
-          name: '画师1',
-          key: 'app.label.name',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师1',
-          key: 'app.label.name',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师3',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师4',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师5',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师6',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师7',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师8',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师9',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师10',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        }
-      ]
+    const year: any = ref(new Date())
+    const demo3:any = reactive({
+      tableData: []
     })
 
     // 通用行合并函数（将相同多列数据合并为一行）
@@ -249,7 +121,7 @@ export default defineComponent({
       column,
       visibleData
     }) => {
-      const fields = ['name']
+      const fields = ['designPostName', 'staffName', 'totalUnitPrice', 'totalDays']
       const cellValue = row[column.property]
       if (cellValue && fields.includes(column.property)) {
         const prevRow = visibleData[_rowIndex - 1]
@@ -271,9 +143,221 @@ export default defineComponent({
     const changeTab = (id: number): void => {
       if (id !== activeTabIndex.value) {
         activeTabIndex.value = id
+        getplanProjectLists()
+      }
+    }
+    const getplanProjectLists = async () => {
+      tableLoading.value = true
+      const query = {
+        type: 2, // 列表类型(1在职人员安排 2外发画师安排)
+        designPostId: activeTabIndex.value === -1 ? '' : activeTabIndex.value, // 职位id
+        limit: -1,
+        month: new Date(year.value).getMonth() + 1,
+        page: 1,
+        year: new Date(year.value).getFullYear()
+      }
+
+      const { code, data } = await getplanProjectList({
+        ...query
+      })
+      if (code === 200) {
+        console.log('data:', data)
+        // const mockData:any = [
+        //   {
+        //     designPostId: 0,
+        //     designPostName: 'test1',
+        //     effectiveDays: 0,
+        //     efficiencyIndex: '12',
+        //     projectList: [
+        //       {
+        //         amount: '100',
+        //         days: 0,
+        //         endDate: '2022-01-01',
+        //         isSettlement: 'isSettlement',
+        //         name: 'name',
+        //         partyACompanyShortName: 'partyACompanyShortName',
+        //         projectFileList: [
+        //           {
+        //             id: 'projectFileList-id',
+        //             type: 'projectFileList-type',
+        //             url: 'projectFileList-url'
+        //           }
+        //         ],
+        //         projectId: 0,
+        //         projectName: 'projectName',
+        //         remark: 'remark',
+        //         settlementFileUrl: 'settlementFileUrl',
+        //         startDate: 'startDate',
+        //         status: 'status',
+        //         unitPrice: 'unitPrice'
+        //       },
+        //       {
+        //         amount: '100',
+        //         days: 0,
+        //         endDate: '2022-01-01',
+        //         isSettlement: 'isSettlement',
+        //         name: 'name',
+        //         partyACompanyShortName: 'partyACompanyShortName',
+        //         projectFileList: [
+        //           {
+        //             id: 'projectFileList-id',
+        //             type: 'projectFileList-type',
+        //             url: 'projectFileList-url'
+        //           }
+        //         ],
+        //         projectId: 0,
+        //         projectName: 'projectName',
+        //         remark: 'remark',
+        //         settlementFileUrl: 'settlementFileUrl',
+        //         startDate: 'startDate',
+        //         status: 'status',
+        //         unitPrice: 'unitPrice'
+        //       },
+        //       {
+        //         amount: '100',
+        //         days: 0,
+        //         endDate: '2022-01-01',
+        //         isSettlement: 'isSettlement',
+        //         name: 'name',
+        //         partyACompanyShortName: 'partyACompanyShortName',
+        //         projectFileList: [
+        //           {
+        //             id: 'projectFileList-id',
+        //             type: 'projectFileList-type',
+        //             url: 'projectFileList-url'
+        //           }
+        //         ],
+        //         projectId: 0,
+        //         projectName: 'projectName',
+        //         remark: 'remark',
+        //         settlementFileUrl: 'settlementFileUrl',
+        //         startDate: 'startDate',
+        //         status: 'status',
+        //         unitPrice: 'unitPrice'
+        //       }
+        //     ],
+        //     staffId: 0,
+        //     staffName: 'staffName',
+        //     totalDays: '0',
+        //     totalUnitPrice: 'totalUnitPrice'
+        //   },
+        //   {
+        //     designPostId: 0,
+        //     designPostName: 'test2',
+        //     effectiveDays: 0,
+        //     efficiencyIndex: '12',
+        //     projectList: [
+        //       {
+        //         amount: '100',
+        //         days: 0,
+        //         endDate: '2022-01-01',
+        //         isSettlement: 'isSettlement',
+        //         name: 'name',
+        //         partyACompanyShortName: 'partyACompanyShortName',
+        //         projectFileList: [
+        //           {
+        //             id: 'projectFileList-id',
+        //             type: 'projectFileList-type',
+        //             url: 'projectFileList-url'
+        //           }
+        //         ],
+        //         projectId: 0,
+        //         projectName: 'projectName',
+        //         remark: 'remark',
+        //         settlementFileUrl: 'settlementFileUrl',
+        //         startDate: 'startDate',
+        //         status: 'status',
+        //         unitPrice: 'unitPrice'
+        //       },
+        //       {
+        //         amount: '100',
+        //         days: 0,
+        //         endDate: '2022-01-01',
+        //         isSettlement: 'isSettlement',
+        //         name: 'name',
+        //         partyACompanyShortName: 'partyACompanyShortName',
+        //         projectFileList: [
+        //           {
+        //             id: 'projectFileList-id',
+        //             type: 'projectFileList-type',
+        //             url: 'projectFileList-url'
+        //           }
+        //         ],
+        //         projectId: 0,
+        //         projectName: 'projectName',
+        //         remark: 'remark',
+        //         settlementFileUrl: 'settlementFileUrl',
+        //         startDate: 'startDate',
+        //         status: 'status',
+        //         unitPrice: 'unitPrice'
+        //       },
+        //       {
+        //         amount: '100',
+        //         days: 0,
+        //         endDate: '2022-01-01',
+        //         isSettlement: 'isSettlement',
+        //         name: 'name',
+        //         partyACompanyShortName: 'partyACompanyShortName',
+        //         projectFileList: [
+        //           {
+        //             id: 'projectFileList-id',
+        //             type: 'projectFileList-type',
+        //             url: 'projectFileList-url'
+        //           }
+        //         ],
+        //         projectId: 0,
+        //         projectName: 'projectName',
+        //         remark: 'remark',
+        //         settlementFileUrl: 'settlementFileUrl',
+        //         startDate: 'startDate',
+        //         status: 'status',
+        //         unitPrice: 'unitPrice'
+        //       }
+        //     ],
+        //     staffId: 0,
+        //     staffName: 'staffName2',
+        //     totalDays: '0',
+        //     totalUnitPrice: 'totalUnitPrice'
+        //   }
+        // ]
+        const newList: any = []
+        data.list.map((item:any) => {
+          if (item.projectList && item.projectList.length > 0) {
+            item.projectList.map((citem: any) => {
+              newList.push({
+                ...item,
+                ...citem
+              })
+            })
+          } else {
+            newList.push(item)
+          }
+        })
+        demo3.tableData = newList
+        // console.log(mockData, demo3.tableData)
+      }
+      tableLoading.value = false
+    }
+    // 查看文件
+    const showFile = (url: string) => {
+      window.open(url, '_blank')
+    }
+
+    // 职位列表
+    const getDesignPosts = async () => {
+      const { code, data } = await getDesignPost()
+      if (code === 200) {
+        data.map((tab:any) => {
+          tabs.value.push({
+            text: tab.name,
+            ...tab
+          })
+        })
       }
     }
     onMounted(() => {
+      getDesignPosts()
+      getplanProjectLists()
       nextTick(() => {
         height.value = document.documentElement.clientHeight - 160
       })
@@ -286,7 +370,11 @@ export default defineComponent({
       demo3,
       mergeRowMethod,
       height,
-      tableHeaderData
+      tableHeaderData,
+      year,
+      getplanProjectLists,
+      tableLoading,
+      showFile
     }
   }
 })

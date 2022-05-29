@@ -3,37 +3,62 @@
     <div class="fillter-content d-flex d-f-row-bet">
       <div class="fillter-content-left d-flex">
         <el-date-picker
-          style="margin-right: 10px; width: 160px"
-          type="month"
-          placeholder="请选择年月"
+          style="margin-right: 10px; width: 180px"
+          type="date"
+          @change="getAllProjectLists"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          v-model="query.startDate"
+          placeholder="请选择开始年月"
+        />
+        <el-date-picker
+          style="margin-right: 10px; width: 180px"
+          type="date"
+          @change="getAllProjectLists"
+          format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
+          v-model="query.endDate"
+          placeholder="请选择结束年月"
         />
         <el-select
+          clearable
+          @change="getAllProjectLists"
           style="margin-right: 10px; width: 160px"
           placeholder="请选择公司"
+          v-model="query.partyACompanyId"
         >
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
+          <el-option v-for="cop in companyList"
+          :key="cop.id"
+          :label="cop.fullName"
+          :value="cop.id" />
+
         </el-select>
         <el-select
+          clearable
+          @change="getAllProjectLists"
           style="margin-right: 10px; width: 160px"
           placeholder="请选择负责人"
+          v-model="query.managerId"
         >
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
+          <el-option v-for="per in staffList" :key="per.staffId" :label="per.staffName" :value="per.staffId" />
         </el-select>
+        <el-input @blur="getAllProjectLists" v-model="query.minTotalPrice" type="number" style="margin-right: 10px; width: 160px" placeholder="请选择最小金额"></el-input>
+        <el-input @blur="getAllProjectLists" v-model="query.maxTotalPrice" type="number" style="margin-right: 10px; width: 160px" placeholder="请选择最大金额"></el-input>
         <el-select
-          style="margin-right: 10px; width: 160px"
-          placeholder="请选择金额范围"
-        >
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
-        </el-select>
-        <el-select
+          @change="getAllProjectLists"
           style="margin-right: 10px; width: 160px"
           placeholder="请选择状态"
+          clearable
+          v-model="query.status"
         >
-          <el-option label="Zone one" value="shanghai" />
-          <el-option label="Zone two" value="beijing" />
+          <el-option label="未分配" value="1" />
+          <el-option label="测试中" value="2" />
+          <el-option label="测试中(未通过)" value="3" />
+          <el-option label="进行中" value="4" />
+          <el-option label="移交" value="5" />
+          <el-option label="已完成" value="6" />
+          <el-option label="已完成(已开发票)" value="7" />
+          <el-option label="已完成(已收款)" value="8" />
         </el-select>
       </div>
       <div class="fillter-content-right d-flex">
@@ -55,6 +80,7 @@
       <vxe-table
         border
         :height="height"
+        :loading="tableLoading"
         :column-config="{ resizable: true }"
         :scroll-y="{ enabled: true }"
         :span-method="mergeRowMethod"
@@ -72,6 +98,7 @@
 <script lang="ts">
 import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
+import { getAllProjectList, getPartyACompanyList, getStaffList } from '@/request/index'
 const tableHeaderData = [
   { name: '编号', prop: 'name', width: 100 },
   { name: '合作公司', prop: 'zw', width: 100 },
@@ -95,6 +122,9 @@ const tableHeaderData = [
 export default defineComponent({
   setup () {
     const height: Ref<number> = ref(300)
+    const tableLoading = ref(false)
+    const companyList: any = ref([])
+    const staffList: any = ref([])
     const demo3 = reactive({
       tableData: [
         {
@@ -241,7 +271,15 @@ export default defineComponent({
         }
       ]
     })
-
+    const query: any = ref({
+      endDate: '',
+      startDate: '',
+      managerId: '',
+      minTotalPrice: '',
+      maxTotalPrice: '',
+      partyACompanyId: '',
+      status: ''
+    })
     // 通用行合并函数（将相同多列数据合并为一行）
     const mergeRowMethod: VxeTablePropTypes.SpanMethod = ({
       row,
@@ -268,7 +306,52 @@ export default defineComponent({
       }
     }
 
+    // 项目列表
+    const getAllProjectLists = async () => {
+      tableLoading.value = true
+      const querys = {
+        // endDate: '', // 项目结束时间YYYY-MM-dd
+        // startDate: '', // 项目开始日期
+        limit: -1,
+        // managerId: '', // 负责人id
+        // maxTotalPrice: '', // 最高总价
+        // minTotalPrice: '', // 最低总价
+        page: 1,
+        // partyACompanyId: '', // 合作甲方公司id
+        // status: '', // 状态
+        ...query.value
+      }
+      const { code, data } = await getAllProjectList(querys)
+      if (code === 200) {
+        console.log('data:', data)
+      }
+      tableLoading.value = false
+    }
+
+    // 公司列表
+    const getPartyACompanyLists = async () => {
+      const { code, data } = await getPartyACompanyList({
+        page: 1,
+        limit: -1
+      })
+      if (code === 200) {
+        companyList.value = data?.list
+      }
+    }
+
+    // 人员列表
+    const getStaffLists = async () => {
+      const { code, data } = await getStaffList()
+      if (code === 200) {
+        console.log('data', data)
+        staffList.value = data
+      }
+    }
+
     onMounted(() => {
+      getAllProjectLists()
+      getPartyACompanyLists()
+      getStaffLists()
       nextTick(() => {
         height.value = document.documentElement.clientHeight - 160
       })
@@ -278,7 +361,12 @@ export default defineComponent({
       demo3,
       mergeRowMethod,
       height,
-      tableHeaderData
+      tableHeaderData,
+      query,
+      tableLoading,
+      companyList,
+      staffList,
+      getAllProjectLists
     }
   }
 })
