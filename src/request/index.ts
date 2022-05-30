@@ -325,3 +325,48 @@ export const logicDeleteEmployee = (id: string) =>
  * */
 export const getInvoiceReceiptList = (data: any) =>
   get('/api/invoiceReceipt/list', data)
+
+/**
+ * @description 在职人员安排- 列表类型(1在职人员安排 2外发画师安排)
+ * */
+export const getplanProjectList = (data: any) =>
+  get('/api/project/planProjectList', data)
+
+/**
+ * @description 公司项目列表
+ * */
+export const getProjectCompanyProjectList = (data: any) =>
+  get('/api/project/companyProjectList', data)
+
+/**
+ * @description 归档项目-列表
+ * */
+export const getarProjectChiveProjectList = (data: any) =>
+  get('/api/project/archiveProjectList', data)
+
+/**
+ * @description 所有项目-列表
+ * */
+export const getAllProjectList = (data: any) => get('/api/project/list', data)
+
+/**
+ * @description 所有项目-人员下拉
+ * */
+export const getStaffList = () => get('/api/project/staffList')
+
+/**
+ * @description 项目工作日历排期
+ * */
+export const getPlanProjectScheduleList = (data: any) =>
+  get('/api/project/planProjectScheduleList', data)
+
+/**
+ * @description 删除项目
+ * */
+export const logicDeleteProject = (id: string) =>
+  post('/api/project/logicDelete', { id })
+
+/**
+ * @description 新增项目
+ * */
+export const saveProject = (data: any) => post('/api/project/save', data)

@@ -6,6 +6,8 @@
           style="margin-right: 10px; width: 160px"
           type="month"
           placeholder="请选择年月"
+          v-model="year"
+          @change="getarProjectChiveProjectLists"
         />
       </div>
       <div class="fillter-content-right d-flex">
@@ -25,6 +27,7 @@
     <div class="table-content">
       <vxe-table
         border
+        :loading="tableLoading"
         :height="height"
         :column-config="{ resizable: true }"
         :scroll-y="{ enabled: true }"
@@ -33,7 +36,35 @@
         class="reverse-table"
       >
         <template v-for="(head, index) in tableHeaderData" :key="index">
-          <vxe-column :field="head.prop" :title="head.name"></vxe-column>
+          <vxe-column :field="head.prop" :title="head.name">
+            <template #default="{ row }">
+              <span v-if="head.prop === 'paymentStatus'">
+                {{
+                  row.paymentStatus === '0'
+                    ? '未收款'
+                    : row.paymentStatus === '1'
+                    ? '已收款'
+                    : ''
+                }}
+              </span>
+              <span v-else-if="head.prop === 'status'">{{
+                getStatus(row.status)
+              }}</span>
+              <span v-else-if="head.prop === 'ppstatus'">{{
+                getPPstatus(row.ppstatus)
+              }}</span>
+
+              <div v-else-if="head.prop === 'ckt' || head.prop === 'xqwd'">
+                <el-button
+                  @click="showFile(head.prop === 'ckt' ? row.ckt : row.xqwd)"
+                  type="text"
+                  link
+                  >{{ head.prop === 'xqwd' ? '需求文档' : '参考图' }}</el-button
+                >
+              </div>
+              <span v-else>{{ row[head.prop] }} </span>
+            </template>
+          </vxe-column>
         </template>
       </vxe-table>
     </div>
@@ -43,174 +74,35 @@
 <script lang="ts">
 import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
+import { getarProjectChiveProjectList } from '@/request/index'
 const tableHeaderData = [
-  { name: '编号', prop: 'name', width: 100 },
-  { name: '合作公司', prop: 'zw', width: 100 },
-  { name: '项目名', prop: 'gs', width: 120 },
-  { name: '项目类型', prop: 'img', width: 120 },
-  { name: '参考图', prop: 'fg', width: 120 },
-  { name: '需求文档', prop: 'startdate', width: 120 },
-  { name: '需求地址', prop: 'enddate', width: 120 },
-  { name: '项目群组（甲方/设计师）', prop: 'state', width: 120 },
-  { name: '分工/天', prop: 'count', width: 120 },
-  { name: '总价', prop: 'price', width: 120 },
-  { name: '单价', prop: 'endcount', width: 120 },
-  { name: '排期', prop: 'bz', width: 160 },
-  { name: '设计师', prop: 'sjs', width: 160 },
-  { name: '状态', prop: 'zt', width: 160 },
-  { name: '收款状态', prop: 'skzt', width: 160 },
-  { name: '发票状态', prop: 'skzt', width: 160 },
-  { name: '备注', prop: 'bzs', width: 160 }
+  { name: '序号', prop: 'order' },
+  { name: '编号', prop: 'serialNumber', width: 100 },
+  { name: '合作公司', prop: 'partyACompanyShortName', width: 100 },
+  { name: '项目名', prop: 'name', width: 120 },
+  { name: '项目类型', prop: 'type', width: 120 },
+  { name: '需求地址', prop: 'demandAddress', width: 160 },
+  { name: '参考图', prop: 'ckt', width: 120 },
+  { name: '需求文档', prop: 'xqwd', width: 120 },
+  { name: '项目群组（甲方/设计师）', prop: 'groupName', width: 120 },
+  { name: '分工/天', prop: 'ppdays', width: 120 },
+  { name: '单价', prop: 'ppunitPrice', width: 120 },
+  { name: '排期', prop: 'pppq', width: 160 },
+  { name: '设计师', prop: 'ppstaffName', width: 160 },
+  { name: '状态', prop: 'ppstatus', width: 160 },
+  { name: '总价', prop: 'totalPrice', width: 120 },
+  { name: '收款状态', prop: 'paymentStatus', width: 160 },
+  { name: '发票状态', prop: 'status', width: 160 },
+  { name: '备注', prop: 'remark', width: 160 }
 ]
 
 export default defineComponent({
   setup () {
     const height: Ref<number> = ref(300)
+    const year: any = ref(new Date())
+    const tableLoading = ref(false)
     const demo3 = reactive({
-      tableData: [
-        {
-          name: '画师1',
-          key: 'app.label.name',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师1',
-          key: 'app.label.name',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师3',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师4',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师5',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师6',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师7',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师8',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师9',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        },
-        {
-          name: '画师10',
-          zw: '开发',
-          gs: '测试公司',
-          img: '测试图片',
-          fg: '分工测试1',
-          startdate: '20220419',
-          enddate: '20221231',
-          state: '完成',
-          count: 100,
-          price: 1300,
-          endcount: 200,
-          bz: '备注内容'
-        }
-      ]
+      tableData: []
     })
 
     // 通用行合并函数（将相同多列数据合并为一行）
@@ -220,7 +112,7 @@ export default defineComponent({
       column,
       visibleData
     }) => {
-      const fields = ['name']
+      const fields = ['order']
       const cellValue = row[column.property]
       if (cellValue && fields.includes(column.property)) {
         const prevRow = visibleData[_rowIndex - 1]
@@ -238,8 +130,221 @@ export default defineComponent({
         }
       }
     }
+    const getStatus = (state: any) => {
+      if (state === '1') return '未分配'
+      if (state === '2') return '测试中'
+      if (state === '3') return '测试中(未通过)'
+      if (state === '4') return '进行中'
+      if (state === '5') return '移交'
+      if (state === '6') return '已完成'
+      if (state === '7') return '已完成(已开发票)'
+      if (state === '8') return '已完成(已收款)'
+    }
+
+    const getPPstatus = (state: any) => {
+      if (state === '0') return '未安排'
+      if (state === '1') return '进行中'
+      if (state === '2') return '已完成'
+      if (state === '3') return '未通过'
+    }
+
+    // 列表
+    const getarProjectChiveProjectLists = async () => {
+      tableLoading.value = true
+      const query = {
+        limit: -1,
+        year: new Date(year.value).getFullYear(),
+        month: new Date(year.value).getMonth() + 1,
+        page: 1
+      }
+      const { code, data } = await getarProjectChiveProjectList(query)
+      if (code === 200) {
+        // const mocks = [
+        //   {
+        //     demandAddress: '需求地址',
+        //     endDate: '项目工期结束日期',
+        //     groupName: '项目组名称',
+        //     id: 0,
+        //     name: '项目名称',
+        //     partyACompanyId: 0,
+        //     partyACompanyShortName: '合作甲方公司简称',
+        //     paymentAmount: '已收款金额(未收款金额=项目总价-已收款金额)',
+        //     paymentStatus: '收款状态(0未收款 1已收款)',
+        //     projectFileList: [
+        //       // 项目文件
+        //       {
+        //         id: '',
+        //         type: '文件类型', // 文件类型(1需求文档2参考图)
+        //         url: 'url'
+        //       }
+        //     ],
+        //     projectManagerList: [
+        //       // 项目负责人
+        //       {
+        //         id: 0,
+        //         managerId: 0,
+        //         managerType: '',
+        //         name: '项目负责人'
+        //       }
+        //     ],
+        //     projectStageList: [
+        //       // projectStageList
+        //       {
+        //         days: '工期天数', // 工期天数
+        //         designPostId: 0,
+        //         designPostName: '职位名称',
+        //         endDate: '排期结束日期',
+        //         id: 0,
+        //         name: '阶段名称',
+        //         staffId: 0,
+        //         staffName: '人员名称',
+        //         staffType: '人员类型(1在职员工 2外发画师 3后台人员)',
+        //         startDate: '排期开始日期',
+        //         status: '3',
+        //         unitPrice: '单价(完成量)'
+        //       }
+        //     ],
+        //     remark: '备注',
+        //     serialNumber: '编号',
+        //     startDate: '项目工期开始日期',
+        //     status: '1', // 项目状态(1未分配2测试中3测试中(未通过)4进行中5移交6已完成7已完成(已开发票)8已完成(已收款))
+        //     totalPrice: '项目总价',
+        //     type: '项目类型'
+        //   },
+        //   {
+        //     demandAddress: '需求地址',
+        //     endDate: '项目工期结束日期',
+        //     groupName: '项目组名称',
+        //     id: 0,
+        //     name: '项目名称',
+        //     partyACompanyId: 0,
+        //     partyACompanyShortName: '合作甲方公司简称',
+        //     paymentAmount: '已收款金额(未收款金额=项目总价-已收款金额)',
+        //     paymentStatus: '收款状态(0未收款 1已收款)',
+        //     projectFileList: [
+        //       // 项目文件
+        //       {
+        //         id: '',
+        //         type: '文件类型', // 文件类型(1需求文档2参考图)
+        //         url: 'url'
+        //       }
+        //     ],
+        //     projectManagerList: [
+        //       // 项目负责人
+        //       {
+        //         id: 0,
+        //         managerId: 0,
+        //         managerType: '',
+        //         name: '项目负责人'
+        //       }
+        //     ],
+        //     projectStageList: [
+        //       // projectStageList
+        //       {
+        //         days: '工期天数', // 工期天数
+        //         designPostId: 0,
+        //         designPostName: '职位名称',
+        //         endDate: '排期结束日期',
+        //         id: 0,
+        //         name: '阶段名称',
+        //         staffId: 0,
+        //         staffName: '人员名称',
+        //         staffType: '人员类型(1在职员工 2外发画师 3后台人员)',
+        //         startDate: '排期开始日期',
+        //         status: '3',
+        //         unitPrice: '单价(完成量)'
+        //       }
+        //     ],
+        //     remark: '备注',
+        //     serialNumber: '编号',
+        //     startDate: '项目工期开始日期',
+        //     status: '1', // 项目状态(1未分配2测试中3测试中(未通过)4进行中5移交6已完成7已完成(已开发票)8已完成(已收款))
+        //     totalPrice: '项目总价',
+        //     type: '项目类型'
+        //   }
+        // ]
+        const newData: any = []
+        const getPq = (start: any, end: any) => {
+          if (!start) return end
+          if (!end) return start
+          if (!end && !start) return '--'
+          return `${start}-${end}`
+        }
+
+        data.list.map((item: any, index: number) => {
+          let newDataItem: any = {}
+          if (item.projectStageList && item.projectStageList.length > 0) {
+            item.projectStageList.map((citem: any) => {
+              const {
+                days,
+                designPostName,
+                endDate,
+                name,
+                staffName,
+                startDate,
+                status,
+                unitPrice
+              } = citem
+              newDataItem = {
+                ...item,
+                ppdays: days,
+                ppdesignPostName: designPostName,
+                ppendDate: endDate,
+                ppname: name,
+                ppstaffName: staffName,
+                ppstartDate: startDate,
+                ppstatus: status,
+                ppunitPrice: unitPrice,
+                xqwd: '',
+                ckt: '',
+                pppq: getPq(startDate, endDate),
+                order: index + 1
+              }
+              // 处理文件类型
+              if (item.projectFileList && item.projectFileList.length > 0) {
+                // 需求文档
+                const xqwd: any = item.projectFileList.find(
+                  (xq: any) => xq.type === '1'
+                )
+                // 参考图
+                const ckt: any = item.projectFileList.find(
+                  (xq: any) => xq.type === '2'
+                )
+                newDataItem.xqwd = (xqwd || {}).url
+                newDataItem.ckt = (ckt || {}).url
+              }
+              newData.push(newDataItem)
+            })
+          } else {
+            newDataItem = item
+            // 处理文件类型
+            if (item.projectFileList && item.projectFileList.length > 0) {
+              // 需求文档
+              const xqwd: any = item.projectFileList.find(
+                (xq: any) => xq.type === '1'
+              )
+              // 参考图
+              const ckt: any = item.projectFileList.find(
+                (xq: any) => xq.type === '2'
+              )
+              newDataItem.xqwd = (xqwd || {}).url
+              newDataItem.ckt = (ckt || {}).url
+              newDataItem.order = index + 1
+            }
+            newData.push(newDataItem)
+          }
+        })
+        console.log('data:', data)
+        demo3.tableData = newData
+      }
+      tableLoading.value = false
+    }
+    const showFile = (url: string) => {
+      window.open(url, '_blank')
+    }
 
     onMounted(() => {
+      getarProjectChiveProjectLists()
       nextTick(() => {
         height.value = document.documentElement.clientHeight - 160
       })
@@ -248,8 +353,14 @@ export default defineComponent({
     return {
       demo3,
       mergeRowMethod,
+      year,
       height,
-      tableHeaderData
+      tableHeaderData,
+      getarProjectChiveProjectLists,
+      showFile,
+      getStatus,
+      getPPstatus,
+      tableLoading
     }
   }
 })

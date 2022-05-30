@@ -16,14 +16,22 @@
         :prop="head.key"
         :label="head.name"
       />
-                <el-table-column fixed="right" label="操作" width="160">
-            <template #default="scope">
-              <el-button type="text" size="small" @click="openOperatingCompany(scope.row)"
-                >编辑</el-button
-              >
-              <el-button type="text" @click="deleteOperatingCompany(scope.row.id)" size="small">删除</el-button>
-            </template>
-          </el-table-column>
+      <el-table-column fixed="right" label="操作" width="160">
+        <template #default="scope">
+          <el-button
+            type="text"
+            size="small"
+            @click="openOperatingCompany(scope.row)"
+            >编辑</el-button
+          >
+          <el-button
+            type="text"
+            @click="deleteOperatingCompany(scope.row.id)"
+            size="small"
+            >删除</el-button
+          >
+        </template>
+      </el-table-column>
     </el-table>
     <div class="d-flex">
       <!-- 职位分工 -->
@@ -52,11 +60,19 @@
             :label="head.name"
           />
           <el-table-column fixed="right" label="操作" width="100">
-            <template  #default="scope">
-              <el-button type="text" size="small" @click="openDesignPostsModal(scope.row)"
+            <template #default="scope">
+              <el-button
+                type="text"
+                size="small"
+                @click="openDesignPostsModal(scope.row)"
                 >编辑</el-button
               >
-              <el-button type="text" size="small" @click="deleteDesignPosts(scope.row.id)">删除</el-button>
+              <el-button
+                type="text"
+                size="small"
+                @click="deleteDesignPosts(scope.row.id)"
+                >删除</el-button
+              >
             </template>
           </el-table-column>
         </el-table>
@@ -171,33 +187,61 @@
     <el-dialog
       v-model="operatingCompany.addModal"
       top="55px"
-      :title="operatingCompany.modal.id?'编辑运营公司':'新增运营公司'"
+      :title="operatingCompany.modal.id ? '编辑运营公司' : '新增运营公司'"
       width="35%"
       @close="closeModal"
       center
     >
       <div class="rule-modal modal scrollbar">
-        <el-form ref="operatingCompanyFormRef" size="large" :model="operatingCompany.modal" :rules="operatingCompany.addmodalRule" label-width="120px">
+        <el-form
+          ref="operatingCompanyFormRef"
+          size="large"
+          :model="operatingCompany.modal"
+          :rules="operatingCompany.addmodalRule"
+          label-width="120px"
+        >
           <el-form-item label="简称" prop="shortName">
-            <el-input placeholder="请输入简称"  v-model="operatingCompany.modal.shortName" />
+            <el-input
+              placeholder="请输入简称"
+              v-model="operatingCompany.modal.shortName"
+            />
           </el-form-item>
           <el-form-item label="公司全名" prop="fullName">
-             <el-input placeholder="请输入公司全名" v-model="operatingCompany.modal.fullName" />
+            <el-input
+              placeholder="请输入公司全名"
+              v-model="operatingCompany.modal.fullName"
+            />
           </el-form-item>
           <el-form-item label="邮寄合同地址" prop="contractAddress">
-            <el-input placeholder="请输入邮寄合同地址" v-model="operatingCompany.modal.contractAddress" />
+            <el-input
+              placeholder="请输入邮寄合同地址"
+              v-model="operatingCompany.modal.contractAddress"
+            />
           </el-form-item>
-          <el-form-item label="税号"  prop="taxId">
-            <el-input placeholder="请输入税号" v-model="operatingCompany.modal.taxId" />
+          <el-form-item label="税号" prop="taxId">
+            <el-input
+              placeholder="请输入税号"
+              v-model="operatingCompany.modal.taxId"
+            />
           </el-form-item>
           <el-form-item label="联系电话" prop="phone">
-            <el-input placeholder="请输入联系电话" type="number" v-model="operatingCompany.modal.phone" />
+            <el-input
+              placeholder="请输入联系电话"
+              type="number"
+              v-model="operatingCompany.modal.phone"
+            />
           </el-form-item>
           <el-form-item label="银行名称" prop="name">
-            <el-input placeholder="请输入银行名称" v-model="operatingCompany.modal.name" />
+            <el-input
+              placeholder="请输入银行名称"
+              v-model="operatingCompany.modal.name"
+            />
           </el-form-item>
           <el-form-item label="银行账号" prop="account">
-            <el-input placeholder="请输入银行账号" v-model="operatingCompany.modal.account" />
+            <el-input
+              placeholder="请输入银行账号"
+              v-model="operatingCompany.modal.account"
+            />
           </el-form-item>
           <el-form-item label="备注" prop="remark">
             <el-input
@@ -231,13 +275,18 @@
       center
     >
       <div class="rule-modal modal scrollbar">
-        <el-form size="large"
+        <el-form
+          size="large"
           ref="designPostsFormRef"
           :rules="designPosts.modals.addModalRules"
           :model="designPosts.modals"
-          label-width="120px">
+          label-width="120px"
+        >
           <el-form-item label="岗位名称" prop="name">
-            <el-input placeholder="请输入岗位名称" v-model="designPosts.modals.name" />
+            <el-input
+              placeholder="请输入岗位名称"
+              v-model="designPosts.modals.name"
+            />
           </el-form-item>
           <el-form-item label="提成点数" prop="percentagePoints">
             <el-select
@@ -245,10 +294,12 @@
               v-model="designPosts.modals.percentagePoints"
               placeholder="请选择提成点数"
             >
-              <el-option v-for="item in percentagePointss"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value" />
+              <el-option
+                v-for="item in percentagePointss"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"
+              />
             </el-select>
           </el-form-item>
         </el-form>
@@ -617,14 +668,22 @@ export default defineComponent({
       tableLoading: false,
       addModal: false,
       addmodalRule: {
-        contractAddress: [{ required: true, message: '请输入合同地址', trigger: 'blur' }],
-        fullName: [{ required: true, message: '请输入公司全称', trigger: 'blur' }],
-        operatingStatus: [{ required: true, message: '请选择提成点数', trigger: 'blur' }],
+        contractAddress: [
+          { required: true, message: '请输入合同地址', trigger: 'blur' }
+        ],
+        fullName: [
+          { required: true, message: '请输入公司全称', trigger: 'blur' }
+        ],
+        operatingStatus: [
+          { required: true, message: '请选择提成点数', trigger: 'blur' }
+        ],
         phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
         shortName: [{ required: true, message: '请输入简称', trigger: 'blur' }],
         taxId: [{ required: true, message: '请输入税号', trigger: 'blur' }],
-        account: [{ required: true, message: '请输入银行卡账号', trigger: 'blur' }],
+        account: [
+          { required: true, message: '请输入银行卡账号', trigger: 'blur' }
+        ],
         name: [{ required: true, message: '请输入银行卡名称', trigger: 'blur' }]
       },
       modal: {
@@ -642,7 +701,17 @@ export default defineComponent({
     })
     // 编辑打开弹窗
     const openOperatingCompany = (row: any) => {
-      const { id, contractAddress, fullName, phone, remark, shortName, taxId, bankName, bankAccount } = row
+      const {
+        id,
+        contractAddress,
+        fullName,
+        phone,
+        remark,
+        shortName,
+        taxId,
+        bankName,
+        bankAccount
+      } = row
       operatingCompany.modal.id = id
       operatingCompany.modal.contractAddress = contractAddress
       operatingCompany.modal.fullName = fullName
@@ -665,11 +734,13 @@ export default defineComponent({
       operatingCompany.modal.remark = '' // 备注(限200字符)
       operatingCompany.modal.shortName = '' // 简称
       operatingCompany.modal.taxId = '' // 税号
-      operatingCompany.modal.account = ''// 银行卡账号
+      operatingCompany.modal.account = '' // 银行卡账号
       operatingCompany.modal.name = '' // 银行卡名称
     }
     // 新增
-    const operatingCompanySubmit = async (FormRef: FormInstance | undefined) => {
+    const operatingCompanySubmit = async (
+      FormRef: FormInstance | undefined
+    ) => {
       if (!FormRef) return
       FormRef.validate(async (valid) => {
         if (valid) {
@@ -720,7 +791,11 @@ export default defineComponent({
       })
       if (code === 200 && data) {
         operatingCompany.tableData = data.list.map((item: any) => {
-          const { name = '', account = '', id = '' } = item.bankList ? item.bankList[0] ? item.bankList[0] : {} : {}
+          const {
+            name = '',
+            account = '',
+            id = ''
+          } = item.bankList ? (item.bankList[0] ? item.bankList[0] : {}) : {}
           item.bankName = name
           item.bankAccount = account
           item.bankId = id
@@ -747,7 +822,8 @@ export default defineComponent({
 
     // ====================职位分工=========================
 
-    const openDesignPostsModal = (row:any) => { // 新增编辑打开弹窗
+    const openDesignPostsModal = (row: any) => {
+      // 新增编辑打开弹窗
       if (row && row.id) {
         const { id, name, percentagePoints } = row
         designPosts.modals.id = id
@@ -781,12 +857,16 @@ export default defineComponent({
           }
           if (!id) {
             const { code } = await designPostSave({
-              name, percentagePoints, id
+              name,
+              percentagePoints,
+              id
             })
             sucess(code)
           } else {
             const { code } = await designPostUpdate({
-              name, percentagePoints, id
+              name,
+              percentagePoints,
+              id
             })
             sucess(code)
           }
@@ -818,7 +898,9 @@ export default defineComponent({
         percentagePoints: '',
         addModalRules: {
           name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
-          percentagePoints: [{ required: true, message: '请选择提成点数', trigger: 'change' }]
+          percentagePoints: [
+            { required: true, message: '请选择提成点数', trigger: 'change' }
+          ]
         }
       }
     })
@@ -1085,6 +1167,6 @@ export default defineComponent({
   margin-right: 40px;
 }
 .w100 {
-  width: 100%
+  width: 100%;
 }
 </style>
