@@ -370,3 +370,8 @@ export const logicDeleteProject = (id: string) =>
  * @description 新增项目
  * */
 export const saveProject = (data: any) => post('/api/project/save', data)
+
+/**
+ * @description 编辑项目
+ * */
+export const updateProject = (data: any) => post('/api/project/update', data)
