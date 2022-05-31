@@ -130,14 +130,14 @@
                   @click="showFile(head.prop === 'ckt' ? row.ckt : row.xqwd)"
                   type="text"
                   link
-                  >{{ head.prop === 'xqwd' ? '需求文档' : '参考图' }}</el-button
+                  >查看</el-button
                 >
               </div>
               <div v-else-if="head.prop === 'id'" style="display: flex">
                 <el-button
                   type="text"
                   size="small"
-                  @click="openOperatingCompany(row)"
+                  @click="openModal(row)"
                   >编辑</el-button
                 >
                 <el-button
@@ -677,185 +677,184 @@ export default defineComponent({
       }
       const { code, data } = await getAllProjectList(querys)
       if (code === 200) {
-        console.log('data:', data)
         const getPQ = (start: any, end: any) => {
           if (!start) return end
           if (!end) return start
           return `${start}-${end}`
         }
-        const mocks = [
-          {
-            order: 1,
-            demandAddress: 'demandAddress',
-            endDate: 'endDate',
-            groupName: 'groupName',
-            id: 1,
-            name: 'name',
-            partyACompanyId: 0,
-            partyACompanyShortName: 'partyACompanyShortName',
-            paymentAmount: 'paymentAmount',
-            paymentStatus: '0',
-            projectFileList: [
-              {
-                id: 'projectFileList-id',
-                type: '1',
-                url: 'projectFileList-url'
-              },
-              {
-                id: 'projectFileList-id',
-                type: '2',
-                url: 'projectFileList-url'
-              },
-              {
-                id: 'projectFileList-id',
-                type: '3',
-                url: 'projectFileList-url'
-              }
-            ],
-            projectManagerList: [
-              {
-                id: 0,
-                managerId: 0,
-                managerType: '1',
-                name: 'projectManagerList-name'
-              },
-              {
-                id: 1,
-                managerId: 0,
-                managerType: '2',
-                name: 'projectManagerList-name'
-              },
-              {
-                id: 2,
-                managerId: 0,
-                managerType: '3',
-                name: 'projectManagerList-name'
-              }
-            ],
-            projectStageList: [
-              {
-                days: 'days',
-                designPostId: 0,
-                designPostName: 'designPostName',
-                endDate: 'endDate',
-                id: 0,
-                name: 'name',
-                staffId: 0,
-                staffName: 'staffName',
-                staffType: 'staffType',
-                startDate: '2022-01-22',
-                status: '0',
-                unitPrice: '1200'
-              },
-              {
-                days: 'days',
-                designPostId: 0,
-                designPostName: 'designPostName',
-                endDate: 'endDate',
-                id: 0,
-                name: 'name1',
-                staffId: 0,
-                staffName: 'staffName',
-                staffType: 'staffType',
-                startDate: '2022-01-22',
-                status: '0',
-                unitPrice: '1200'
-              },
-              {
-                days: 'days',
-                designPostId: 0,
-                designPostName: 'designPostName',
-                endDate: 'endDate',
-                id: 0,
-                name: 'name1',
-                staffId: 0,
-                staffName: 'staffName',
-                staffType: 'staffType',
-                startDate: '2022-01-22',
-                status: '0',
-                unitPrice: '1200'
-              }
-            ],
-            remark: 'remark',
-            serialNumber: 'serialNumber',
-            startDate: '2022-02-21',
-            status: '1',
-            totalPrice: '2000',
-            type: 'type'
-          },
-          {
-            demandAddress: 'demandAddress',
-            endDate: 'endDate',
-            groupName: 'groupName',
-            id: 2,
-            name: 'name',
-            partyACompanyId: 0,
-            partyACompanyShortName: 'partyACompanyShortName',
-            paymentAmount: 'paymentAmount',
-            paymentStatus: '1',
-            projectFileList: [
-              {
-                id: 'projectFileList-id',
-                type: 'projectFileList-type',
-                url: 'projectFileList-url'
-              },
-              {
-                id: 'projectFileList-id',
-                type: 'projectFileList-type',
-                url: 'projectFileList-url'
-              },
-              {
-                id: 'projectFileList-id',
-                type: 'projectFileList-type',
-                url: 'projectFileList-url'
-              }
-            ],
-            projectManagerList: [
-              {
-                id: 0,
-                managerId: 0,
-                managerType: 'projectManagerList-managerType',
-                name: 'projectManagerList-name'
-              },
-              {
-                id: 1,
-                managerId: 0,
-                managerType: 'projectManagerList-managerType',
-                name: 'projectManagerList-name'
-              },
-              {
-                id: 2,
-                managerId: 0,
-                managerType: 'projectManagerList-managerType',
-                name: 'projectManagerList-name'
-              }
-            ],
-            projectStageList: [
-              {
-                days: 'days',
-                designPostId: 0,
-                designPostName: 'designPostName',
-                endDate: 'endDate',
-                id: 0,
-                name: 'name',
-                staffId: 0,
-                staffName: 'staffName',
-                staffType: 'staffType',
-                startDate: '2022-01-22',
-                status: '0',
-                unitPrice: '1200'
-              }
-            ],
-            remark: 'remark',
-            serialNumber: 'serialNumber',
-            startDate: '2022-02-21',
-            status: '1',
-            totalPrice: '2000',
-            type: 'type'
-          }
-        ]
+        // const mocks = [
+        //   {
+        //     order: 1,
+        //     demandAddress: 'demandAddress',
+        //     endDate: 'endDate',
+        //     groupName: 'groupName',
+        //     id: 1,
+        //     name: 'name',
+        //     partyACompanyId: 0,
+        //     partyACompanyShortName: 'partyACompanyShortName',
+        //     paymentAmount: 'paymentAmount',
+        //     paymentStatus: '0',
+        //     projectFileList: [
+        //       {
+        //         id: 'projectFileList-id',
+        //         type: '1',
+        //         url: 'projectFileList-url'
+        //       },
+        //       {
+        //         id: 'projectFileList-id',
+        //         type: '2',
+        //         url: 'projectFileList-url'
+        //       },
+        //       {
+        //         id: 'projectFileList-id',
+        //         type: '3',
+        //         url: 'projectFileList-url'
+        //       }
+        //     ],
+        //     projectManagerList: [
+        //       {
+        //         id: 0,
+        //         managerId: 0,
+        //         managerType: '1',
+        //         name: 'projectManagerList-name'
+        //       },
+        //       {
+        //         id: 1,
+        //         managerId: 0,
+        //         managerType: '2',
+        //         name: 'projectManagerList-name'
+        //       },
+        //       {
+        //         id: 2,
+        //         managerId: 0,
+        //         managerType: '3',
+        //         name: 'projectManagerList-name'
+        //       }
+        //     ],
+        //     projectStageList: [
+        //       {
+        //         days: 'days',
+        //         designPostId: 0,
+        //         designPostName: 'designPostName',
+        //         endDate: 'endDate',
+        //         id: 0,
+        //         name: 'name',
+        //         staffId: 0,
+        //         staffName: 'staffName',
+        //         staffType: 'staffType',
+        //         startDate: '2022-01-22',
+        //         status: '0',
+        //         unitPrice: '1200'
+        //       },
+        //       {
+        //         days: 'days',
+        //         designPostId: 0,
+        //         designPostName: 'designPostName',
+        //         endDate: 'endDate',
+        //         id: 0,
+        //         name: 'name1',
+        //         staffId: 0,
+        //         staffName: 'staffName',
+        //         staffType: 'staffType',
+        //         startDate: '2022-01-22',
+        //         status: '0',
+        //         unitPrice: '1200'
+        //       },
+        //       {
+        //         days: 'days',
+        //         designPostId: 0,
+        //         designPostName: 'designPostName',
+        //         endDate: 'endDate',
+        //         id: 0,
+        //         name: 'name1',
+        //         staffId: 0,
+        //         staffName: 'staffName',
+        //         staffType: 'staffType',
+        //         startDate: '2022-01-22',
+        //         status: '0',
+        //         unitPrice: '1200'
+        //       }
+        //     ],
+        //     remark: 'remark',
+        //     serialNumber: 'serialNumber',
+        //     startDate: '2022-02-21',
+        //     status: '1',
+        //     totalPrice: '2000',
+        //     type: 'type'
+        //   },
+        //   {
+        //     demandAddress: 'demandAddress',
+        //     endDate: 'endDate',
+        //     groupName: 'groupName',
+        //     id: 2,
+        //     name: 'name',
+        //     partyACompanyId: 0,
+        //     partyACompanyShortName: 'partyACompanyShortName',
+        //     paymentAmount: 'paymentAmount',
+        //     paymentStatus: '1',
+        //     projectFileList: [
+        //       {
+        //         id: 'projectFileList-id',
+        //         type: 'projectFileList-type',
+        //         url: 'projectFileList-url'
+        //       },
+        //       {
+        //         id: 'projectFileList-id',
+        //         type: 'projectFileList-type',
+        //         url: 'projectFileList-url'
+        //       },
+        //       {
+        //         id: 'projectFileList-id',
+        //         type: 'projectFileList-type',
+        //         url: 'projectFileList-url'
+        //       }
+        //     ],
+        //     projectManagerList: [
+        //       {
+        //         id: 0,
+        //         managerId: 0,
+        //         managerType: 'projectManagerList-managerType',
+        //         name: 'projectManagerList-name'
+        //       },
+        //       {
+        //         id: 1,
+        //         managerId: 0,
+        //         managerType: 'projectManagerList-managerType',
+        //         name: 'projectManagerList-name'
+        //       },
+        //       {
+        //         id: 2,
+        //         managerId: 0,
+        //         managerType: 'projectManagerList-managerType',
+        //         name: 'projectManagerList-name'
+        //       }
+        //     ],
+        //     projectStageList: [
+        //       {
+        //         days: 'days',
+        //         designPostId: 0,
+        //         designPostName: 'designPostName',
+        //         endDate: 'endDate',
+        //         id: 0,
+        //         name: 'name',
+        //         staffId: 0,
+        //         staffName: 'staffName',
+        //         staffType: 'staffType',
+        //         startDate: '2022-01-22',
+        //         status: '0',
+        //         unitPrice: '1200'
+        //       }
+        //     ],
+        //     remark: 'remark',
+        //     serialNumber: 'serialNumber',
+        //     startDate: '2022-02-21',
+        //     status: '1',
+        //     totalPrice: '2000',
+        //     type: 'type'
+        //   }
+        // ]
         const newData: any = []
-        mocks.map((item: any, index: number) => {
+        data.list.map((item: any, index: number) => {
           if (item && item.projectStageList.length > 0) {
             item.projectStageList.map((citem: any) => {
               const newItem = { ...item, order: index + 1 }
@@ -946,12 +945,13 @@ export default defineComponent({
                 }
               })
             }
+            newData.push(newItem)
           }
 
           // newData.push(newItem)
         })
-        console.log('newData:', newData)
         demo3.tableData = newData
+        console.log('newData:', newData)
       }
       tableLoading.value = false
     }
@@ -1052,7 +1052,34 @@ export default defineComponent({
     }
 
     // 打开弹窗
-    const openModal = () => {
+    const openModal = (row: any) => {
+      if (row && row.id) {
+        // 编辑
+        for (const key in form.value) {
+          form.value[key] = row[key]
+        }
+        // 负责人
+        if (row.projectManagerList && row.projectManagerList.length > 0) {
+          const xmjlItem = row.projectManagerList.find((item: any) => item.managerType === '1')
+          form.value.xmjl = (xmjlItem || {}).managerId
+          const fzzmItem = row.projectManagerList.find((item: any) => item.managerType === '2')
+          form.value.fzzm = (fzzmItem || {}).managerId
+          const swfzrItem = row.projectManagerList.find((item: any) => item.managerType === '3')
+          form.value.swfzr = (swfzrItem || {}).managerId
+        } else {
+          form.value.xmjl = ''
+          form.value.fzzm = ''
+          form.value.swfzr = ''
+        }
+      } else {
+        for (const key in form.value) {
+          if (typeof form.value[key] === 'string') {
+            form.value[key] = ''
+          } else {
+            form.value[key] = []
+          }
+        }
+      }
       addModal.value = true
     }
 
@@ -1073,9 +1100,13 @@ export default defineComponent({
     const addPersion = (row: any) => {
       if (row && row.id) {
         // 编辑
+        for (const key in subForm.value) {
+          subForm.value[key] = row[key]
+        }
+        selectStaffName()
       } else {
-        for (const key in subFormRules.value) {
-          subFormRules.value[key] = ''
+        for (const key in subForm.value) {
+          subForm.value[key] = ''
         }
       }
       persionModal.value = true
@@ -1156,6 +1187,10 @@ export default defineComponent({
                 type
               } = form.value
               //  projectFileList
+              if (projectStageList.length === 0) {
+                ElMessage.error('请添加人员分工.')
+                return
+              }
               const submitQuery = {
                 demandAddress,
                 endDate,
@@ -1218,6 +1253,11 @@ export default defineComponent({
       })
     }
 
+    // 查看文档
+    const showFile = (url: string) => {
+      window.open(url, '_blank')
+    }
+
     onMounted(() => {
       getAllProjectLists()
       getPartyACompanyLists()
@@ -1261,7 +1301,8 @@ export default defineComponent({
       subFormRef,
       submitAddPersonnelModal,
       deleteStaffInfo,
-      saveProjectClick
+      saveProjectClick,
+      showFile
     }
   }
 })
