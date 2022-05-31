@@ -919,7 +919,7 @@ export default defineComponent({
     // 获取后台管理人员列表
     const getSysUsers = async () => {
       peopleTable.loading = true
-      const { code, data } = await getSysUser()
+      const { code, data } = await getSysUser({ limit: -1, page: 1 })
       if (code === 200 && data) {
         peopleTable.data = data.list || []
       } else {

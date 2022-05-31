@@ -214,75 +214,46 @@
                 placeholder="请选择项目工期结束时间"
               />
             </el-form-item>
-            <el-form-item label="项目经理" prop="name">
+            <el-form-item label="项目经理" prop="xmjl">
               <el-select
                 style="width: 100%"
                 v-model="form.xmjl"
                 placeholder="请选择项目经理"
               >
                 <el-option
-                  v-for="cop in companyList"
+                  v-for="cop in sysUserss"
                   :key="cop.id"
-                  :label="cop.fullName"
+                  :label="cop.name"
                   :value="cop.id"
                 />
               </el-select>
             </el-form-item>
-            <el-form-item label="商务负责人" prop="name">
+            <el-form-item label="商务负责人" prop="swfzr">
               <el-select
                 style="width: 100%"
-                v-model="form.xmjl"
+                v-model="form.swfzr"
                 placeholder="请选择商务负责人"
               >
                 <el-option
-                  v-for="cop in companyList"
+                  v-for="cop in sysUserss"
                   :key="cop.id"
-                  :label="cop.fullName"
+                  :label="cop.name"
                   :value="cop.id"
                 />
               </el-select>
             </el-form-item>
-
-            <!-- <el-form-item label="历史调薪" prop="historyWageList">
-              <div class="history-wage-list">
-                <div
-                  class="list"
-                  v-for="(item, index) in form.historyWageList"
-                  :key="index"
-                >
-                  <el-date-picker
-                    class="list-item left"
-                    v-model="item.changeTime"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    type="date"
-                    placeholder="选择时间"
-                  />
-                  <el-input
-                    class="list-item right"
-                    placeholder="金额"
-                    v-model="item.wage"
-                  />
-                </div>
-                <d-add
-                  style="width: 120px"
-                  text="添加"
-                  @click="addHistoryWage"
-                />
-              </div>
-            </el-form-item> -->
             <el-form-item label="需求文档" prop="xqwd">
               <div class="upload-content" v-if="!form.xqwd">
                 <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
                 <input
                   class="file-input"
                   type="file"
-                  @change="uploadFileChange"
+                  @change="uploadXFileChange"
                 />
               </div>
               <div v-else class="invoice-file">
                 <img :src="form.xqwd" alt="" srcset="" />
-                <el-icon :size="24" @click="deleteImg" class="delete"
+                <el-icon :size="24" @click="deleteXImg" class="delete"
                   ><CircleCloseFilled color="#F56C6C"
                 /></el-icon>
               </div>
@@ -319,9 +290,9 @@
                 placeholder="请选择负责主美"
               >
                 <el-option
-                  v-for="cop in companyList"
+                  v-for="cop in sysUserss"
                   :key="cop.id"
-                  :label="cop.fullName"
+                  :label="cop.name"
                   :value="cop.id"
                 />
               </el-select>
@@ -346,12 +317,12 @@
                 <input
                   class="file-input"
                   type="file"
-                  @change="uploadFileChange"
+                  @change="uploadCFileChange"
                 />
               </div>
               <div v-else class="invoice-file">
                 <img :src="form.ckt" alt="" srcset="" />
-                <el-icon :size="24" @click="deleteImg" class="delete"
+                <el-icon :size="24" @click="deleteCImg" class="delete"
                   ><CircleCloseFilled color="#F56C6C"
                 /></el-icon>
               </div>
@@ -361,6 +332,14 @@
       </div>
       <div class="drawer-content-bottom">
         <d-add text="添加人员分工" @click="addPersion" />
+        <el-table class="table" :border="true" :stripe="true" :data="form.projectStageList" style="width: 100%">
+          <el-table-column prop="name" label="姓名"  />
+          <el-table-column prop="name" label="职位" />
+          <el-table-column prop="name" label="阶段名称" />
+          <el-table-column prop="startDate" label="排期开始时间" />
+          <el-table-column prop="endDate" label="排期结束时间" />
+          <el-table-column prop="unitPrice" label="单价" />
+        </el-table>
       </div>
 
       <template #footer>
@@ -384,30 +363,43 @@
       center
     >
       <div class="rule-modal modal scrollbar">
-        <el-form size="large" ref="peopleTableFormRef" label-width="120px">
-          <!-- <el-form-item label="姓名" prop="name">
-            <el-input placeholder="请输入姓名" />
-          </el-form-item> -->
-          <el-form-item label="姓名" prop="managePostId">
-            <el-select style="width: 100%" placeholder="请选择姓名">
-              <el-option label="manage.name" value="manage.id" />
+        <el-form size="large" :rules="subFormRules" ref="subFormRef" label-width="120px">
+          <el-form-item label="姓名" prop="staffId">
+            <el-select style="width: 100%" v-model="subForm.staffId" @change="selectStaffName" placeholder="请选择姓名">
+              <el-option v-for="p in staffList" :key="p.staffId"  :label="p.staffName" :value="p.staffId" />
             </el-select>
           </el-form-item>
-          <el-form-item label="部门" prop="managePostId">
-            <el-select style="width: 100%" placeholder="请选择部门">
-              <el-option label="manage.name" value="manage.id" />
-            </el-select>
+          <el-form-item label="职位" prop="designPostName">
+            <el-input placeholder="请选择姓名" disabled v-model="subForm.designPostName"/>
           </el-form-item>
-          <el-form-item label="职位" prop="managePostId">
-            <el-select style="width: 100%" placeholder="请选择职位">
-              <el-option label="manage.name" value="manage.id" />
-            </el-select>
+          <el-form-item label="阶段名称" prop="name">
+            <el-input v-model="subForm.name" placeholder="请输入阶段名称"/>
           </el-form-item>
-          <el-form-item label="工期">
-            <el-input placeholder="请输入工期" />
+          <el-form-item label="排期开始时间" prop="startDate">
+              <el-date-picker
+                style="width: 100%"
+                v-model="subForm.startDate"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                type="date"
+                placeholder="请选择排期开始时间"
+              />
           </el-form-item>
-          <el-form-item label="单价" prop="phone">
-            <el-input type="number" placeholder="请输入单价" />
+          <el-form-item label="排期结束时间" prop="endDate">
+              <el-date-picker
+                style="width: 100%"
+                v-model="subForm.endDate"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                type="date"
+                placeholder="请选择排期结束时间"
+              />
+          </el-form-item>
+          <el-form-item label="工期" prop="days">
+            <el-input type="number" v-model="subForm.days" placeholder="请选择时间" />
+          </el-form-item>
+          <el-form-item label="单价" prop="unitPrice">
+            <el-input type="number" v-model="subForm.unitPrice" placeholder="请输入单价" />
           </el-form-item>
         </el-form>
       </div>
@@ -419,7 +411,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="submitAddPersonnelModal(peopleTableFormRef)"
+            @click="submitAddPersonnelModal(subFormRef)"
             >保存</el-button
           >
         </div>
@@ -430,6 +422,7 @@
 
 <script lang="ts">
 import { ElMessage, ElMessageBox } from 'element-plus'
+import type { FormInstance } from 'element-plus'
 import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
 import { Plus, CircleCloseFilled } from '@element-plus/icons-vue'
@@ -439,8 +432,10 @@ import {
   getPartyACompanyList,
   getStaffList,
   logicDeleteProject,
-  saveProject
+  saveProject,
+  getSysUser
 } from '@/request/index'
+import { uploadFile } from '@/utils/index'
 const tableHeaderData = [
   { name: '序号', prop: 'order' },
   { name: '编号', prop: 'serialNumber', width: 100 },
@@ -477,6 +472,10 @@ export default defineComponent({
     const staffList: any = ref([])
     const addModal: Ref<boolean> = ref(false)
     const persionModal: Ref<boolean> = ref(false)
+    const sysUserss: any = ref([])
+    const rightModalRef = ref<FormInstance>()
+    const leftModalRef = ref<FormInstance>()
+    const subFormRef = ref<FormInstance>()
     const form: any = ref({
       id: '', // id
       demandAddress: '', // 需求地址
@@ -497,8 +496,30 @@ export default defineComponent({
       xmjl: '', // 项目经理
       xqwd: '', // 需求文档
       ckt: '', // 参考图
-      fzzm: '' // 负责主美
+      fzzm: '', // 负责主美
+      swfzr: ''// 商务负责人
     })
+    const subForm: any = ref({
+      id: '', // 编辑
+      name: '', // 阶段名称
+      staffId: '', // 人员id
+      staffType: '', // 人员类型
+      designPostName: '', // 职位名称
+      startDate: '', // 排期开始时间
+      endDate: '', // 排期结束时间
+      days: '', // 工期天数
+      unitPrice: ''// 单价
+    })
+    const subFormRules: any = {
+      name: [{ required: true, message: '请输入阶段名称', trigger: 'blur' }],
+      staffId: [{ required: true, message: '请选择人员姓名', trigger: 'change' }],
+      staffType: [{ required: true, message: '请选择人员姓名', trigger: 'change' }],
+      designPostName: [{ required: true, message: '请选择人员姓名', trigger: 'change' }],
+      startDate: [{ required: true, message: '请选择时间', trigger: 'blur' }],
+      endDate: [{ required: true, message: '请选择时间', trigger: 'blur' }],
+      days: [{ required: true, message: '请输入工期天数', trigger: 'blur' }],
+      unitPrice: [{ required: true, message: '请输入单价', trigger: 'blur' }]
+    }
     const demo3: any = reactive({
       tableData: []
     })
@@ -841,8 +862,17 @@ export default defineComponent({
     const getStaffLists = async () => {
       const { code, data } = await getStaffList()
       if (code === 200) {
-        console.log('data', data)
+        console.log('data-getStaffList', data)
         staffList.value = data
+      }
+    }
+
+    // 后台设置，人员列表
+    const getSysUsers = async () => {
+      const { code, data } = await getSysUser({ limit: -1, page: 1 })
+      if (code === 200) {
+        console.log('后台设置人员列表', data)
+        sysUserss.value = data?.list
       }
     }
 
@@ -878,9 +908,52 @@ export default defineComponent({
       })
     }
 
+    // 上传参考图
+    const uploadCFileChange = async (e:any) => {
+      if (e.target.files && e.target.files[0]) {
+        const { code, data } = await uploadFile(e.target.files[0])
+        if (code === 200) {
+          form.value.ckt = data[0].url;
+          (leftModalRef.value as any).validateField(['ckt'])
+        }
+      }
+    }
+
+    // 删除参考图
+    const deleteCImg = () => {
+      form.value.ckt = '';
+      (leftModalRef.value as any).validateField(['ckt'])
+    }
+
+    // 上传需求文档
+    const uploadXFileChange = async (e: any) => {
+      if (e.target.files && e.target.files[0]) {
+        const { code, data } = await uploadFile(e.target.files[0])
+        if (code === 200) {
+          form.value.xqwd = data[0].xqwd;
+          (leftModalRef.value as any).validateField(['xqwd'])
+        }
+      }
+    }
+
+    // 删除需求文档
+    const deleteXImg = () => {
+      form.value.xqwd = '';
+      (leftModalRef.value as any).validateField(['xqwd'])
+    }
+
     // 打开弹窗
     const openModal = () => {
       addModal.value = true
+    }
+
+    // 选择人员
+    const selectStaffName = () => {
+      const type = staffList.value.find((item:any) => item.staffId === subForm.value.staffId)
+      if (type) {
+        subForm.value.staffId = type.staffId
+        subForm.value.designPostName = type.designPostName
+      }
     }
 
     const addPersion = () => {
@@ -891,6 +964,8 @@ export default defineComponent({
       getAllProjectLists()
       getPartyACompanyLists()
       getStaffLists()
+      getSysUsers()
+
       nextTick(() => {
         height.value = document.documentElement.clientHeight - 160
       })
@@ -913,7 +988,18 @@ export default defineComponent({
       form,
       openModal,
       addPersion,
-      persionModal
+      persionModal,
+      sysUserss,
+      uploadCFileChange,
+      uploadXFileChange,
+      deleteCImg,
+      rightModalRef,
+      leftModalRef,
+      deleteXImg,
+      subForm,
+      selectStaffName,
+      subFormRules,
+      subFormRef
     }
   }
 })
@@ -958,6 +1044,12 @@ export default defineComponent({
     }
     &-right {
       width: 50%;
+    }
+  }
+  .drawer-content-bottom {
+    margin-left: 20px;
+    .table {
+      margin-top: 10px;
     }
   }
   .upload-content {

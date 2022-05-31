@@ -37,8 +37,8 @@ export const getOperatingCompanyList = (
 /**
  * @description 后台设置-获取后台人员列表
  * */
-export const getSysUser = (): HttpPromise<UersssyListProps> =>
-  get('/api/sysUser/list')
+export const getSysUser = (data: any): HttpPromise<UersssyListProps> =>
+  get('/api/sysUser/list', data)
 
 /**
  * @description 后台设置-新增后台管理人员
