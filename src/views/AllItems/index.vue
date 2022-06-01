@@ -134,10 +134,7 @@
                 >
               </div>
               <div v-else-if="head.prop === 'id'" style="display: flex">
-                <el-button
-                  type="text"
-                  size="small"
-                  @click="openModal(row)"
+                <el-button type="text" size="small" @click="openModal(row)"
                   >编辑</el-button
                 >
                 <el-button
@@ -1054,17 +1051,24 @@ export default defineComponent({
     // 打开弹窗
     const openModal = (row: any) => {
       if (row && row.id) {
+        const newRow = JSON.parse(JSON.stringify(row))
         // 编辑
         for (const key in form.value) {
-          form.value[key] = row[key]
+          form.value[key] = newRow[key]
         }
         // 负责人
-        if (row.projectManagerList && row.projectManagerList.length > 0) {
-          const xmjlItem = row.projectManagerList.find((item: any) => item.managerType === '1')
+        if (newRow.projectManagerList && newRow.projectManagerList.length > 0) {
+          const xmjlItem = newRow.projectManagerList.find(
+            (item: any) => item.managerType === '1'
+          )
           form.value.xmjl = (xmjlItem || {}).managerId
-          const fzzmItem = row.projectManagerList.find((item: any) => item.managerType === '2')
+          const fzzmItem = newRow.projectManagerList.find(
+            (item: any) => item.managerType === '2'
+          )
           form.value.fzzm = (fzzmItem || {}).managerId
-          const swfzrItem = row.projectManagerList.find((item: any) => item.managerType === '3')
+          const swfzrItem = newRow.projectManagerList.find(
+            (item: any) => item.managerType === '3'
+          )
           form.value.swfzr = (swfzrItem || {}).managerId
         } else {
           form.value.xmjl = ''
@@ -1119,9 +1123,20 @@ export default defineComponent({
       if (!subFormRef) return
       subFormRef.validate(async (valid) => {
         if (valid) {
-          form.value.projectStageList.push({
-            ...subForm.value
-          })
+          // 判断是编辑还是新增
+          console.log('subForm.value:', subForm.value)
+          if (subForm.value.id) {
+            // 编辑
+            const index = form.value.projectStageList.findIndex(
+              (item: any) => item.id === subForm.value.id
+            )
+            if (index > -1) {
+              form.value.projectStageList.splice(index, 1, subForm.value)
+            }
+          } else {
+            form.value.projectStageList.push({ ...subForm.value })
+          }
+
           persionModal.value = false
         }
       })
