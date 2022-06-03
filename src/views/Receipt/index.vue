@@ -24,56 +24,86 @@
     </div>
     <!-- 表格 -->
     <div class="table-content">
-      <el-table
-        border
-        :stripe="true"
-        :height="height"
-        size="large"
-        :data="tableDataCopy"
+      <vxe-table
         style="width: 100%"
-        v-loading="tableLoading"
+        border
+        :height="height"
+        :loading="tableLoading"
+        :column-config="{ resizable: true }"
+        :scroll-y="{ enabled: true }"
+        :span-method="mergeRowMethod"
+        :data="tableData"
+        class="reverse-table"
       >
+        <vxe-column
+          field="invoiceNumber"
+          fixed="left"
+          title="发票编号"
+          :width="120"
+        />
         <template v-for="(head, index) in tableHeaderData" :key="index">
-          <!-- 非附件展示 -->
-          <el-table-column
-            v-if="head.prop !== 'file'"
-            :prop="head.prop"
-            :label="head.name"
-            :width="head.width"
-          />
-          <el-table-column :label="head.name" :width="head.width" v-else>
-            <template #default="scope">
-              <el-button
-                type="text"
-                size="small"
-                @click.prevent="deleteRow(scope.$index)"
-              >
-                点击查看大图
-              </el-button>
+          <vxe-column
+            v-if="head.prop === 'id'"
+            fixed="right"
+            field="id"
+            title="操作"
+            :width="120"
+          >
+            <template #default="{ row }">
+              <div style="display: flex">
+                <el-button type="text" size="small" @click="openModal(row)"
+                  >编辑</el-button
+                >
+                <el-button
+                  type="text"
+                  @click="deleteReceipt(row.id)"
+                  size="small"
+                  >删除</el-button
+                >
+              </div>
             </template>
-          </el-table-column>
+          </vxe-column>
+          <vxe-column
+            v-else
+            :field="head.prop"
+            :title="head.name"
+            :width="head.width"
+          >
+            <template #default="{ row }">
+              <span v-if="head.prop === 'pppaymentStatus'">
+                {{
+                  row.paymentStatus === '0'
+                    ? '未收款'
+                    : row.paymentStatus === '1'
+                    ? '已收款'
+                    : ''
+                }}
+              </span>
+              <div v-else-if="head.prop === 'skpz' || head.prop === 'fpsmj'">
+                <el-button
+                  @click="showFile(head.prop === 'skpz' ? row.skpz : row.fpsmj)"
+                  type="text"
+                  link
+                  >查看</el-button
+                >
+                <!-- {{ row }} -->
+              </div>
+              <span v-else>{{ row[head.prop] }} </span>
+            </template>
+          </vxe-column>
         </template>
-
-        <el-table-column fixed="right" label="操作" width="120">
-          <template #default>
-            <el-button type="text" size="small" @click="handleClick"
-              >编辑</el-button
-            >
-            <el-button type="text" size="small">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+      </vxe-table>
     </div>
     <!-- 新增编辑 -->
     <el-drawer
       size="50%"
       v-model="addReceiptModal"
-      :title="form.id ? '编辑合同' : '新增合同'"
+      :title="form.id ? '编辑发票' : '新增发票'"
       :with-header="true"
     >
       <template #title>
         <p class="t-c t-main-color f20">
-          {{ form.id ? '编辑合同' : '新增合同' }}
+          {{ form.id ? '编辑发票' : '新增发票' }}
         </p>
       </template>
       <div class="drawer-content d-flex d-f-row-bet">
@@ -83,70 +113,70 @@
             :rules="formRuls"
             :model="form"
             ref="leftModalRef"
-            label-width="110px"
+            label-width="120px"
           >
-            <el-form-item label="姓名" prop="name">
-              <el-input placeholder="请输入姓名" v-model="form.name" />
-            </el-form-item>
-            <el-form-item label="联系方式" prop="phone">
-              <el-input placeholder="请输入电话号码" v-model="form.phone" />
-            </el-form-item>
-            <el-form-item label="合同地址" prop="contractAddress">
+            <el-form-item label="发票编号" prop="invoiceNumber">
               <el-input
-                placeholder="请输入合同地址"
-                v-model="form.contractAddress"
+                placeholder="请输入发票编号"
+                v-model="form.invoiceNumber"
               />
             </el-form-item>
-            <el-form-item label="转正日期" prop="positiveTime">
-              <el-date-picker
+            <el-form-item label="包含项目" prop="projectList">
+              <el-select
+                v-model="form.projectList"
+                multiple
+                placeholder="请选择项目"
                 style="width: 100%"
-                v-model="form.positiveTime"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-                type="date"
-                placeholder="请选择转正日期"
-              />
-            </el-form-item>
-            <el-form-item label="历史调薪" prop="historyWageList">
-              <div class="history-wage-list">
-                <div
-                  class="list"
-                  v-for="(item, index) in form.historyWageList"
-                  :key="index"
-                >
-                  <el-date-picker
-                    class="list-item left"
-                    v-model="item.changeTime"
-                    format="YYYY-MM-DD"
-                    value-format="YYYY-MM-DD"
-                    type="date"
-                    placeholder="选择时间"
-                  />
-                  <el-input
-                    class="list-item right"
-                    placeholder="金额"
-                    v-model="item.wage"
-                  />
-                </div>
-                <d-add
-                  style="width: 120px"
-                  text="添加"
-                  @click="addHistoryWage"
+              >
+                <el-option
+                  v-for="item in projectList"
+                  :key="item.id"
+                  :label="item.groupName"
+                  :value="item.id"
                 />
-              </div>
+              </el-select>
             </el-form-item>
-            <el-form-item label="合同扫描件" prop="contractFileUrl">
+            <el-form-item label="收款公司" prop="operatingCompanyId">
+              <el-select
+                v-model="form.operatingCompanyId"
+                placeholder="请选择收款公司"
+                style="width: 100%"
+                @change="changeBank('operating')"
+              >
+                <el-option
+                  v-for="item in operatingCompanyList"
+                  :key="item.id"
+                  :label="item.fullName"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="收款银行账号" prop="collectionBankId">
+              <el-select
+                v-model="form.collectionBankId"
+                placeholder="请选择收款账号"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="item in operatingCompanyBankList"
+                  :key="item.id"
+                  :label="item.account"
+                  :value="item.id"
+                />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="发票扫描件" prop="contractFileUrl">
               <div class="upload-content" v-if="!form.contractFileUrl">
                 <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
                 <input
                   class="file-input"
                   type="file"
-                  @change="uploadFileChange"
+                  @change="uploadConFileChange"
                 />
               </div>
               <div v-else class="invoice-file">
                 <img :src="form.contractFileUrl" alt="" srcset="" />
-                <el-icon :size="24" @click="deleteImg" class="delete"
+                <el-icon :size="24" @click="deleteImg('con')" class="delete"
                   ><CircleCloseFilled color="#F56C6C"
                 /></el-icon>
               </div>
@@ -159,54 +189,65 @@
             :model="form"
             :rules="formRuls"
             ref="rightModalRef"
-            label-width="100px"
+            label-width="120px"
           >
-            <el-form-item label="职位" prop="designPostId">
+            <el-form-item label="开票日期" prop="billingDate">
+              <el-date-picker
+                style="width: 100%"
+                v-model="form.billingDate"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                type="date"
+                placeholder="请选择开票日期"
+              />
+            </el-form-item>
+
+            <el-form-item label="付款公司" prop="partyACompanyId">
               <el-select
                 style="width: 100%"
-                v-model="form.designPostId"
-                placeholder="请选择职位"
+                v-model="form.partyACompanyId"
+                placeholder="请选择付款公司"
+                @change="changeBank('com')"
               >
                 <el-option
-                  v-for="design in designPosts"
+                  v-for="design in aCompanyList"
                   :key="design.id"
-                  :label="design.name"
+                  :label="design.fullName"
                   :value="design.id"
                 />
               </el-select>
             </el-form-item>
-            <el-form-item label="银行名称" prop="bankName">
-              <el-input placeholder="请输入银行名称" v-model="form.bankName" />
-            </el-form-item>
-            <el-form-item label="银行账号" prop="bankAccount">
-              <el-input
-                placeholder="请输入银行账号"
-                v-model="form.bankAccount"
-              />
-            </el-form-item>
-            <el-form-item label="入职时间" prop="entryTime">
-              <el-date-picker
-                style="width: 100%"
-                v-model="form.entryTime"
-                format="YYYY-MM-DD"
-                value-format="YYYY-MM-DD"
-                type="date"
-                placeholder="请选择入职时间"
-              />
-            </el-form-item>
-            <el-form-item label="基本工资" prop="basicWage">
-              <el-input placeholder="请输入基本工资" v-model="form.basicWage" />
-            </el-form-item>
-            <el-form-item label="状态" prop="status">
+            <el-form-item label="付款银行账号" prop="paymentBankId">
               <el-select
                 style="width: 100%"
-                v-model="form.status"
-                placeholder="请选择状态"
+                v-model="form.paymentBankId"
+                placeholder="请选择付款银行账号"
               >
-                <el-option label="未合作" value="0" />
-                <el-option label="合作中" value="1" />
+                <el-option
+                  v-for="design in companyBankList"
+                  :key="design.id"
+                  :label="design.fullName"
+                  :value="design.id"
+                />
               </el-select>
             </el-form-item>
+            <el-form-item label="收款凭证" prop="skpz">
+              <div class="upload-content" v-if="!form.skpz">
+                <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
+                <input
+                  class="file-input"
+                  type="file"
+                  @change="uploadSkpzFileChange"
+                />
+              </div>
+              <div v-else class="invoice-file">
+                <img :src="form.skpz" alt="" srcset="" />
+                <el-icon :size="24" @click="deleteImg('skpz')" class="delete"
+                  ><CircleCloseFilled color="#F56C6C"
+                /></el-icon>
+              </div>
+            </el-form-item>
+
             <el-form-item label="备注" prop="remark">
               <el-input
                 type="textarea"
@@ -224,7 +265,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="saveEmployeeClick(leftModalRef, rightModalRef)"
+            @click="saveReceiptClick(leftModalRef, rightModalRef)"
             >保存</el-button
           >
         </div>
@@ -235,10 +276,22 @@
 
 <script lang="ts">
 import { defineComponent, ref, Ref, onMounted, nextTick } from 'vue'
-import { getInvoiceReceiptList } from '@/request/index'
+import {
+  getInvoiceReceiptList,
+  getPartyACompanyList,
+  getAllProjectList,
+  getOperatingCompanyList,
+  saveInvoiceReceipt,
+  updateInvoiceReceipt,
+  logicDeleteInvoiceReceipt
+} from '@/request/index'
 import { Plus, CircleCloseFilled } from '@element-plus/icons-vue'
+import type { FormInstance } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { VxeTablePropTypes } from 'vxe-table'
+import { uploadFile } from '@/utils/index'
 const tableHeaderData = [
-  { name: '发票编号', prop: 'invoiceNumber', width: 120 },
+  // { name: '发票编号', prop: 'invoiceNumber', width: 120 },
   { name: '开票日期', prop: 'billingDate', width: 150 },
   { name: '甲方(付款)公司简称', prop: 'partyACompanyShortName', width: 160 },
   { name: '运营(收款)公司简称', prop: 'operatingCompanyShortName', width: 160 },
@@ -246,109 +299,70 @@ const tableHeaderData = [
   { name: '付款银行账号', prop: 'paymentBankAccount', width: 150 },
   { name: '收款银行名称', prop: 'collectionBankName', width: 160 },
   { name: '收款银行账号', prop: 'collectionBankAccount', width: 150 },
-  { name: '包含项目', prop: 'projectList', width: 120 },
-  { name: '阶段总价', prop: 'name', width: 130 },
-  { name: '阶段单价', prop: 'name', width: 130 },
-  { name: '收款状态', prop: 'name', width: 120 },
-  // { name: '收款账号/名称', prop: 'name', width: 150 },
-  { name: '收款凭证', prop: 'fileList', width: 120 },
-  { name: '发票扫描件', prop: 'fileList', width: 120 },
-  { name: '备注', prop: 'remark', width: 180 }
+  { name: '项目名称', prop: 'ppname', width: 120 },
+  { name: '项目总价', prop: 'pptotalPrice', width: 130 },
+  { name: '已收款金额', prop: 'pppaymentAmount', width: 130 },
+  { name: '收款状态', prop: 'pppaymentStatus', width: 120 },
+  { name: '收款凭证', prop: 'skpz', width: 120 },
+  { name: '发票扫描件', prop: 'fpsmj', width: 120 },
+  { name: '备注', prop: 'remark', width: 180 },
+  { name: '操作', prop: 'id', width: 120 }
 ]
-const tableData: any = ref([])
-
 export default defineComponent({
   components: {
     Plus,
     CircleCloseFilled
   },
   setup () {
-    const activeTabIndex: Ref<number> = ref(0)
+    const activeTabIndex: Ref<number> = ref(-1)
     const height: Ref<number> = ref(300)
     const year: any = ref(new Date()) // 日期
     const tableLoading = ref(false)
     const addReceiptModal = ref(false)
-    const pos = ref(0)
-    const tabs = ref([
-      { text: '所有发票', id: 0 },
-      { text: '友塔', id: 1 },
-      { text: '西山居', id: 2 },
-      { text: '冠游', id: 3 },
-      { text: '叠纸', id: 4 }
-    ])
+    const aCompanyList: any = ref([]) // 甲方公司
+    const operatingCompanyList: any = ref([]) // 运营中公司
+    const operatingCompanyBankList: any = ref([]) // 收款银行账号列表
+    const companyBankList: any = ref([]) // 付款银行列表
+    const tabs = ref([{ text: '所有发票', id: -1 }])
     const tableData: any = ref([])
-    const tableDataCopy: any = ref([])
-    const spanArr: any = ref([])
-
-    const getSpanArr = (data: any) => {
-      // data就是我们从后台拿到的数据
-      for (let i = 0; i < data.length; i++) {
-        if (i === 0) {
-          spanArr.value.push(1)
-          pos.value = 0
-        } else {
-          // 判断当前元素与上一个元素是否相同 if (data[i].id === data[i - 1].id) {
-          if (data[i].id === data[i - 1].id) {
-            spanArr.value[pos.value] += 1
-            spanArr.value.push(0)
-          } else {
-            spanArr.value.push(1)
-            pos.value = i
-          }
+    const projectList: any = ref([])
+    const rightModalRef = ref<FormInstance>()
+    const leftModalRef = ref<FormInstance>()
+    const formRuls: any = ref({
+      id: '',
+      invoiceNumber: [
+        { required: true, message: '请输入发票编号', trigger: 'blur' }
+      ], // 发票编号
+      billingDate: [
+        { required: true, message: '请选择开票日期', trigger: 'blur' }
+      ], // 开票日期
+      collectionBankId: [
+        { required: true, message: '请选择收款银行', trigger: 'blur' }
+      ], // 收款银行id
+      fileList: [{ required: true, message: '请上传文件', trigger: 'blur' }], // 发票，收款凭证文件列表
+      operatingCompanyId: [
+        { required: true, message: '请选择收款公司', trigger: 'blur' }
+      ], // 收款公司id，运营公司
+      partyACompanyId: [
+        { required: true, message: '请选择付款公司', trigger: 'blur' }
+      ], // 付款公司id，甲方公司
+      paymentBankId: [
+        { required: true, message: '请选择付款账号', trigger: 'blur' }
+      ], // 付款银行id
+      projectList: [
+        {
+          required: true,
+          type: 'array',
+          message: '请选择项目',
+          trigger: 'blur'
         }
-      }
-    }
-
-    const objectSpanMethod = ({ row, column, rowIndex, columnIndex }: any) => {
-      if (columnIndex === 0 || columnIndex === 1) {
-        const _row = spanArr.value[rowIndex]
-        const _col = _row > 0 ? 1 : 0
-        console.log(`rowspan:${_row} colspan:${_col}`)
-        return {
-          // [0,0] 表示这一行不显示， [2,1]表示行的合并数
-          rowspan: _row,
-          colspan: _col
-        }
-      }
-    }
-
-    const tableDataaa = [
-      {
-        id: '12987122',
-        name: 'Tom',
-        amount1: '234',
-        amount2: '3.2',
-        amount3: 10
-      },
-      {
-        id: '12987122',
-        name: 'Tom',
-        amount1: '165',
-        amount2: '4.43',
-        amount3: 12
-      },
-      {
-        id: '12987124',
-        name: 'Tom',
-        amount1: '324',
-        amount2: '1.9',
-        amount3: 9
-      },
-      {
-        id: '12987125',
-        name: 'Tom',
-        amount1: '621',
-        amount2: '2.2',
-        amount3: 17
-      },
-      {
-        id: '12987125',
-        name: 'Tom',
-        amount1: '539',
-        amount2: '4.1',
-        amount3: 15
-      }
-    ]
+      ], // 项目列表 id
+      contractFileUrl: [
+        { required: true, message: '请上传合同扫描件', trigger: 'blur' }
+      ], // 合同扫描件
+      skpz: [{ required: true, message: '请上传收款凭证', trigger: 'blur' }], // 收款凭证
+      remark: [{ required: true, message: '请输入备注信息', trigger: 'blur' }] // 备注信息
+    })
 
     const changeTab = (id: number): void => {
       if (activeTabIndex.value !== id) {
@@ -367,27 +381,386 @@ export default defineComponent({
         limit: -1,
         month: new Date(year.value).getMonth() + 1,
         page: 1,
-        partyACompanyId: '',
+        partyACompanyId:
+          activeTabIndex.value === -1 ? '' : activeTabIndex.value,
         year: new Date(year.value).getFullYear()
       }
       const { code, data } = await getInvoiceReceiptList({
         ...query
       })
       if (code === 200) {
-        tableData.value = data?.list
+        // tableData.value = data?.list
+        // 处理数据
+        const newData: any = []
+        ;(data.list || []).map((item: any) => {
+          if (item.projectList && item.projectList.length > 0) {
+            // 处理文件
+            let fpsmj = ''
+            let skpz = ''
+            if (item.fileList && item.fileList) {
+              item.fileList.map((file: any) => {
+                if (file.type === '1') {
+                  skpz = file.url
+                }
+                if (file.type === '2') {
+                  fpsmj = file.url
+                }
+              })
+            }
+            item.projectList.map((citem: any) => {
+              const newItem = { ...item, fpsmj, skpz }
+              const { id, name, paymentAmount, paymentStatus, totalPrice } =
+                citem
+              newItem.ppid = id
+              newItem.ppname = name
+              newItem.pppaymentAmount = paymentAmount
+              newItem.pppaymentStatus = paymentStatus
+              newItem.pptotalPrice = totalPrice
+              newData.push(newItem)
+            })
+          } else {
+            // 处理文件
+            let fpsmj = ''
+            let skpz = ''
+            if (item.fileList && item.fileList) {
+              item.fileList.map((file: any) => {
+                if (file.type === '1') {
+                  skpz = file.url
+                }
+                if (file.type === '2') {
+                  fpsmj = file.url
+                }
+              })
+            }
+            const newItem = {
+              ...item,
+              fpsmj,
+              skpz
+            }
+            newData.push(newItem)
+          }
+        })
+        tableData.value = newData
       }
       tableLoading.value = false
     }
+    // 公司列表
+    const getPartyACompanyLists = async () => {
+      const { code, data } = await getPartyACompanyList({
+        status: '',
+        page: 1,
+        limit: -1
+      })
+      if (code === 200) {
+        aCompanyList.value = data.list || []
+        ;(data.list || []).map((item: any) => {
+          tabs.value.push({
+            ...item,
+            text: item.fullName
+          })
+        })
+      }
+    }
+    // 项目列表
+    const getAllProjectLists = async () => {
+      const { code, data } = await getAllProjectList({
+        limit: -1,
+        page: 1
+      })
+      if (code === 200) {
+        console.log('project-list:', data)
+        projectList.value = data.list || []
+      }
+    }
+    // 收款公司列表（运营中的公司）
+    const getOperatingCompanyLists = async () => {
+      const { code, data } = await getOperatingCompanyList({
+        limit: -1,
+        page: 1,
+        operatingStatus: 0
+      })
+      if (code === 200) {
+        operatingCompanyList.value = data.list || []
+      }
+    }
+    // 选择公司，获取银行列表
+    const changeBank = (type: string) => {
+      if (type === 'operating') {
+        // 收款公司银行
+        const index = operatingCompanyList.value.findIndex(
+          (item: any) => item.id === form.value.operatingCompanyId
+        )
+        if (index > -1) {
+          const banklit = operatingCompanyList.value[index].bankList
+          operatingCompanyBankList.value = banklit
+        } else {
+          operatingCompanyBankList.value = []
+        }
+      }
+      if (type === 'com') {
+        // 付款公司
+        const index = aCompanyList.value.findIndex(
+          (item: any) => item.id === form.value.partyACompanyId
+        )
+        console.log(index, aCompanyList.value, aCompanyList.value[index])
+        if (index > -1) {
+          const banklit = aCompanyList.value[index].bankList
+          companyBankList.value = banklit
+        } else {
+          companyBankList.value = []
+        }
+      }
+      if (type === 'all') {
+        // 收款公司银行
+        const oindex = operatingCompanyList.value.findIndex(
+          (item: any) => item.id === form.value.operatingCompanyId
+        )
+        if (oindex > -1) {
+          const banklit = operatingCompanyList.value[oindex].bankList
+          operatingCompanyBankList.value = banklit
+        } else {
+          operatingCompanyBankList.value = []
+        }
+        // 付款公司
+        const cindex = aCompanyList.value.findIndex(
+          (item: any) => item.id === form.value.partyACompanyId
+        )
+        if (cindex > -1) {
+          const banklit = aCompanyList.value[cindex].bankList
+          companyBankList.value = banklit
+        } else {
+          companyBankList.value = []
+        }
+      }
+    }
+
+    // 通用行合并函数（将相同多列数据合并为一行）
+    const mergeRowMethod: VxeTablePropTypes.SpanMethod = ({
+      row,
+      _rowIndex,
+      column,
+      visibleData
+    }) => {
+      const fields = ['invoiceNumber', 'id']
+      const cellValue = row[column.property]
+      if (cellValue && fields.includes(column.property)) {
+        const prevRow = visibleData[_rowIndex - 1]
+        let nextRow = visibleData[_rowIndex + 1]
+        if (prevRow && prevRow[column.property] === cellValue) {
+          return { rowspan: 0, colspan: 0, row: 5 }
+        } else {
+          let countRowspan = 1
+          while (nextRow && nextRow[column.property] === cellValue) {
+            nextRow = visibleData[++countRowspan + _rowIndex]
+          }
+          if (countRowspan > 1) {
+            return { rowspan: countRowspan, colspan: 1 }
+          }
+        }
+      }
+    }
+    // 保存，编辑
+    const saveReceiptClick = async (
+      leftModalRef: FormInstance | undefined,
+      rightModalRef: FormInstance | undefined
+    ) => {
+      if (!leftModalRef) return
+      if (!rightModalRef) return
+      const sucess = (code: number) => {
+        if (code === 200) {
+          ElMessage({
+            type: 'success',
+            message: '操作成功'
+          })
+          // 获取新的列表
+          getInvoiceReceiptLists()
+          // 关闭弹窗
+          addReceiptModal.value = false
+          rightModalRef.resetFields()
+          leftModalRef.resetFields()
+          // resetFields()
+        }
+      }
+      leftModalRef.validate(async (valid) => {
+        if (valid) {
+          const {
+            id,
+            invoiceNumber, // 发票编号
+            billingDate, // 开票日期
+            collectionBankId, // 收款银行id
+            fileList, // 发票，收款凭证文件列表
+            operatingCompanyId, // 收款公司id，运营公司
+            partyACompanyId, // 付款公司id，甲方公司
+            paymentBankId, // 付款银行id
+            projectList, // 项目列表 id
+            contractFileUrl, // 发票扫描件
+            skpz, // 收款凭证
+            remark // 备注信息
+          } = form.value
+          const query: any = {
+            // ...form
+            id,
+            fileList,
+            invoiceNumber,
+            billingDate,
+            collectionBankId,
+            partyACompanyId,
+            operatingCompanyId,
+            paymentBankId,
+            projectList: projectList.map((id: number) => ({ id })),
+            remark
+          }
+          // 处理文件
+          if (fileList && fileList.length > 0) {
+            // 编辑
+            query.fileList.forEach((file: any) => {
+              if (file.type === '1') {
+                file.url = skpz
+              } else if (file.type === '2') {
+                file.url = contractFileUrl
+              }
+            })
+          } else {
+            // 新增
+            query.fileList = [
+              // 1收款凭证 2发票扫描件)
+              {
+                type: '1',
+                url: skpz
+              },
+              {
+                type: '2',
+                url: contractFileUrl
+              }
+            ]
+          }
+          rightModalRef.validate(async (rightValid) => {
+            if (rightValid) {
+              if (!form.value.id) {
+                // 新增
+                const { code } = await saveInvoiceReceipt(query)
+                if (code === 200) {
+                  sucess(code)
+                }
+              } else {
+                // 编辑
+                const { code } = await updateInvoiceReceipt(query)
+                if (code === 200) {
+                  sucess(code)
+                }
+              }
+            }
+          })
+        } else {
+          rightModalRef.validate()
+        }
+      })
+    }
+
+    // 发票扫描件上传
+    const uploadConFileChange = async (e: any) => {
+      if (e.target.files && e.target.files[0]) {
+        const { code, data } = await uploadFile(e.target.files[0])
+        if (code === 200) {
+          form.value.contractFileUrl = data[0].url
+          ;(leftModalRef.value as any).validateField(['invoiceFileUrl'])
+        }
+      }
+    }
+
+    // 收款凭证
+    const uploadSkpzFileChange = async (e: any) => {
+      if (e.target.files && e.target.files[0]) {
+        const { code, data } = await uploadFile(e.target.files[0])
+        if (code === 200) {
+          form.value.skpz = data[0].url
+          ;(rightModalRef.value as any).validateField(['skpz'])
+        }
+      }
+    }
+
+    // 删除图片
+    const deleteImg = (type: string) => {
+      if (type === 'con') {
+        form.value.contractFileUrl = ''
+        ;(leftModalRef.value as any).validateField(['contractFileUrl'])
+      } else {
+        form.value.skpz = ''
+        ;(leftModalRef.value as any).validateField(['skpz'])
+      }
+    }
     // 弹窗内容
     const form = ref({
-      id: ''
+      id: '',
+      invoiceNumber: '', // 发票编号
+      billingDate: '', // 开票日期
+      collectionBankId: '', // 收款银行id
+      fileList: [], // 发票，收款凭证文件列表
+      operatingCompanyId: '', // 收款公司id，运营公司
+      partyACompanyId: '', // 付款公司id，甲方公司
+      paymentBankId: '', // 付款银行id
+      projectList: [], // 项目列表 id
+      contractFileUrl: '', // 合同扫描件
+      skpz: '', // 收款凭证
+      remark: '' // 备注信息
     })
     // 打开弹窗
-    const openModal = () => {
+    const openModal = (row: any) => {
+      if (row && row.id) {
+        // 编辑
+        const newRow = JSON.parse(JSON.stringify(row))
+        for (const key in form.value) {
+          form.value[key] = newRow[key]
+        }
+        // 处理文件
+        // form.value.fileList = []
+        form.value.skpz = newRow.skpz
+        form.value.contractFileUrl = newRow.fpsmj
+        // 处理项目
+        const newProject: any = []
+        if (newRow.projectList && newRow.projectList.length > 0) {
+          newRow.projectList.map((item: any) => {
+            newProject.push(item.id)
+          })
+        }
+        form.value.projectList = newProject
+        // 处理银行列表
+        changeBank('all')
+      } else {
+        // 新增
+        for (const key in form.value) {
+          if (typeof form.value[key] === 'string') {
+            form.value[key] = ''
+          } else {
+            form.value[key] = []
+          }
+        }
+      }
       addReceiptModal.value = true
+    }
+    // 文件查看
+    const showFile = (url: string) => {
+      console.log('url:', url)
+      window.open(url, '_blank')
+    }
+    // 删除
+    const deleteReceipt = async (id: string) => {
+      ElMessageBox.confirm('确定删除该项吗?', '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await logicDeleteInvoiceReceipt(id)
+        if (code === 200) {
+          getInvoiceReceiptLists()
+        }
+      })
     }
     onMounted(() => {
       getInvoiceReceiptLists()
+      getPartyACompanyLists()
+      getAllProjectLists()
+      getOperatingCompanyLists()
       nextTick(() => {
         height.value = document.documentElement.clientHeight - 160
       })
@@ -405,7 +778,23 @@ export default defineComponent({
       tableLoading,
       addReceiptModal,
       form,
-      openModal
+      openModal,
+      aCompanyList,
+      projectList,
+      operatingCompanyList,
+      operatingCompanyBankList,
+      changeBank,
+      companyBankList,
+      formRuls,
+      rightModalRef,
+      leftModalRef,
+      saveReceiptClick,
+      uploadConFileChange,
+      uploadSkpzFileChange,
+      deleteImg,
+      mergeRowMethod,
+      showFile,
+      deleteReceipt
     }
   }
 })
@@ -494,6 +883,32 @@ export default defineComponent({
         margin-left: 10px;
       }
     }
+  }
+  /*滚动条整体部分*/
+  .reverse-table ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  /*滚动条的轨道*/
+  .reverse-table ::-webkit-scrollbar-track {
+    background-color: #ffffff;
+  }
+  /*滚动条里面的小方块，能向上向下移动*/
+  .reverse-table ::-webkit-scrollbar-thumb {
+    background-color: #c0c4cc;
+    border-radius: 5px;
+    border: 1px solid #f1f1f1;
+    // box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  }
+  .reverse-table ::-webkit-scrollbar-thumb:hover {
+    background-color: #909399;
+  }
+  .reverse-table ::-webkit-scrollbar-thumb:active {
+    background-color: #909399;
+  }
+  /*边角，即两个滚动条的交汇处*/
+  .reverse-table ::-webkit-scrollbar-corner {
+    background-color: #ffffff;
   }
 }
 </style>

@@ -375,3 +375,21 @@ export const saveProject = (data: any) => post('/api/project/save', data)
  * @description 编辑项目
  * */
 export const updateProject = (data: any) => post('/api/project/update', data)
+
+/**
+ * @description 新增发票
+ * */
+export const saveInvoiceReceipt = (data: any) =>
+  post('/api/invoiceReceipt/save', data)
+
+/**
+ * @description 发票编辑
+ * */
+export const updateInvoiceReceipt = (data: any) =>
+  post('/api/invoiceReceipt/update', data)
+
+/**
+ * @description 发票删除
+ * */
+export const logicDeleteInvoiceReceipt = (id: string) =>
+  post('/api/invoiceReceipt/logicDelete', { id })
