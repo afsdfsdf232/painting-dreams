@@ -1,5 +1,13 @@
+/*
+ * @Description:
+ * @Author: Author
+ * @Date: 2022-05-20 09:32:48
+ * @LastEditTime: 2022-06-03 22:42:08
+ * @LastEditors: Author
+ */
 module.exports = {
   publicPath: './',
+  productionSourceMap: false,
   devServer: {
     port: 8081, // 本机端口号
     host: 'localhost', // 本机主机名
