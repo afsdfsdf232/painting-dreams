@@ -96,7 +96,7 @@
     </div>
     <div class="table-content">
       <vxe-table
-        style="width: 1800px"
+        style="width: 2300px"
         border
         :height="height"
         :loading="tableLoading"
@@ -577,7 +577,7 @@ export default defineComponent({
         { required: true, message: '请输入收款金额', trigger: 'blur' }
       ],
       paymentStatus: [
-        { required: true, message: '请选择收款状态', trigger: 'change' }
+        { required: false, message: '请选择收款状态', trigger: 'change' }
       ],
       remark: [{ required: true, message: '请输入备注信息', trigger: 'blur' }],
       serialNumber: [

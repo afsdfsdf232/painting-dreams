@@ -59,9 +59,10 @@
             :prop="head.key"
             :label="head.name"
           />
-          <el-table-column fixed="right" label="操作" width="100">
+          <el-table-column fixed="right" label="操作" width="130">
             <template #default="scope">
-              <el-button
+            <div style="width: 130px">
+               <el-button
                 type="text"
                 size="small"
                 @click="openDesignPostsModal(scope.row)"
@@ -73,6 +74,7 @@
                 @click="deleteDesignPosts(scope.row.id)"
                 >删除</el-button
               >
+            </div>
             </template>
           </el-table-column>
         </el-table>
@@ -104,6 +106,7 @@
         />
         <el-table-column fixed="right" label="操作" width="220">
           <template #default="scope">
+          <div style="width: 220px">
             <el-button
               type="text"
               size="small"
@@ -122,67 +125,53 @@
               size="small"
               >删除人员</el-button
             >
+          </div>
           </template>
         </el-table-column>
       </el-table>
     </div>
 
-    <!-- 查看规则弹窗 -->
-    <el-dialog
-      v-model="showRuleModal"
-      top="55px"
-      title="后台设置说明"
-      width="60%"
-      center
-    >
-      <div class="rule-modal scrollbar">
-        <p>
-          {画师薪水+公司支出五险一金+{（总房租+总水电费+总管理成本）÷在职画师数量}]÷画师该月过稿收入
-          说明：指数越小画师效率越高，指数越大画师效率越低，
-        </p>
-        <p>指数0.7以下正常，</p>
-        <p>0.7~0.8背景框为警示色，</p>
-        <p>0.8~0.9提示画师留职察看，</p>
-        <p>0.9~1，PM会找画师谈话，连续两个月负数就会劝退画师，。</p>
-        <p>指数大于1，公司亏损，公司可以当月辞退画师。</p>
-        <p>
-          初始公司纯利润率：【10】% （只能填10-90整数数字） 那么初始指数就是0.9
-        </p>
-        <p>【外发画师】绩效指数核算公式： 画师外发价 ÷ 税后接价</p>
-        <p>画师年终奖核算公式：</p>
-        <p>（0.9-1月绩效指数）x1月薪水</p>
-        <p>+（0.9-2月绩效指数）x2月薪水</p>
-        <p>+（0.9-3月绩效指数）x3月薪水</p>
-        <p>+（0.9-4月绩效指数）x4月薪水</p>
-        <p>+（0.9-5月绩效指数）x5月薪水</p>
-        <p>+（0.9-6月绩效指数）x6月薪水</p>
-        <p>+（0.9-7月绩效指数）x7月薪水</p>
-        <p>+（0.9-8月绩效指数）x8月薪水</p>
-        <p>+（0.9-9月绩效指数）x9月薪水</p>
-        <p>+（0.9-10月绩效指数）x10月薪水</p>
-        <p>+（0.9-11月绩效指数）x11月薪水</p>
-        <p>+（0.9-12月绩效指数）x12月薪水</p>
-
-        <p>
-          薪水是指：工资表一栏的【实发工资】的最终金额。（比如有全勤或者其他奖金填进去了，那么也要加进去计算）
-        </p>
-        <p>
-          例：也就是说，如果画师某个月的0.9减去绩效指数为负，那么这个月的月奖励也是负数。
-          PM会找画师谈话，连续两个月负数就会劝退画师。
-        </p>
-        <p>商务奖金率：【5】% （只能填1-10数字,最多到小数点后1位）</p>
-        <p>项目经理监督奖金率：【2.5】% （只能填1-10数字,最多到小数点后1位）</p>
-        <p>主美监督奖金率：【1】% （只能填1-10数字,最多到小数点后1位）</p>
+    <!-- 管理岗位 -->
+    <div class="job-division">
+      <div class="job-division-header">
+        <div class="tab-item">管理岗位</div>
+        <el-button size="large" @click="addPositionClick" :icon="CirclePlus"
+          >新建管理岗位</el-button
+        >
       </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button type="primary" @click="showRuleModal = false"
-            >我知道了</el-button
-          >
-        </span>
-      </template>
-    </el-dialog>
-
+      <el-table
+        border
+        v-loading="managementPosition.loading"
+        :stripe="true"
+        height="250"
+        size="large"
+        :data="peopleTable.managerPosts"
+        style="width: 100%"
+      >
+        <el-table-column
+          v-for="(head, index) in managementPositionHeader"
+          :key="index"
+          :prop="head.key"
+          :label="head.name"
+        />
+        <el-table-column fixed="right" label="操作" width="220">
+          <template #default="scope">
+            <el-button
+              type="text"
+              size="small"
+              @click="addPositionClick(scope.row)"
+              >编辑</el-button
+            >
+            <el-button
+              @click="handlePositionClick(scope.row)"
+              type="text"
+              size="small"
+              >删除</el-button
+            >
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
     <!-- 新增运营公司弹窗 -->
     <el-dialog
       v-model="operatingCompany.addModal"
@@ -212,6 +201,16 @@
               v-model="operatingCompany.modal.fullName"
             />
           </el-form-item>
+          <el-form-item label="运营状态" prop="status">
+              <el-select
+                style="width: 100%"
+                v-model="operatingCompany.modal.operatingStatus"
+                placeholder="请选择合作状态"
+              >
+                <el-option label="运营中" value="0" />
+                <el-option label="已注销" value="1" />
+              </el-select>
+            </el-form-item>
           <el-form-item label="邮寄合同地址" prop="contractAddress">
             <el-input
               placeholder="请输入邮寄合同地址"
@@ -289,18 +288,10 @@
             />
           </el-form-item>
           <el-form-item label="提成点数" prop="percentagePoints">
-            <el-select
-              style="width: 100%"
+            <el-input
+              placeholder="请输入提成点数"
               v-model="designPosts.modals.percentagePoints"
-              placeholder="请选择提成点数"
-            >
-              <el-option
-                v-for="item in percentagePointss"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -450,6 +441,54 @@
         </div>
       </template>
     </el-dialog>
+    <!-- 新增管理岗位弹窗 -->
+    <el-dialog
+      v-model="managementPosition.addModal"
+      top="55px"
+      :title="managementPosition.addModal.id ? '编辑管理岗位' : '新增管理岗位'"
+      width="35%"
+      center
+    >
+      <div class="rule-modal modal scrollbar">
+        <el-form
+          size="large"
+          ref="managementPositionFormRef"
+          :rules="managementPosition.addModalRules"
+          :model="managementPosition.addModals"
+          label-width="120px"
+        >
+          <el-form-item label="名称" prop="name">
+            <el-input
+              placeholder="请输入岗位名称"
+              v-model="managementPosition.addModals.name"
+            />
+          </el-form-item>
+          <el-form-item label="提成点数" prop="percentagePoints">
+            <el-input
+              placeholder="请输入提成点数"
+              v-model="managementPosition.addModals.percentagePoints"
+            />
+          </el-form-item>
+
+          <el-form-item label="权限" prop="permission">
+            <el-tree-select check-strictly style="width: 100%" v-model="managementPosition.addModals.permission" :data="permissionData" multiple />
+          </el-form-item>
+        </el-form>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button
+            class="btn"
+            type="primary"
+            style="width: 200px"
+            size="large"
+            @click="submitManagementPositionModal(managementPositionFormRef)"
+            >保存</el-button
+          >
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -472,51 +511,17 @@ import {
   designPostDelete,
   operatingCompanySave,
   operatingCompanyUpdate,
-  operatingCompanyDelete
+  operatingCompanyDelete,
+  saveManagePost,
+  updateManagePost,
+  logicDeleteManagePost
 } from '@/request/index'
 import {
   SysUserRequestProps,
   UersssyListItemProps
 } from '@/request/requestProps'
 import { md5Encode } from '@/utils/index'
-const percentagePointss = [
-  {
-    label: '0.1',
-    value: 0.1
-  },
-  {
-    label: '0.2',
-    value: 0.2
-  },
-  {
-    label: '0.3',
-    value: 0.3
-  },
-  {
-    label: '0.4',
-    value: 0.4
-  },
-  {
-    label: '0.5',
-    value: 0.5
-  },
-  {
-    label: '0.6',
-    value: 0.6
-  },
-  {
-    label: '0.7',
-    value: 0.7
-  },
-  {
-    label: '0.8',
-    value: 0.8
-  },
-  {
-    label: '0.9',
-    value: 0.9
-  }
-]
+
 interface peopleTableProps {
   data: Array<UersssyListItemProps>
   managerPosts: Array<any>
@@ -528,6 +533,172 @@ interface peopleTableProps {
   addModalRules: any
   updatePwdModalRules: any
 }
+const permissionData: any = [
+  {
+    value: '1',
+    label: '工作日历'
+  },
+  {
+    label: '所有项目',
+    value: '2',
+    children: [
+      {
+        label: '所有项目-新增',
+        value: '2-add'
+      },
+      {
+        label: '所有项目-编辑',
+        value: '2-edit'
+      },
+      {
+        label: '所有项目-删除',
+        value: '2-delete'
+      }
+    ]
+  },
+  {
+    label: '归档项目',
+    value: '3'
+  },
+  {
+    label: '公司项目',
+    value: '4'
+  },
+  {
+    label: '在职人员安排',
+    value: '5'
+  },
+  {
+    label: '外发画师安排',
+    value: '6'
+  },
+  {
+    label: '发票和收据',
+    value: '7',
+    children: [
+      {
+        label: '发票和收据-新增',
+        value: '7-add'
+      },
+      {
+        label: '发票和收据-删除',
+        value: '7-delete'
+      },
+      {
+        label: '发票和收据-编辑',
+        value: '7-edit'
+      }
+    ]
+  },
+  {
+    label: '员工资料',
+    value: '8',
+    children: [
+      {
+        label: '员工资料-删除',
+        value: '8-delete'
+      },
+      {
+        label: '员工资料-新增',
+        value: '8-add'
+      },
+      {
+        label: '员工资料-编辑',
+        value: '8-edit'
+      }
+    ]
+  },
+  {
+    label: '外发画师资料',
+    value: '9',
+    children: [
+      {
+        label: '外发画师资料-新增',
+        value: '9-add'
+      },
+      {
+        label: '外发画师资料-编辑',
+        value: '9-edit'
+      },
+      {
+        label: '外发画师资料-删除',
+        value: '9-delete'
+      }
+    ]
+  },
+  {
+    label: '工资表',
+    value: '10',
+    children: [
+      {
+        label: '工资表-新增',
+        value: '10-add'
+      },
+      {
+        label: '工资表-编辑',
+        value: '10-edit'
+      },
+      {
+        label: '工资表-删除',
+        value: '10-delete'
+      }
+    ]
+  },
+  {
+    label: '合作甲方公司信息',
+    value: '11',
+    children: [
+      {
+        label: '合作甲方公司信息-新增',
+        value: '11-add'
+      },
+      {
+        label: '合作甲方公司信息-编辑',
+        value: '11-edit'
+      },
+      {
+        label: '合作甲方公司信息-删除',
+        value: '11-delete'
+      }
+    ]
+  },
+  {
+    label: '管理成本',
+    value: '12',
+    children: [
+      {
+        label: '管理成本-新增',
+        value: '12-add'
+      },
+      {
+        label: '管理成本-编辑',
+        value: '12-edit'
+      },
+      {
+        label: '管理成本-删除',
+        value: '12-delete'
+      }
+    ]
+  },
+  {
+    label: '后台设置',
+    value: '13',
+    children: [
+      {
+        label: '后台设置-新增',
+        value: '13-add'
+      },
+      {
+        label: '后台设置-编辑',
+        value: '13-edit'
+      },
+      {
+        label: '后台设置-删除',
+        value: '13-delete'
+      }
+    ]
+  }
+]
 const headerData = [
   { name: '简称', key: 'shortName' },
   { name: '公司全名', key: 'fullName' },
@@ -564,6 +735,12 @@ const peopleHeaderData = [
   { name: '提成点数', key: 'percentagePoints' },
   { name: '联系电话', key: 'phone' },
   { name: '添加时间', key: 'createTime' }
+]
+
+const managementPositionHeader = [
+  { name: '名称', key: 'name' },
+  { name: '提成点数', key: 'percentagePoints' },
+  { name: '权限', key: 'permission' }
 ]
 export default defineComponent({
   setup () {
@@ -640,6 +817,7 @@ export default defineComponent({
     const peopleTableUpdatePwdFormRef = ref<FormInstance>()
     const designPostsFormRef = ref<FormInstance>()
     const operatingCompanyFormRef = ref<FormInstance>()
+    const managementPositionFormRef = ref<FormInstance>()
     // 弹窗岗位点数
     const modalPostPoints = computed(() => {
       if (peopleTable.managerPosts && peopleTable.addModal.managePostId) {
@@ -675,7 +853,7 @@ export default defineComponent({
           { required: true, message: '请输入公司全称', trigger: 'blur' }
         ],
         operatingStatus: [
-          { required: true, message: '请选择提成点数', trigger: 'blur' }
+          { required: true, message: '请选择运营状态', trigger: 'change' }
         ],
         phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
         remark: [{ required: true, message: '请输入备注', trigger: 'blur' }],
@@ -690,7 +868,7 @@ export default defineComponent({
         id: '',
         contractAddress: '', // 合同地址
         fullName: '', // 公司全称
-        operatingStatus: 0, // 运营中状态，营运状态(0营运中 1已注销)
+        operatingStatus: '', // 运营中状态，营运状态(0营运中 1已注销)
         phone: '', // 联系电话
         remark: '', // 备注(限200字符)
         shortName: '', // 简称
@@ -710,10 +888,12 @@ export default defineComponent({
         shortName,
         taxId,
         bankName,
-        bankAccount
+        bankAccount,
+        operatingStatus
       } = row
       operatingCompany.modal.id = id
       operatingCompany.modal.contractAddress = contractAddress
+      operatingCompany.modal.operatingStatus = operatingStatus // 运营中状态，营运状态(0营运中 1已注销)
       operatingCompany.modal.fullName = fullName
       operatingCompany.modal.phone = phone
       operatingCompany.modal.remark = remark
@@ -729,7 +909,7 @@ export default defineComponent({
       operatingCompany.modal.id = ''
       operatingCompany.modal.contractAddress = '' // 合同地址
       operatingCompany.modal.fullName = '' // 公司全称
-      operatingCompany.modal.operatingStatus = 0 // 运营中状态，营运状态(0营运中 1已注销)
+      operatingCompany.modal.operatingStatus = '' // 运营中状态，营运状态(0营运中 1已注销)
       operatingCompany.modal.phone = '' // 联系电话
       operatingCompany.modal.remark = '' // 备注(限200字符)
       operatingCompany.modal.shortName = '' // 简称
@@ -899,7 +1079,7 @@ export default defineComponent({
         addModalRules: {
           name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
           percentagePoints: [
-            { required: true, message: '请选择提成点数', trigger: 'change' }
+            { required: true, message: '请输入提成点数', trigger: 'blur' }
           ]
         }
       }
@@ -1067,10 +1247,107 @@ export default defineComponent({
 
     // ==================================================
 
+    // ===================管理岗位交互==========================
+    const managementPosition:any = reactive({
+      data: [], // 后台人员列表
+      managerPosts: [], // 岗位列表
+      addModal: false, // 新增编辑弹窗
+      addModalRules: {
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
+        percentagePoints: [
+          { required: true, message: '请输输入提成点数', trigger: 'blur' }
+        ],
+        permission: [
+          { required: true, type: 'array', message: '请输选择权限', trigger: 'change' }
+        ]
+      },
+      addModals: {
+        // 弹窗数据
+        id: '', // 新增为空，编辑需要携带
+        name: '', // 名称
+        percentagePoints: '', // 提成点数
+        permission: [] // 权限
+      }
+    })
+
+    // 打开弹窗
+    const addPositionClick = (row: any) => {
+      if (row && row.id) {
+        managementPosition.addModals.id = row.id
+        managementPosition.addModals.name = row.name
+        managementPosition.addModals.percentagePoints = row.percentagePoints
+        if (row.permission && row.permission.length > 0) {
+          try {
+            managementPosition.addModals.permission = JSON.parse(row.permission)
+          } catch (err) {
+            managementPosition.addModals.permission = []
+          }
+        } else {
+          managementPosition.addModals.permission = []
+        }
+      } else {
+        managementPosition.addModals.id = ''
+        managementPosition.addModals.name = ''
+        managementPosition.addModals.percentagePoints = ''
+        managementPosition.addModals.permission = ''
+      }
+      managementPosition.addModal = true
+    }
+
+    // 新增/编辑后台管理人员弹窗提交
+    const submitManagementPositionModal = async (
+      peopleTableFormRef: FormInstance | undefined
+    ) => {
+      if (!peopleTableFormRef) return
+      peopleTableFormRef.validate(async (valid) => {
+        if (valid) {
+          const { id, name, percentagePoints, permission } =
+            managementPosition.addModals
+          const query = {
+            id,
+            name,
+            percentagePoints,
+            permission: JSON.stringify(permission)
+          }
+          // 新增
+          if (!managementPosition.addModals.id) {
+            const { code } = await saveManagePost(query)
+            if (code === 200) {
+              getManagerPosts()
+              managementPosition.addModal = false
+            }
+          } else {
+            const { code } = await updateManagePost(query)
+            if (code === 200) {
+              getManagerPosts()
+              managementPosition.addModal = false
+            }
+          }
+        }
+      })
+    }
+
+    // 删除岗位
+    const handlePositionClick = (row: any) => {
+      ElMessageBox.confirm('确定删除该项吗?', '删除', {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { code } = await logicDeleteManagePost(row.id)
+        if (code === 200) {
+          getManagerPosts()
+        }
+      })
+    }
+
+    // ======================================================
+
     onMounted(() => {
       getOperatingCompanyLists()
       getDesignPosts()
       getSysUsers()
+      getManagerPosts()
     })
 
     const showRuleModal = ref(false) // 后台配置说明
@@ -1079,7 +1356,6 @@ export default defineComponent({
     const addDepartmentModal = ref(false) // 新建部门弹窗
 
     return {
-      percentagePointss,
       designPostsFormRef,
       setRowStyle,
       headerData,
@@ -1110,7 +1386,14 @@ export default defineComponent({
       operatingCompanySubmit,
       openOperatingCompany,
       closeModal,
-      deleteOperatingCompany
+      deleteOperatingCompany,
+      managementPosition,
+      managementPositionHeader,
+      addPositionClick,
+      managementPositionFormRef,
+      submitManagementPositionModal,
+      handlePositionClick,
+      permissionData
     }
   }
 })
@@ -1140,17 +1423,6 @@ export default defineComponent({
       align-items: center;
       justify-content: space-between;
     }
-  }
-}
-.rule-modal {
-  max-height: calc(100vh - 300px);
-  // overflow-y: auto;
-  div {
-    margin: 0;
-    padding: 0;
-  }
-  p {
-    padding: 0;
   }
 }
 .modal {

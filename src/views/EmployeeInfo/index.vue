@@ -56,7 +56,11 @@
           </el-table-column>
           <el-table-column :label="head.name" :width="head.width" v-else-if="head.prop === 'status'">
             <template #default="scope">
-             {{scope.row.status==='0'?'实习':scope.row.status==='1'?'正式':scope.row.status==='2'?'已离职':''}}
+              <span v-if="scope.row.status === '1'">实习</span>
+              <span v-else-if="scope.row.status === '2'">试用</span>
+              <span v-else-if="scope.row.status === '3'">正式</span>
+              <span v-else-if="scope.row.status === '4'">离职</span>
+              <span v-else-if="scope.row.status === '5'">停薪留职</span>
             </template>
           </el-table-column>
           <el-table-column :label="head.name" :width="head.width" v-else-if="head.prop === 'historyWageList'">
@@ -184,8 +188,11 @@
                 v-model="form.status"
                 placeholder="请选择状态"
               >
-                <el-option label="未合作" value="0" />
-                <el-option label="合作中" value="1" />
+                <el-option label="实习" value="1" />
+                <el-option label="试用" value="2" />
+                <el-option label="正式" value="3" />
+                <el-option label="离职" value="4" />
+                <el-option label="停薪留职" value="5" />
               </el-select>
             </el-form-item>
             <el-form-item label="备注" prop="remark">

@@ -96,17 +96,9 @@
           </el-form>
         </div>
         <div class="drawer-content-right">
-          <el-form size="large" ref="companyRightRef" :rules="formRules" :model="form" label-width="100px">
+          <el-form size="large" ref="companyRightRef" :rules="formRules" :model="form" label-width="130px">
             <el-form-item label="公司全名" prop="fullName">
-              <el-select
-                :disabled="disabledSelect"
-                @change="cahngeCompany"
-                style="width: 100%"
-                v-model="form.fullName"
-                placeholder="请选择公司"
-              >
-                <el-option v-for="cop in aCompanySelectList" :key="cop.id" :label="cop.fullName" :value="cop.fullName" />
-              </el-select>
+              <el-input placeholder="请输入公司全名" v-model="form.fullName" />
             </el-form-item>
             <el-form-item label="合同地址" prop="contractAddress">
               <el-input placeholder="请输入合同地址" v-model="form.contractAddress" />
@@ -143,7 +135,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   getPartyACompanyList,
   savePartyACompany,
-  getPartyACompanySelectList,
   updatePartyACompany,
   logicDeletePartyACompany
 } from '@/request/index'
@@ -154,7 +145,7 @@ const tableHeaderData = [
   { name: '邮寄合同地址', prop: 'contractAddress', width: 160 },
   { name: '联系电话', prop: 'phone' },
   { name: '税号', prop: 'taxId' },
-  { name: '银行账号/名称', prop: '', width: 160 },
+  { name: '银行账号/名称', prop: 'bankInfo', width: 160 },
   { name: '客户联系方式', prop: 'customerContactInfo', width: 160 },
   { name: '备注', prop: 'remark' }
 ]
@@ -168,11 +159,9 @@ export default defineComponent({
     const activeTab: Ref<number> = ref(2)
     const tableLoading: Ref<boolean> = ref(false)
     const addCompanyModal: Ref<boolean> = ref(false)
-    const aCompanySelectList: Ref<Array<any>> = ref([])
     const companyLeftRef = ref<FormInstance>()
     const companyRightRef = ref<FormInstance>()
     const tableData = ref([])
-    const disabledSelect = ref(false)
     const modalLoading = ref(false)
     const formRules = {
       bankListName: [{ required: true, message: '请输入银行卡名称', trigger: 'blur' }], // 银行卡名称
@@ -216,7 +205,13 @@ export default defineComponent({
         }
         const { code, data } = await getPartyACompanyList(query)
         if (code === 200) {
-          tableData.value = data.list
+          tableData.value = data.list.map((item:any) => {
+            // 获取银行信息
+            const bankInfo:any = item.bankList.map((bank:any) => {
+              return bank.name + '/' + bank.account
+            })
+            return { ...item, bankInfo: bankInfo.join(',') }
+          })
         }
       } finally {
         tableLoading.value = false
@@ -224,11 +219,9 @@ export default defineComponent({
     }
     // 打开弹窗
     const openAddModal = async (row: any) => {
-      // 获取公司列表
       addCompanyModal.value = true
       modalLoading.value = true
       if (row && row.id) {
-        disabledSelect.value = true
         for (const key in form) {
           form[key] = row[key] || ''
         }
@@ -239,40 +232,13 @@ export default defineComponent({
           form.bankListName = name
         }
       } else {
-        disabledSelect.value = false
         for (const key in form) {
           form[key] = ''
         }
       }
-      await getPartyACompanySelectLists()
       modalLoading.value = false
     }
 
-    // 获取选择公司下拉列表
-    const getPartyACompanySelectLists = async () => {
-      const { code, data } = await getPartyACompanySelectList()
-      if (code === 200) {
-        aCompanySelectList.value = data
-      }
-    }
-
-    // 选择公司
-    const cahngeCompany = () => {
-      const index = aCompanySelectList.value.findIndex(citem => citem.fullName === form.fullName)
-      if (index > -1) {
-        const { bankList } = aCompanySelectList.value[index]
-        if (bankList && bankList[0]) {
-          const { account, name } = bankList[0]
-          form.bankListName = name
-          form.bankListAccount = account
-        }
-        for (const key in form) {
-          if (key !== 'id') {
-            form[key] = aCompanySelectList.value[index][key]
-          }
-        }
-      }
-    }
     // 删除
     const deleteComp = async (id: string) => {
       ElMessageBox.confirm('确定删除该项吗?', '删除', {
@@ -355,13 +321,10 @@ export default defineComponent({
       form,
       tableLoading,
       openAddModal,
-      aCompanySelectList,
       saveCompanyModal,
       companyLeftRef,
       companyRightRef,
-      cahngeCompany,
       formRules,
-      disabledSelect,
       modalLoading,
       deleteComp
     }

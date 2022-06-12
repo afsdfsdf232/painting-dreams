@@ -150,7 +150,8 @@
           >
             <template #default="scope">
               <template v-if="scope.column.property === 'invoiceFileUrl'">
-                <img style="max-width: 160px; max-height: 160px" :src="scope.row.invoiceFileUrl" alt="" />
+                <!-- <img style="max-width: 160px; max-height: 160px" :src="scope.row.invoiceFileUrl" alt="发票" /> -->
+                <span class="text-button" @click="viewInvoiceFile(scope.row.invoiceFileUrl)">查看</span>
               </template>
               <template v-if="scope.column.property === 'auditStatus'">
                 {{scope.row[scope.column.property] === '0'? '未审核': '已审核'}}
@@ -189,14 +190,15 @@
       <div class="rule-modal modal scrollbar">
         <el-form size="large" ref="fixedCostsModalRef" :model="fixedCosts.modal" :rules="fixedCosts.rules" label-width="120px">
           <el-form-item label="名称" prop="name">
-            <el-select
+            <!-- <el-select
               style="width: 100%"
               v-model="fixedCosts.modal.name"
               @change="changeFixedCostsSelectList"
               placeholder="请选择费用名称"
             >
               <el-option v-for="item in fixedCosts.fixedCostsSelectList" :key="item.id" :label="item.name" :value="item.name" />
-            </el-select>
+            </el-select> -->
+             <el-input placeholder="请输入费用名称" v-model="fixedCosts.modal.name" />
           </el-form-item>
            <el-form-item label="费用" prop="amount">
             <el-input placeholder="请输入费用"  v-model="fixedCosts.modal.amount" />
@@ -479,7 +481,8 @@ export default defineComponent({
       rules: {
         amount: [{ required: true, message: '请输入成本费用', trigger: 'blur' }],
         costsDate: [{ required: true, message: '请选择日期', trigger: 'change' }],
-        name: [{ required: true, message: '请选择名称', trigger: 'change' }],
+        // name: [{ required: true, message: '请选择名称', trigger: 'change' }],
+        name: [{ required: true, message: '请输入名称', trigger: 'blur' }],
         payFileUrl: [{ required: true, message: '请上传截图', trigger: 'change' }]
       }
     })
@@ -964,6 +967,10 @@ export default defineComponent({
         return 'invoice-img'
       }
     }
+
+    const viewInvoiceFile = (url:string) => {
+      window.open(url)
+    }
     onMounted(() => {
       getFixedCostsLists()
       getManagerCostsLists()
@@ -1000,7 +1007,8 @@ export default defineComponent({
       uploadFileChange2,
       deleteImg2,
       changeFixedCostsSelectList,
-      deleteFixedCosts
+      deleteFixedCosts,
+      viewInvoiceFile
     }
   }
 })
@@ -1108,5 +1116,13 @@ export default defineComponent({
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.text-button {
+  cursor: pointer;
+  color: #409eff;
+  &:hover {
+    text-decoration: underline;
+  }
 }
 </style>

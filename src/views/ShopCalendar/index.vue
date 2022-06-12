@@ -129,7 +129,6 @@ export default defineComponent({
     const designPosts: any = ref([])
     const tableHeader: any = ref([])
     const tableData: any = ref([])
-    const position: any = ref(0)
     const height: Ref<number> = ref(300)
     const demo3: any = reactive({ tableData: [] })
 

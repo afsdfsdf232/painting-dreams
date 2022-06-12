@@ -393,3 +393,18 @@ export const updateInvoiceReceipt = (data: any) =>
  * */
 export const logicDeleteInvoiceReceipt = (id: string) =>
   post('/api/invoiceReceipt/logicDelete', { id })
+
+/**
+ * 管理岗位新增
+ * */
+export const saveManagePost = (data: any) => post('/api/managePost/save', data)
+
+/**
+ * @description 管理岗位-编辑
+ * */
+export const updateManagePost = (data: any) => post('/api/managePost/update', data)
+
+/**
+ * @description 删除岗位
+ * */
+export const logicDeleteManagePost = (id: string) => post('/api/managePost/logicDelete', { id })
