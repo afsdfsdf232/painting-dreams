@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: Author
+ * @Date: 2022-03-31 09:41:23
+ * @LastEditTime: 2022-06-13 18:01:19
+ * @LastEditors: Author
+-->
 <template>
   <div class="layout-cointainer">
     <div class="main-header">
@@ -15,7 +22,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref } from 'vue'
+import { computed, defineComponent, ref, Ref, watchEffect } from 'vue'
+import { useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import Header from './components/Header.vue'
 import SideBar from './components/SideBar.vue'
 export default defineComponent({
@@ -25,6 +34,13 @@ export default defineComponent({
   },
   setup () {
     const page: Ref<number> = ref(1)
+    const route = computed(() => useRoute())
+    const store = useStore()
+    watchEffect(() => {
+      if (route.value.meta.permission) {
+        store.commit('SET_META_VALUE', route.value.meta.permission)
+      }
+    })
     return {
       page
     }

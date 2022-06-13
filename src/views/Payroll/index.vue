@@ -2,15 +2,18 @@
   <div class="payroll-container">
     <div class="header-filter d-flex d-f-row-bet">
       <div class="header-filter-left d-flex d-f-col-center">
-         <el-date-picker
-            @change="changePicher"
-            v-model="year"
-            size="large"
-            type="month"
-            placeholder="请选择年月" />
+        <el-date-picker
+          @change="changePicher"
+          v-model="year"
+          size="large"
+          type="month"
+          placeholder="请选择年月"
+        />
         <div class="month-data d-flex d-f-col-center d-f-row-center">
           <i class="iconfont d-tishi"></i>
-          <span v-show="isMonthUpdateStatus === 0 || isMonthUpdateStatus === 1">该月{{isMonthUpdateStatus===0?'未更新':'已更新'}} </span>
+          <span v-show="isMonthUpdateStatus === 0 || isMonthUpdateStatus === 1"
+            >该月{{ isMonthUpdateStatus === 0 ? '未更新' : '已更新' }}
+          </span>
         </div>
       </div>
       <div class="header-filter-right">
@@ -38,28 +41,39 @@
         :cell-style="setCellStyle"
         style="width: 100%"
       >
-      <el-table-column
-            v-for="(head, index) in tableHeaderData"
-            :key="index"
-            :prop="head.prop"
-            :label="head.name"
-            :width="head.width"
-          >
-            <template #default="scope">
-             <template v-if="scope.column.property === 'historyWageList'">
-                <div class="history-wageList" v-for="(history,index) in scope.row.property" :key="index">
-                  <p>{{history.changeTime}}</p>
-                  <p>{{history.wage}}</p>
-                </div>
-              </template>
+        <el-table-column
+          v-for="(head, index) in tableHeaderData"
+          :key="index"
+          :prop="head.prop"
+          :label="head.name"
+          :width="head.width"
+        >
+          <template #default="scope">
+            <template v-if="scope.column.property === 'historyWageList'">
+              <div
+                class="history-wageList"
+                v-for="(history, index) in scope.row.property"
+                :key="index"
+              >
+                <p>{{ history.changeTime }}</p>
+                <p>{{ history.wage }}</p>
+              </div>
             </template>
-          </el-table-column>
+          </template>
+        </el-table-column>
         <el-table-column fixed="right" label="操作" width="120">
           <template #default="scope">
-            <el-button type="text" size="small" @click="openModal(scope.row)"
-              >编辑</el-button
-            >
-            <el-button type="text" size="small" @click="deleteWage(scope.row.id)">删除</el-button>
+            <div style="width: 120px">
+              <el-button type="text" size="small" @click="openModal(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                type="text"
+                size="small"
+                @click="deleteWage(scope.row.id)"
+                >删除</el-button
+              >
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -76,7 +90,13 @@
       </template>
       <div class="drawer-content d-flex d-f-row-bet">
         <div class="drawer-content-left">
-          <el-form size="large" ref="leftModalRef" :model="form" :rules="formRules" label-width="110px">
+          <el-form
+            size="large"
+            ref="leftModalRef"
+            :model="form"
+            :rules="formRules"
+            label-width="110px"
+          >
             <el-form-item label="员工姓名" prop="employeeId">
               <el-select
                 style="width: 100%"
@@ -84,7 +104,12 @@
                 @change="changeEmployee"
                 placeholder="请选择员工"
               >
-                <el-option :label="user.name" :value="user.id" v-for="user in employeeList" :key="user.id"/>
+                <el-option
+                  :label="user.name"
+                  :value="user.id"
+                  v-for="user in employeeList"
+                  :key="user.id"
+                />
               </el-select>
             </el-form-item>
             <el-form-item label="入职时间" prop="entryTime">
@@ -97,22 +122,37 @@
               />
             </el-form-item>
             <el-form-item label="计薪基数" prop="salaryBase">
-              <el-input placeholder="请输入计薪基数" v-model="form.salaryBase" />
+              <el-input
+                placeholder="请输入计薪基数"
+                v-model="form.salaryBase"
+              />
             </el-form-item>
             <el-form-item label="基本工资" prop="basicWage">
               <el-input placeholder="请输入基本工资" v-model="form.basicWage" />
             </el-form-item>
             <el-form-item label="全勤" prop="perfectAttendance">
-              <el-input placeholder="请输入全勤" v-model="form.perfectAttendance" />
+              <el-input
+                placeholder="请输入全勤"
+                v-model="form.perfectAttendance"
+              />
             </el-form-item>
             <el-form-item label="考勤扣款" prop="attendanceDeduction">
-              <el-input placeholder="请输入考勤扣款" v-model="form.attendanceDeduction" />
+              <el-input
+                placeholder="请输入考勤扣款"
+                v-model="form.attendanceDeduction"
+              />
             </el-form-item>
             <el-form-item label="养老保险" prop="endowmentInsurance">
-              <el-input placeholder="请输入养老保险" v-model="form.endowmentInsurance" />
+              <el-input
+                placeholder="请输入养老保险"
+                v-model="form.endowmentInsurance"
+              />
             </el-form-item>
             <el-form-item label="失业保险" prop="unemploymentInsurance">
-              <el-input placeholder="请输入失业保险" v-model="form.unemploymentInsurance" />
+              <el-input
+                placeholder="请输入失业保险"
+                v-model="form.unemploymentInsurance"
+              />
             </el-form-item>
             <el-form-item label="备注" prop="remark">
               <el-input
@@ -124,27 +164,56 @@
           </el-form>
         </div>
         <div class="drawer-content-right">
-          <el-form  ref="rightModalRef" size="large" :model="form" :rules="formRules" label-width="100px">
+          <el-form
+            ref="rightModalRef"
+            size="large"
+            :model="form"
+            :rules="formRules"
+            label-width="100px"
+          >
             <el-form-item label="职位" prop="designPostName">
-              <el-input placeholder="请输入人员" disabled v-model="form.designPostName" />
+              <el-input
+                placeholder="请输入人员"
+                disabled
+                v-model="form.designPostName"
+              />
             </el-form-item>
             <el-form-item label="出勤天数" prop="attendanceDays">
-              <el-input placeholder="请输入出勤天数" v-model="form.attendanceDays" />
+              <el-input
+                placeholder="请输入出勤天数"
+                v-model="form.attendanceDays"
+              />
             </el-form-item>
             <el-form-item label="状态" prop="employeeStatusName">
-              <el-input placeholder="请选择人员" disabled v-model="form.employeeStatusName" />
+              <el-input
+                placeholder="请选择人员"
+                disabled
+                v-model="form.employeeStatusName"
+              />
             </el-form-item>
             <el-form-item label="加班绩效" prop="overtimePerformance">
-              <el-input placeholder="请输入加班绩效" v-model="form.overtimePerformance" />
+              <el-input
+                placeholder="请输入加班绩效"
+                v-model="form.overtimePerformance"
+              />
             </el-form-item>
             <el-form-item label="实际应付" prop="actuallyPayable">
-              <el-input placeholder="请输入实际应付" v-model="form.actuallyPayable" />
+              <el-input
+                placeholder="请输入实际应付"
+                v-model="form.actuallyPayable"
+              />
             </el-form-item>
             <el-form-item label="应发工资" prop="payableWage">
-              <el-input placeholder="请输入应发工资" v-model="form.payableWage" />
+              <el-input
+                placeholder="请输入应发工资"
+                v-model="form.payableWage"
+              />
             </el-form-item>
             <el-form-item label="医疗保险" prop="medicalInsurance">
-              <el-input placeholder="请输入医疗保险" v-model="form.medicalInsurance" />
+              <el-input
+                placeholder="请输入医疗保险"
+                v-model="form.medicalInsurance"
+              />
             </el-form-item>
             <el-form-item label="公积金" prop="providentFund">
               <el-input
@@ -162,7 +231,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="saveWageInfo(leftModalRef,rightModalRef)"
+            @click="saveWageInfo(leftModalRef, rightModalRef)"
             >保存</el-button
           >
         </div>
@@ -184,30 +253,30 @@ import {
   logicDeleteWage
 } from '@/request/index'
 const tableHeaderData = [
-  { name: '姓名', prop: 'employeeName' },
-  { name: '职位', prop: 'designPostName' },
+  { name: '姓名', prop: 'employeeName', width: 120 },
+  { name: '职位', prop: 'designPostName', width: 120 },
   { name: '入职时间', prop: 'entryTime', width: 160 },
   { name: '出勤天数', prop: 'attendanceDays', width: 100 },
   { name: '计薪基数', prop: 'salaryBase', width: 100 },
-  { name: '状态', prop: 'employeeStatus' },
+  { name: '状态', prop: 'employeeStatus', width: 120 },
   { name: '基本工资', prop: 'basicWage', width: 100 },
   { name: '加班/绩效', prop: 'overtimePerformance', width: 100 },
-  { name: '全勤', prop: 'perfectAttendance' },
+  { name: '全勤', prop: 'perfectAttendance', width: 130 },
   { name: '实际应付', prop: 'actuallyPayable', width: 100 },
   { name: '考勤扣款', prop: 'attendanceDeduction', width: 100 },
   { name: '应发工资', prop: 'payableWage', width: 100 },
   { name: '养老保险', prop: 'endowmentInsurance', width: 100 },
   { name: '医疗保险', prop: 'medicalInsurance', width: 100 },
   { name: '失业保险', prop: 'unemploymentInsurance', width: 100 },
-  { name: '公积金', prop: 'providentFund' },
+  { name: '公积金', prop: 'providentFund', width: 160 },
   { name: '扣款小计', prop: 'deductionSubtotal', width: 100 },
   { name: '应发小计', prop: 'payableSubtotal', width: 100 },
-  { name: '个税', prop: 'personalTax' },
+  { name: '个税', prop: 'personalTax', width: 120 },
   { name: '实发工资', prop: 'actuallyWage', width: 100 },
   { name: '银行名称', prop: 'bankName', width: 100 },
   { name: '发放账号', prop: 'bankAccount', width: 100 },
   { name: '历史调薪', prop: 'historyWageList', width: 100 },
-  { name: '备注', prop: 'remark' }
+  { name: '备注', prop: 'remark', width: 200 }
 ]
 export default defineComponent({
   setup () {
@@ -220,39 +289,87 @@ export default defineComponent({
     const height: Ref<number> = ref(500)
     const rightModalRef = ref<FormInstance>()
     const leftModalRef = ref<FormInstance>()
-    const employeeList: Ref<Array<{
-      id: string
-      name: string
-      designPostId: string
-      designPostName: string
-      status: any
-    }>> = ref([])
+    const employeeList: Ref<
+      Array<{
+        id: string
+        name: string
+        designPostId: string
+        designPostName: string
+        status: any
+      }>
+    > = ref([])
     const formRules = {
-      actualSubtotal: [{ required: true, message: '请输入实发小计', trigger: 'blur' }], // 实发小计
-      entryTime: [{ required: true, message: '请选择职时间', trigger: 'change' }], // 入职时间
-      actuallyPayable: [{ required: true, message: '请输入成本费用', trigger: 'blur' }], // 实际应付
-      actuallyWage: [{ required: true, message: '请输入实际应付', trigger: 'blur' }], // 实发工资
-      attendanceDays: [{ required: true, message: '请输入出勤天数', trigger: 'blur' }], // 出勤天数
-      attendanceDeduction: [{ required: true, message: '请输入考勤扣款', trigger: 'blur' }], // 考勤扣款
-      bankAccount: [{ required: true, message: '请输入银行账号', trigger: 'blur' }], // 银行账号
-      bankName: [{ required: true, message: '请输入银行名称', trigger: 'blur' }], // 银行名称
-      basicWage: [{ required: true, message: '请输入基本工资', trigger: 'blur' }], // 基本工资
-      deductionSubtotal: [{ required: true, message: '请输入扣款小计', trigger: 'blur' }], // 扣款小计
-      employeeId: [{ required: true, message: '请选择员工', trigger: 'change' }], // 员工ID
-      employeeStatus: [{ required: true, message: '请选择员工', trigger: 'change' }], // 员工状态
-      endowmentInsurance: [{ required: true, message: '请输入养老保险', trigger: 'blur' }], // 养老保险
-      medicalInsurance: [{ required: true, message: '请输入医疗保险', trigger: 'blur' }], // 医疗保险
-      overtimePerformance: [{ required: true, message: '请输入加班绩效', trigger: 'blur' }], // 加班绩效
-      payableSubtotal: [{ required: true, message: '请输入应发小计', trigger: 'blur' }], // 应发小计
-      employeeStatusName: [{ required: true, message: '请选择员工', trigger: 'change' }], // 状态名称
-      payableWage: [{ required: true, message: '请输入应付工资', trigger: 'blur' }], // 应付工资
-      perfectAttendance: [{ required: true, message: '请输入全勤', trigger: 'blur' }], // 全勤
+      actualSubtotal: [
+        { required: true, message: '请输入实发小计', trigger: 'blur' }
+      ], // 实发小计
+      entryTime: [
+        { required: true, message: '请选择职时间', trigger: 'change' }
+      ], // 入职时间
+      actuallyPayable: [
+        { required: true, message: '请输入成本费用', trigger: 'blur' }
+      ], // 实际应付
+      actuallyWage: [
+        { required: true, message: '请输入实际应付', trigger: 'blur' }
+      ], // 实发工资
+      attendanceDays: [
+        { required: true, message: '请输入出勤天数', trigger: 'blur' }
+      ], // 出勤天数
+      attendanceDeduction: [
+        { required: true, message: '请输入考勤扣款', trigger: 'blur' }
+      ], // 考勤扣款
+      bankAccount: [
+        { required: true, message: '请输入银行账号', trigger: 'blur' }
+      ], // 银行账号
+      bankName: [
+        { required: true, message: '请输入银行名称', trigger: 'blur' }
+      ], // 银行名称
+      basicWage: [
+        { required: true, message: '请输入基本工资', trigger: 'blur' }
+      ], // 基本工资
+      deductionSubtotal: [
+        { required: true, message: '请输入扣款小计', trigger: 'blur' }
+      ], // 扣款小计
+      employeeId: [
+        { required: true, message: '请选择员工', trigger: 'change' }
+      ], // 员工ID
+      employeeStatus: [
+        { required: true, message: '请选择员工', trigger: 'change' }
+      ], // 员工状态
+      endowmentInsurance: [
+        { required: true, message: '请输入养老保险', trigger: 'blur' }
+      ], // 养老保险
+      medicalInsurance: [
+        { required: true, message: '请输入医疗保险', trigger: 'blur' }
+      ], // 医疗保险
+      overtimePerformance: [
+        { required: true, message: '请输入加班绩效', trigger: 'blur' }
+      ], // 加班绩效
+      payableSubtotal: [
+        { required: true, message: '请输入应发小计', trigger: 'blur' }
+      ], // 应发小计
+      employeeStatusName: [
+        { required: true, message: '请选择员工', trigger: 'change' }
+      ], // 状态名称
+      payableWage: [
+        { required: true, message: '请输入应付工资', trigger: 'blur' }
+      ], // 应付工资
+      perfectAttendance: [
+        { required: true, message: '请输入全勤', trigger: 'blur' }
+      ], // 全勤
       personalTax: [{ required: true, message: '请输入个税', trigger: 'blur' }], // 个税
-      providentFund: [{ required: true, message: '请输入成本费用', trigger: 'blur' }], // 公积金
+      providentFund: [
+        { required: true, message: '请输入成本费用', trigger: 'blur' }
+      ], // 公积金
       remark: [{ required: true, message: '请输入公积金', trigger: 'blur' }], // 备注
-      salaryBase: [{ required: true, message: '请输入成本费用', trigger: 'blur' }], // 计薪基数
-      designPostName: [{ required: true, message: '请输入计薪基数', trigger: 'blur' }], // 职位名称
-      unemploymentInsurance: [{ required: true, message: '请输入失业保险', trigger: 'blur' }]// 失业保险
+      salaryBase: [
+        { required: true, message: '请输入成本费用', trigger: 'blur' }
+      ], // 计薪基数
+      designPostName: [
+        { required: true, message: '请输入计薪基数', trigger: 'blur' }
+      ], // 职位名称
+      unemploymentInsurance: [
+        { required: true, message: '请输入失业保险', trigger: 'blur' }
+      ] // 失业保险
     }
     const form: any = reactive({
       id: '',
@@ -281,7 +398,7 @@ export default defineComponent({
       remark: '', // 备注
       salaryBase: '', // 计薪基数
       designPostName: '', // 职位名称
-      unemploymentInsurance: ''// 失业保险
+      unemploymentInsurance: '' // 失业保险
     })
 
     const tableData = ref([])
@@ -331,17 +448,24 @@ export default defineComponent({
         if (num === '1') return '正式'
         if (num === '2') return '已离职'
       }
-      const index = employeeList.value.findIndex((item:any) => item.id === form.employeeId)
+      const index = employeeList.value.findIndex(
+        (item: any) => item.id === form.employeeId
+      )
       if (index > -1) {
         form.designPostId = employeeList.value[index].designPostId
         form.designPostName = employeeList.value[index].designPostName
-        form.employeeStatusName = getStatusName(employeeList.value[index].status)
+        form.employeeStatusName = getStatusName(
+          employeeList.value[index].status
+        )
         form.employeeStatus = employeeList.value[index].status
       }
     }
 
     // 新增编辑保存
-    const saveWageInfo = async (leftModalRef: FormInstance | undefined, rightModalRef: FormInstance | undefined) => {
+    const saveWageInfo = async (
+      leftModalRef: FormInstance | undefined,
+      rightModalRef: FormInstance | undefined
+    ) => {
       // 新增编辑提交
       if (!leftModalRef) return
       if (!rightModalRef) return
@@ -357,12 +481,12 @@ export default defineComponent({
           addPayrollModal.value = false
         }
       }
-      leftModalRef.validate(async valid => {
+      leftModalRef.validate(async (valid) => {
         if (valid) {
           const query = {
             ...form
           }
-          rightModalRef.validate(async rightValid => {
+          rightModalRef.validate(async (rightValid) => {
             if (rightValid) {
               if (!form.id) {
                 // 新增

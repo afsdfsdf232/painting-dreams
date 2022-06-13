@@ -72,7 +72,11 @@
       :data="tableData"
       class="reverse-table"
     >
-      <vxe-column field="staffName" fixed="left" title="姓名" :width="120" />
+      <vxe-column field="staffId" fixed="left" title="姓名" :width="120">
+        <template #default="{ row }">
+          <span>{{ row.staffName }}</span>
+        </template>
+      </vxe-column>
       <vxe-column
         :field="head.prop"
         :title="head.name"
@@ -141,7 +145,6 @@ export default defineComponent({
       designPostId: '' // 职位id
     })
     const changeMonth = (mouth: monthEventProps): void => {
-      console.log(mouth)
       query.value.month = mouth.value + 1
       getPlanProjectScheduleLists()
     }
@@ -157,11 +160,9 @@ export default defineComponent({
           prop: `day-${i + 1}`,
           name: `${query.value.month}月${i + 1}日`
         })
-        console.log('tableHeader:', tableHeader.value)
       }
 
       if (code === 200) {
-        console.log('data:', data)
         const newData: any = []
         if (data && data.list) {
           data.list.map((item: any) => {
@@ -217,25 +218,7 @@ export default defineComponent({
         }
       }
     }
-    // const rowspan = (data: any) => {
-    //   // 每次调用清空数据
-    //   spanArr.value = []
-    //   position.value = 0
-    //   data.map((item: any, index: number) => {
-    //     if (index === 0) {
-    //       spanArr.value.push(1)
-    //       position.value = 0
-    //     } else {
-    //       if (data[index].staffId === data[index - 1].staffId) {
-    //         spanArr.value[position.value] += 1
-    //         spanArr.value.push(0)
-    //       } else {
-    //         spanArr.value.push(1)
-    //         position.value = index
-    //       }
-    //     }
-    //   })
-    // }
+
     // 通用行合并函数（将相同多列数据合并为一行）
     const mergeRowMethod: VxeTablePropTypes.SpanMethod = ({
       row,
@@ -243,7 +226,7 @@ export default defineComponent({
       column,
       visibleData
     }) => {
-      const fields = ['staffName', 'staffId']
+      const fields = ['staffId']
       const cellValue = row[column.property]
       if (cellValue && fields.includes(column.property)) {
         const prevRow = visibleData[_rowIndex - 1]

@@ -18,7 +18,8 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "ShopCalendar" */ '@/views/ShopCalendar/index.vue'
           ),
         meta: {
-          title: '工作日历'
+          title: '工作日历',
+          permission: '1'
         }
       },
       {
@@ -29,7 +30,8 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "AllItems" */ '@/views/AllItems/index.vue'
           ),
         meta: {
-          title: '所有项目'
+          title: '所有项目',
+          permission: '2'
         }
       },
       {
@@ -40,7 +42,8 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "ArchivedItems" */ '@/views/ArchivedItems/index.vue'
           ),
         meta: {
-          title: '归档项目'
+          title: '归档项目',
+          permission: '3'
         }
       },
       {
@@ -51,7 +54,8 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "CompanyItems" */ '@/views/CompanyItems/index.vue'
           ),
         meta: {
-          title: '公司项目'
+          title: '公司项目',
+          permission: '4'
         }
       },
       {
@@ -60,7 +64,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "Job" */ '@/views/Job/index.vue'),
         meta: {
-          title: '在职人员安排'
+          title: '在职人员安排',
+          permission: '5'
         }
       },
       {
@@ -69,7 +74,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "Job" */ '@/views/Painter/index.vue'),
         meta: {
-          title: '外发画师安排'
+          title: '外发画师安排',
+          permission: '6'
         }
       },
       {
@@ -78,7 +84,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "Job" */ '@/views/Receipt/index.vue'),
         meta: {
-          title: '发票和收据'
+          title: '发票和收据',
+          permission: '7'
         }
       },
       {
@@ -89,7 +96,8 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "Job" */ '@/views/EmployeeInfo/index.vue'
           ),
         meta: {
-          title: '员工资料'
+          title: '员工资料',
+          permission: '8'
         }
       },
       {
@@ -98,7 +106,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "Job" */ '@/views/PainterInfo/index.vue'),
         meta: {
-          title: '外发画师资料'
+          title: '外发画师资料',
+          permission: '9'
         }
       },
       {
@@ -107,7 +116,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "Job" */ '@/views/Payroll/index.vue'),
         meta: {
-          title: '工资表'
+          title: '工资表',
+          permission: '10'
         }
       },
       {
@@ -118,7 +128,8 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "Job" */ '@/views/CooperativeCompany/index.vue'
           ),
         meta: {
-          title: '合作甲方公司信息'
+          title: '合作甲方公司信息',
+          permission: '11'
         }
       },
       {
@@ -129,7 +140,8 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "Job" */ '@/views/AdministrationCost/index.vue'
           ),
         meta: {
-          title: '管理成本'
+          title: '管理成本',
+          permission: '12'
         }
       },
       {
@@ -138,7 +150,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () =>
           import(/* webpackChunkName: "Job" */ '@/views/Settings/index.vue'),
         meta: {
-          title: '后台设置'
+          title: '后台设置',
+          permission: '13'
         }
       }
     ]

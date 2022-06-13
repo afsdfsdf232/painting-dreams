@@ -21,11 +21,10 @@
             @click="changeTab(tab.id)"
             v-else
           />
-
         </template>
       </div>
       <div class="fillter-header-content-right">
-        <d-add text="添加职员" @click="openModal"/>
+        <d-add text="添加职员" @click="openModal" />
       </div>
     </div>
     <!-- 表格 -->
@@ -42,7 +41,11 @@
         <template v-for="(head, index) in tableHeaderData" :key="index">
           <!-- 非附件展示 -->
 
-          <el-table-column :label="head.name" :width="head.width" v-if="head.prop === 'contractFileUrl'">
+          <el-table-column
+            :label="head.name"
+            :width="head.width"
+            v-if="head.prop === 'contractFileUrl'"
+          >
             <template #default="scope">
               <el-button
                 v-if="scope.row.contractFileUrl"
@@ -54,7 +57,11 @@
               </el-button>
             </template>
           </el-table-column>
-          <el-table-column :label="head.name" :width="head.width" v-else-if="head.prop === 'status'">
+          <el-table-column
+            :label="head.name"
+            :width="head.width"
+            v-else-if="head.prop === 'status'"
+          >
             <template #default="scope">
               <span v-if="scope.row.status === '1'">实习</span>
               <span v-else-if="scope.row.status === '2'">试用</span>
@@ -63,15 +70,24 @@
               <span v-else-if="scope.row.status === '5'">停薪留职</span>
             </template>
           </el-table-column>
-          <el-table-column :label="head.name" :width="head.width" v-else-if="head.prop === 'historyWageList'">
+          <el-table-column
+            :label="head.name"
+            :width="head.width"
+            v-else-if="head.prop === 'historyWageList'"
+          >
             <template #default="scope">
-             <div v-if="scope.row.historyWageList && scope.row.historyWageList.length>0">
-              <p v-for="h in scope.row.historyWageList" :key="h.id">
-                <span>{{h.changeTime}}</span>
-                <span style="margin-left: 20px">{{h.wage}}</span>
-              </p>
-             </div>
-             <span v-else>暂无</span>
+              <div
+                v-if="
+                  scope.row.historyWageList &&
+                  scope.row.historyWageList.length > 0
+                "
+              >
+                <p v-for="h in scope.row.historyWageList" :key="h.id">
+                  <span>{{ h.changeTime }}</span>
+                  <span style="margin-left: 20px">{{ h.wage }}</span>
+                </p>
+              </div>
+              <span v-else>暂无</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -84,10 +100,17 @@
 
         <el-table-column fixed="right" label="操作" width="120">
           <template #default="scope">
-            <el-button type="text" size="small" @click="openModal(scope.row)"
-              >编辑</el-button
-            >
-            <el-button type="text" @click="deleteEmployee(scope.row.id)" size="small">删除</el-button>
+            <div style="width: 120px">
+              <el-button type="text" size="small" @click="openModal(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                type="text"
+                @click="deleteEmployee(scope.row.id)"
+                size="small"
+                >删除</el-button
+              >
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -96,15 +119,23 @@
     <el-drawer
       size="50%"
       v-model="addEmployeeModal"
-      :title="form.id? '编辑员工': '新增员工'"
+      :title="form.id ? '编辑员工' : '新增员工'"
       :with-header="true"
     >
       <template #title>
-        <p class="t-c t-main-color f20">{{form.id? '编辑员工': '新增员工'}}</p>
+        <p class="t-c t-main-color f20">
+          {{ form.id ? '编辑员工' : '新增员工' }}
+        </p>
       </template>
       <div class="drawer-content d-flex d-f-row-bet">
         <div class="drawer-content-left">
-          <el-form size="large" :rules="formRuls" :model="form" ref="leftModalRef" label-width="110px">
+          <el-form
+            size="large"
+            :rules="formRuls"
+            :model="form"
+            ref="leftModalRef"
+            label-width="110px"
+          >
             <el-form-item label="姓名" prop="name">
               <el-input placeholder="请输入姓名" v-model="form.name" />
             </el-form-item>
@@ -112,11 +143,14 @@
               <el-input placeholder="请输入电话号码" v-model="form.phone" />
             </el-form-item>
             <el-form-item label="合同地址" prop="contractAddress">
-              <el-input placeholder="请输入合同地址" v-model="form.contractAddress" />
+              <el-input
+                placeholder="请输入合同地址"
+                v-model="form.contractAddress"
+              />
             </el-form-item>
             <el-form-item label="转正日期" prop="positiveTime">
-               <el-date-picker
-                style="width:100%"
+              <el-date-picker
+                style="width: 100%"
                 v-model="form.positiveTime"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
@@ -126,7 +160,11 @@
             </el-form-item>
             <el-form-item label="历史调薪" prop="historyWageList">
               <div class="history-wage-list">
-                <div class="list" v-for="(item,index) in form.historyWageList" :key="index">
+                <div
+                  class="list"
+                  v-for="(item, index) in form.historyWageList"
+                  :key="index"
+                >
                   <el-date-picker
                     class="list-item left"
                     v-model="item.changeTime"
@@ -135,43 +173,71 @@
                     type="date"
                     placeholder="选择时间"
                   />
-                  <el-input class="list-item right" placeholder="金额" v-model="item.wage" />
+                  <el-input
+                    class="list-item right"
+                    placeholder="金额"
+                    v-model="item.wage"
+                  />
                 </div>
-                <d-add style="width:120px" text="添加" @click="addHistoryWage"/>
+                <d-add
+                  style="width: 120px"
+                  text="添加"
+                  @click="addHistoryWage"
+                />
               </div>
             </el-form-item>
             <el-form-item label="合同扫描件" prop="contractFileUrl">
               <div class="upload-content" v-if="!form.contractFileUrl">
                 <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
-                <input class="file-input" type="file" @change="uploadFileChange">
+                <input
+                  class="file-input"
+                  type="file"
+                  @change="uploadFileChange"
+                />
               </div>
               <div v-else class="invoice-file">
-                <img :src="form.contractFileUrl" alt="" srcset="">
-                <el-icon :size="24" @click="deleteImg" class="delete"><CircleCloseFilled color="#F56C6C"/></el-icon>
+                <img :src="form.contractFileUrl" alt="" srcset="" />
+                <el-icon :size="24" @click="deleteImg" class="delete"
+                  ><CircleCloseFilled color="#F56C6C"
+                /></el-icon>
               </div>
             </el-form-item>
           </el-form>
         </div>
         <div class="drawer-content-right">
-          <el-form size="large" :model="form" :rules="formRuls" ref="rightModalRef" label-width="100px">
+          <el-form
+            size="large"
+            :model="form"
+            :rules="formRuls"
+            ref="rightModalRef"
+            label-width="100px"
+          >
             <el-form-item label="职位" prop="designPostId">
               <el-select
                 style="width: 100%"
                 v-model="form.designPostId"
                 placeholder="请选择职位"
               >
-                <el-option v-for="design in designPosts" :key="design.id" :label="design.name" :value="design.id" />
+                <el-option
+                  v-for="design in designPosts"
+                  :key="design.id"
+                  :label="design.name"
+                  :value="design.id"
+                />
               </el-select>
             </el-form-item>
             <el-form-item label="银行名称" prop="bankName">
               <el-input placeholder="请输入银行名称" v-model="form.bankName" />
             </el-form-item>
             <el-form-item label="银行账号" prop="bankAccount">
-              <el-input placeholder="请输入银行账号" v-model="form.bankAccount" />
+              <el-input
+                placeholder="请输入银行账号"
+                v-model="form.bankAccount"
+              />
             </el-form-item>
             <el-form-item label="入职时间" prop="entryTime">
-               <el-date-picker
-               style="width:100%"
+              <el-date-picker
+                style="width: 100%"
                 v-model="form.entryTime"
                 format="YYYY-MM-DD"
                 value-format="YYYY-MM-DD"
@@ -212,7 +278,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="saveEmployeeClick(leftModalRef,rightModalRef)"
+            @click="saveEmployeeClick(leftModalRef, rightModalRef)"
             >保存</el-button
           >
         </div>
@@ -282,7 +348,8 @@ export default defineComponent({
     ])
     const tableData = ref([])
     const designPosts = ref([])
-    const form: any = ref({ // 表单字段
+    const form: any = ref({
+      // 表单字段
       id: '',
       name: '', // 姓名
       phone: '', // 联系方式
@@ -302,14 +369,28 @@ export default defineComponent({
     const formRuls = {
       name: [{ required: true, message: '请输入姓名', trigger: 'blur' }], // 姓名
       phone: [{ required: true, message: '请输入联系方式', trigger: 'blur' }], // 联系方式
-      contractAddress: [{ required: true, message: '请输入合同地址', trigger: 'blur' }], // 合同地址
-      positiveTime: [{ required: true, message: '请选择日期', trigger: 'change' }], // 转正日期
-      contractFileUrl: [{ required: true, message: '请上传图片', trigger: 'blur' }], // 合同扫描件url
-      designPostId: [{ required: true, message: '请选择职位', trigger: 'change' }], // 职位id
-      bankAccount: [{ required: true, message: '请输入银行账号', trigger: 'blur' }], // 银行账号
-      bankName: [{ required: true, message: '请输入银行名称', trigger: 'blur' }], // 银行名称
+      contractAddress: [
+        { required: true, message: '请输入合同地址', trigger: 'blur' }
+      ], // 合同地址
+      positiveTime: [
+        { required: true, message: '请选择日期', trigger: 'change' }
+      ], // 转正日期
+      contractFileUrl: [
+        { required: true, message: '请上传图片', trigger: 'blur' }
+      ], // 合同扫描件url
+      designPostId: [
+        { required: true, message: '请选择职位', trigger: 'change' }
+      ], // 职位id
+      bankAccount: [
+        { required: true, message: '请输入银行账号', trigger: 'blur' }
+      ], // 银行账号
+      bankName: [
+        { required: true, message: '请输入银行名称', trigger: 'blur' }
+      ], // 银行名称
       entryTime: [{ required: true, message: '请选择日期', trigger: 'blur' }], // 入职时间
-      basicWage: [{ required: true, message: '请输入基本工资', trigger: 'blur' }], // 基本工资
+      basicWage: [
+        { required: true, message: '请输入基本工资', trigger: 'blur' }
+      ], // 基本工资
       status: [{ required: true, message: '请选择状态', trigger: 'blur' }], // 状态
       remark: [{ required: true, message: '请输入备注', trigger: 'blur' }], // 备注
       historyWageList: [
@@ -356,7 +437,7 @@ export default defineComponent({
       const { code, data } = await getDesignPost()
       if (code === 200) {
         if (data && data.length > 0) {
-          data.map((item:any) => {
+          data.map((item: any) => {
             tabs.value.push(item)
           })
           tabs.value.push({
@@ -405,18 +486,21 @@ export default defineComponent({
       if (e.target.files && e.target.files[0]) {
         const { code, data } = await uploadFile(e.target.files[0])
         if (code === 200) {
-          form.value.contractFileUrl = data[0].url;
-          (leftModalRef.value as any).validateField(['contractFileUrl'])
+          form.value.contractFileUrl = data[0].url
+          ;(leftModalRef.value as any).validateField(['contractFileUrl'])
         }
       }
     }
     // 图片删除
     const deleteImg = () => {
-      form.value.contractFileUrl = '';
-      (leftModalRef.value as any).validateField(['contractFileUrl'])
+      form.value.contractFileUrl = ''
+      ;(leftModalRef.value as any).validateField(['contractFileUrl'])
     }
     // 编辑、新增保存
-    const saveEmployeeClick = async (leftModalRef: FormInstance | undefined, rightModalRef: FormInstance | undefined) => {
+    const saveEmployeeClick = async (
+      leftModalRef: FormInstance | undefined,
+      rightModalRef: FormInstance | undefined
+    ) => {
       if (!leftModalRef) return
       if (!rightModalRef) return
       const sucess = (code: number) => {
@@ -431,13 +515,15 @@ export default defineComponent({
           addEmployeeModal.value = false
         }
       }
-      leftModalRef.validate(async valid => {
+      leftModalRef.validate(async (valid) => {
         if (valid) {
-          form.value.historyWageList = form.value.historyWageList.filter((his:any) => his.changeTime && his.wage)
+          form.value.historyWageList = form.value.historyWageList.filter(
+            (his: any) => his.changeTime && his.wage
+          )
           const query = {
             ...form.value
           }
-          rightModalRef.validate(async rightValid => {
+          rightModalRef.validate(async (rightValid) => {
             if (rightValid) {
               if (!form.value.id) {
                 // 新增

@@ -69,14 +69,12 @@
           clearable
           v-model="query.status"
         >
-          <el-option label="未分配" value="1" />
-          <el-option label="测试中" value="2" />
-          <el-option label="测试中(未通过)" value="3" />
-          <el-option label="进行中" value="4" />
-          <el-option label="移交" value="5" />
-          <el-option label="已完成" value="6" />
-          <el-option label="已完成(已开发票)" value="7" />
-          <el-option label="已完成(已收款)" value="8" />
+          <el-option
+            v-for="item in projectStatus"
+            :key="item.id"
+            :label="item.name"
+            :value="item.id"
+          />
         </el-select>
       </div>
       <div class="fillter-content-right d-flex">
@@ -96,7 +94,7 @@
     </div>
     <div class="table-content">
       <vxe-table
-        style="width: 2300px"
+        style="min-width: 100%"
         border
         :height="height"
         :loading="tableLoading"
@@ -107,9 +105,14 @@
         class="reverse-table"
       >
         <template v-for="(head, index) in tableHeaderData" :key="index">
-          <vxe-column :field="head.prop" :title="head.name">
+          <vxe-column
+            :fixed="head.prop === 'id' && 'right'"
+            :field="head.prop"
+            :width="head.width"
+            :title="head.name"
+          >
             <template #default="{ row }">
-              <span v-if="head.prop === 'paymentStatus'">
+              <div v-if="head.prop === 'paymentStatus'">
                 {{
                   row.paymentStatus === '0'
                     ? '未收款'
@@ -117,14 +120,24 @@
                     ? '已收款'
                     : ''
                 }}
+                <p v-if="row.paymentStatus === '1'">
+                  {{ row.paymentAmount || 0 }}
+                </p>
+              </div>
+              <span v-else-if="head.prop === 'status'">
+                {{ getStatus(row.status) }}
               </span>
-              <span v-else-if="head.prop === 'status'">{{
-                getStatus(row.status)
-              }}</span>
               <span v-else-if="head.prop === 'ppstatus'">{{
                 getPPstatus(row.ppstatus)
               }}</span>
-
+              <div v-else-if="head.prop === 'isArchive'">
+                <el-button
+                  type="text"
+                  size="small"
+                  @click="archiveOperation(row)"
+                  >{{ row.isArchive === '0' ? '归档' : '撤销' }}</el-button
+                >
+              </div>
               <div v-else-if="head.prop === 'ckt' || head.prop === 'xqwd'">
                 <el-button
                   @click="showFile(head.prop === 'ckt' ? row.ckt : row.xqwd)"
@@ -239,6 +252,21 @@
                 />
               </el-select>
             </el-form-item>
+            <el-form-item label="项目状态" prop="status">
+              <el-select
+                style="width: 100%"
+                v-model="form.status"
+                placeholder="请选择项目状态"
+              >
+                <el-option
+                  v-for="cop in projectStatus"
+                  :key="cop.id"
+                  :label="cop.name"
+                  :value="cop.id"
+                />
+              </el-select>
+            </el-form-item>
+
             <el-form-item label="需求文档" prop="xqwd">
               <div class="upload-content" v-if="!form.xqwd">
                 <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
@@ -280,6 +308,13 @@
                 v-model="form.groupName"
               />
             </el-form-item>
+            <el-form-item label="收款金额" prop="paymentAmount">
+              <el-input
+                placeholder="请输入收款金额"
+                v-model="form.paymentAmount"
+              />
+            </el-form-item>
+
             <el-form-item label="负责主美" prop="fzzm">
               <el-select
                 style="width: 100%"
@@ -355,19 +390,20 @@
           <el-table-column prop="unitPrice" label="单价" />
           <el-table-column fixed="right" label="操作" width="120">
             <template #default="scope">
-              <!-- <span>{{ scope }}</span> -->
-              <el-button
-                type="text"
-                size="small"
-                @click="deleteStaffInfo(scope.row, scope.$index)"
-                >删除</el-button
-              >
-              <el-button
-                type="text"
-                @click="addPersion(scope.row, scope.$index)"
-                size="small"
-                >编辑</el-button
-              >
+              <div style="width: 120px">
+                <el-button
+                  type="text"
+                  size="small"
+                  @click="deleteStaffInfo(scope.row, scope.$index)"
+                  >删除</el-button
+                >
+                <el-button
+                  type="text"
+                  @click="addPersion(scope.row, scope.$index)"
+                  size="small"
+                  >编辑</el-button
+                >
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -493,11 +529,13 @@ import {
   logicDeleteProject,
   saveProject,
   getSysUser,
-  updateProject
+  archiveProject,
+  updateProject,
+  unArchiveProject
 } from '@/request/index'
 import { uploadFile } from '@/utils/index'
 const tableHeaderData = [
-  { name: '序号', prop: 'order' },
+  { name: '序号', prop: 'order', width: 80 },
   { name: '编号', prop: 'serialNumber', width: 100 },
   { name: '合作公司', prop: 'partyACompanyShortName', width: 100 },
   { name: '项目名', prop: 'name', width: 120 },
@@ -507,6 +545,8 @@ const tableHeaderData = [
   { name: '需求地址', prop: 'demandAddress', width: 120 },
   { name: '项目群组', prop: 'groupName', width: 120 },
   { name: '分工/天', prop: 'ppdays', width: 120 },
+  { name: '阶段名称', prop: 'ppname', width: 120 },
+  { name: '项目归档', prop: 'isArchive', width: 120 },
   { name: '总价', prop: 'totalPrice', width: 120 },
   { name: '单价', prop: 'ppunitPrice', width: 120 },
   { name: '排期', prop: 'pq', width: 160 },
@@ -514,10 +554,10 @@ const tableHeaderData = [
   { name: '项目经理', prop: 'xmjl', width: 160 },
   { name: '负责主美', prop: 'zmfzr', width: 160 },
   { name: '商务负责人', prop: 'swfzr', width: 160 },
-  { name: '状态', prop: 'ppstatus', width: 160 },
+  { name: '状态', prop: 'status', width: 160 },
   { name: '收款状态', prop: 'paymentStatus', width: 160 },
   { name: '备注', prop: 'remark', width: 160 },
-  { name: '操作', prop: 'id' }
+  { name: '操作', prop: 'id', width: 200 }
 ]
 
 export default defineComponent({
@@ -557,7 +597,8 @@ export default defineComponent({
       xqwd: '', // 需求文档
       ckt: '', // 参考图
       fzzm: '', // 负责主美
-      swfzr: '' // 商务负责人
+      swfzr: '', // 商务负责人
+      status: '' // 项目状态
     })
     const formRuls: any = {
       demandAddress: [
@@ -573,9 +614,9 @@ export default defineComponent({
       partyACompanyId: [
         { required: true, message: '请选择合作甲方公司', trigger: 'change' }
       ],
-      paymentAmount: [
-        { required: true, message: '请输入收款金额', trigger: 'blur' }
-      ],
+      // paymentAmount: [
+      //   { required: true, message: '请输入收款金额', trigger: 'blur' }
+      // ],
       paymentStatus: [
         { required: false, message: '请选择收款状态', trigger: 'change' }
       ],
@@ -596,7 +637,8 @@ export default defineComponent({
       fzzm: [{ required: true, message: '请选择负责主美', trigger: 'change' }],
       swfzr: [
         { required: true, message: '请选择商务负责人', trigger: 'change' }
-      ]
+      ],
+      status: [{ required: true, message: '请选择项目状态', trigger: 'change' }]
     }
     const subForm: any = ref({
       id: '', // 编辑
@@ -629,6 +671,39 @@ export default defineComponent({
     const demo3: any = reactive({
       tableData: []
     })
+    //     项目状态(1未分配 2测试中 3测试中(未通过) 4进行中 5移交 6已完成 7已完成(已开发票)
+    // 8已完成(已收款))
+
+    const projectStatus: any = [
+      {
+        id: '1',
+        name: '未分配'
+      },
+      {
+        id: '2',
+        name: '测试中'
+      },
+      {
+        id: '3',
+        name: '测试中(未通过)'
+      },
+      {
+        id: '4',
+        name: '进行中'
+      },
+      {
+        id: '5',
+        name: '移交'
+      },
+      {
+        id: '6',
+        name: '已完成'
+      },
+      {
+        id: '7',
+        name: '已完成(已开发票)'
+      }
+    ]
     const query: any = ref({
       endDate: '',
       startDate: '',
@@ -679,177 +754,7 @@ export default defineComponent({
           if (!end) return start
           return `${start}-${end}`
         }
-        // const mocks = [
-        //   {
-        //     order: 1,
-        //     demandAddress: 'demandAddress',
-        //     endDate: 'endDate',
-        //     groupName: 'groupName',
-        //     id: 1,
-        //     name: 'name',
-        //     partyACompanyId: 0,
-        //     partyACompanyShortName: 'partyACompanyShortName',
-        //     paymentAmount: 'paymentAmount',
-        //     paymentStatus: '0',
-        //     projectFileList: [
-        //       {
-        //         id: 'projectFileList-id',
-        //         type: '1',
-        //         url: 'projectFileList-url'
-        //       },
-        //       {
-        //         id: 'projectFileList-id',
-        //         type: '2',
-        //         url: 'projectFileList-url'
-        //       },
-        //       {
-        //         id: 'projectFileList-id',
-        //         type: '3',
-        //         url: 'projectFileList-url'
-        //       }
-        //     ],
-        //     projectManagerList: [
-        //       {
-        //         id: 0,
-        //         managerId: 0,
-        //         managerType: '1',
-        //         name: 'projectManagerList-name'
-        //       },
-        //       {
-        //         id: 1,
-        //         managerId: 0,
-        //         managerType: '2',
-        //         name: 'projectManagerList-name'
-        //       },
-        //       {
-        //         id: 2,
-        //         managerId: 0,
-        //         managerType: '3',
-        //         name: 'projectManagerList-name'
-        //       }
-        //     ],
-        //     projectStageList: [
-        //       {
-        //         days: 'days',
-        //         designPostId: 0,
-        //         designPostName: 'designPostName',
-        //         endDate: 'endDate',
-        //         id: 0,
-        //         name: 'name',
-        //         staffId: 0,
-        //         staffName: 'staffName',
-        //         staffType: 'staffType',
-        //         startDate: '2022-01-22',
-        //         status: '0',
-        //         unitPrice: '1200'
-        //       },
-        //       {
-        //         days: 'days',
-        //         designPostId: 0,
-        //         designPostName: 'designPostName',
-        //         endDate: 'endDate',
-        //         id: 0,
-        //         name: 'name1',
-        //         staffId: 0,
-        //         staffName: 'staffName',
-        //         staffType: 'staffType',
-        //         startDate: '2022-01-22',
-        //         status: '0',
-        //         unitPrice: '1200'
-        //       },
-        //       {
-        //         days: 'days',
-        //         designPostId: 0,
-        //         designPostName: 'designPostName',
-        //         endDate: 'endDate',
-        //         id: 0,
-        //         name: 'name1',
-        //         staffId: 0,
-        //         staffName: 'staffName',
-        //         staffType: 'staffType',
-        //         startDate: '2022-01-22',
-        //         status: '0',
-        //         unitPrice: '1200'
-        //       }
-        //     ],
-        //     remark: 'remark',
-        //     serialNumber: 'serialNumber',
-        //     startDate: '2022-02-21',
-        //     status: '1',
-        //     totalPrice: '2000',
-        //     type: 'type'
-        //   },
-        //   {
-        //     demandAddress: 'demandAddress',
-        //     endDate: 'endDate',
-        //     groupName: 'groupName',
-        //     id: 2,
-        //     name: 'name',
-        //     partyACompanyId: 0,
-        //     partyACompanyShortName: 'partyACompanyShortName',
-        //     paymentAmount: 'paymentAmount',
-        //     paymentStatus: '1',
-        //     projectFileList: [
-        //       {
-        //         id: 'projectFileList-id',
-        //         type: 'projectFileList-type',
-        //         url: 'projectFileList-url'
-        //       },
-        //       {
-        //         id: 'projectFileList-id',
-        //         type: 'projectFileList-type',
-        //         url: 'projectFileList-url'
-        //       },
-        //       {
-        //         id: 'projectFileList-id',
-        //         type: 'projectFileList-type',
-        //         url: 'projectFileList-url'
-        //       }
-        //     ],
-        //     projectManagerList: [
-        //       {
-        //         id: 0,
-        //         managerId: 0,
-        //         managerType: 'projectManagerList-managerType',
-        //         name: 'projectManagerList-name'
-        //       },
-        //       {
-        //         id: 1,
-        //         managerId: 0,
-        //         managerType: 'projectManagerList-managerType',
-        //         name: 'projectManagerList-name'
-        //       },
-        //       {
-        //         id: 2,
-        //         managerId: 0,
-        //         managerType: 'projectManagerList-managerType',
-        //         name: 'projectManagerList-name'
-        //       }
-        //     ],
-        //     projectStageList: [
-        //       {
-        //         days: 'days',
-        //         designPostId: 0,
-        //         designPostName: 'designPostName',
-        //         endDate: 'endDate',
-        //         id: 0,
-        //         name: 'name',
-        //         staffId: 0,
-        //         staffName: 'staffName',
-        //         staffType: 'staffType',
-        //         startDate: '2022-01-22',
-        //         status: '0',
-        //         unitPrice: '1200'
-        //       }
-        //     ],
-        //     remark: 'remark',
-        //     serialNumber: 'serialNumber',
-        //     startDate: '2022-02-21',
-        //     status: '1',
-        //     totalPrice: '2000',
-        //     type: 'type'
-        //   }
-        // ]
+
         const newData: any = []
         data.list.map((item: any, index: number) => {
           if (item && item.projectStageList.length > 0) {
@@ -948,7 +853,6 @@ export default defineComponent({
           // newData.push(newItem)
         })
         demo3.tableData = newData
-        console.log('newData:', newData)
       }
       tableLoading.value = false
     }
@@ -968,7 +872,6 @@ export default defineComponent({
     const getStaffLists = async () => {
       const { code, data } = await getStaffList()
       if (code === 200) {
-        console.log('data-getStaffList', data)
         staffList.value = data
       }
     }
@@ -977,20 +880,13 @@ export default defineComponent({
     const getSysUsers = async () => {
       const { code, data } = await getSysUser({ limit: -1, page: 1 })
       if (code === 200) {
-        console.log('后台设置人员列表', data)
         sysUserss.value = data?.list
       }
     }
 
     const getStatus = (state: any) => {
-      if (state === '1') return '未分配'
-      if (state === '2') return '测试中'
-      if (state === '3') return '测试中(未通过)'
-      if (state === '4') return '进行中'
-      if (state === '5') return '移交'
-      if (state === '6') return '已完成'
-      if (state === '7') return '已完成(已开发票)'
-      if (state === '8') return '已完成(已收款)'
+      const item = projectStatus.find((item: any) => item.id === state)
+      return (item || {}).name
     }
 
     const getPPstatus = (state: any) => {
@@ -1124,7 +1020,6 @@ export default defineComponent({
       subFormRef.validate(async (valid) => {
         if (valid) {
           // 判断是编辑还是新增
-          console.log('subForm.value:', subForm.value)
           if (subForm.value.id) {
             // 编辑
             const index = form.value.projectStageList.findIndex(
@@ -1199,13 +1094,14 @@ export default defineComponent({
                 serialNumber,
                 startDate,
                 totalPrice,
-                type
+                type,
+                status
               } = form.value
               //  projectFileList
-              if (projectStageList.length === 0) {
-                ElMessage.error('请添加人员分工.')
-                return
-              }
+              // if (projectStageList.length === 0) {
+              //   ElMessage.error('请添加人员分工.')
+              //   return
+              // }
               const submitQuery = {
                 demandAddress,
                 endDate,
@@ -1215,6 +1111,7 @@ export default defineComponent({
                 partyACompanyId,
                 paymentAmount,
                 paymentStatus,
+                status,
                 projectFileList: [
                   {
                     type: '1', // 需求文档
@@ -1268,6 +1165,36 @@ export default defineComponent({
       })
     }
 
+    // 归档
+    const archiveOperation = async (row: any) => {
+      const { id, isArchive } = row
+      if (isArchive === '0') {
+        // 归档
+        ElMessageBox.confirm('确定归档该项目吗?', '归档', {
+          confirmButtonText: '归档',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          const { code } = await archiveProject(id)
+          if (code === 200) {
+            getAllProjectLists()
+          }
+        })
+      } else {
+        // 取消归档
+        ElMessageBox.confirm('确定撤销归档吗?', '撤销归档', {
+          confirmButtonText: '撤销归档',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          const { code } = await unArchiveProject(id)
+          if (code === 200) {
+            getAllProjectLists()
+          }
+        })
+      }
+    }
+
     // 查看文档
     const showFile = (url: string) => {
       window.open(url, '_blank')
@@ -1317,7 +1244,9 @@ export default defineComponent({
       submitAddPersonnelModal,
       deleteStaffInfo,
       saveProjectClick,
-      showFile
+      showFile,
+      projectStatus,
+      archiveOperation
     }
   }
 })

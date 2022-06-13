@@ -27,6 +27,7 @@
     <div class="table-content">
       <vxe-table
         border
+        style="min-width: 100%"
         :loading="tableLoading"
         :height="height"
         :column-config="{ resizable: true }"
@@ -36,7 +37,7 @@
         class="reverse-table"
       >
         <template v-for="(head, index) in tableHeaderData" :key="index">
-          <vxe-column :field="head.prop" :title="head.name">
+          <vxe-column :field="head.prop" :title="head.name" :width="head.width">
             <template #default="{ row }">
               <span v-if="head.prop === 'paymentStatus'">
                 {{
@@ -54,11 +55,13 @@
                 getPPstatus(row.ppstatus)
               }}</span>
 
-              <div v-else-if="head.prop === 'ckt' || head.prop === 'xqwd'">
+              <div
+                style="width: 130px"
+                v-else-if="head.prop === 'ckt' || head.prop === 'xqwd'"
+              >
                 <el-button
                   @click="showFile(head.prop === 'ckt' ? row.ckt : row.xqwd)"
                   type="text"
-                  link
                   >{{ head.prop === 'xqwd' ? '需求文档' : '参考图' }}</el-button
                 >
               </div>
@@ -76,7 +79,7 @@ import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
 import { getarProjectChiveProjectList } from '@/request/index'
 const tableHeaderData = [
-  { name: '序号', prop: 'order' },
+  { name: '序号', prop: 'order', width: 80 },
   { name: '编号', prop: 'serialNumber', width: 100 },
   { name: '合作公司', prop: 'partyACompanyShortName', width: 100 },
   { name: '项目名', prop: 'name', width: 120 },
@@ -84,10 +87,10 @@ const tableHeaderData = [
   { name: '需求地址', prop: 'demandAddress', width: 160 },
   { name: '参考图', prop: 'ckt', width: 120 },
   { name: '需求文档', prop: 'xqwd', width: 120 },
-  { name: '项目群组（甲方/设计师）', prop: 'groupName', width: 120 },
+  { name: '项目群组（甲方/设计师）', prop: 'groupName', width: 190 },
   { name: '分工/天', prop: 'ppdays', width: 120 },
   { name: '单价', prop: 'ppunitPrice', width: 120 },
-  { name: '排期', prop: 'pppq', width: 160 },
+  { name: '排期', prop: 'pppq', width: 180 },
   { name: '设计师', prop: 'ppstaffName', width: 160 },
   { name: '状态', prop: 'ppstatus', width: 160 },
   { name: '总价', prop: 'totalPrice', width: 120 },

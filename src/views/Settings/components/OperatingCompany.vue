@@ -22,12 +22,14 @@
             type="text"
             size="small"
             @click="openOperatingCompany(scope.row)"
+            v-permission="'edit'"
             >编辑</el-button
           >
           <el-button
             type="text"
             @click="deleteOperatingCompany(scope.row.id)"
             size="small"
+            v-permission="'delete'"
             >删除</el-button
           >
         </template>
@@ -40,6 +42,7 @@
           <div class="tab-item">职位分工</div>
           <el-button
             size="large"
+            v-permission="'add'"
             @click="openDesignPostsModal"
             :icon="CirclePlus"
             >新增分工</el-button
@@ -61,20 +64,22 @@
           />
           <el-table-column fixed="right" label="操作" width="130">
             <template #default="scope">
-            <div style="width: 130px">
-               <el-button
-                type="text"
-                size="small"
-                @click="openDesignPostsModal(scope.row)"
-                >编辑</el-button
-              >
-              <el-button
-                type="text"
-                size="small"
-                @click="deleteDesignPosts(scope.row.id)"
-                >删除</el-button
-              >
-            </div>
+              <div style="width: 130px">
+                <el-button
+                  type="text"
+                  size="small"
+                  v-permission="'edit'"
+                  @click="openDesignPostsModal(scope.row)"
+                  >编辑</el-button
+                >
+                <el-button
+                  type="text"
+                  size="small"
+                  v-permission="'delete'"
+                  @click="deleteDesignPosts(scope.row.id)"
+                  >删除</el-button
+                >
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -85,7 +90,11 @@
     <div class="job-division">
       <div class="job-division-header">
         <div class="tab-item">后台人员</div>
-        <el-button size="large" @click="addPersonnelClick" :icon="CirclePlus"
+        <el-button
+          size="large"
+          v-permission="'add'"
+          @click="addPersonnelClick"
+          :icon="CirclePlus"
           >新建人员</el-button
         >
       </div>
@@ -106,26 +115,30 @@
         />
         <el-table-column fixed="right" label="操作" width="220">
           <template #default="scope">
-          <div style="width: 220px">
-            <el-button
-              type="text"
-              size="small"
-              @click="handlePeopleEditClick(scope.row)"
-              >编辑</el-button
-            >
-            <el-button
-              @click="handlePeopleUpdatePwdlick(scope.row)"
-              type="text"
-              size="small"
-              >修改密码</el-button
-            >
-            <el-button
-              @click="handlePeopleDeletelick(scope.row)"
-              type="text"
-              size="small"
-              >删除人员</el-button
-            >
-          </div>
+            <div style="width: 220px">
+              <el-button
+                type="text"
+                size="small"
+                v-permission="'edit'"
+                @click="handlePeopleEditClick(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                @click="handlePeopleUpdatePwdlick(scope.row)"
+                type="text"
+                size="small"
+                v-permission="'edit'"
+                >修改密码</el-button
+              >
+              <el-button
+                style="margin-right: 10px"
+                @click="handlePeopleDeletelick(scope.row)"
+                type="text"
+                size="small"
+                v-permission="'delete'"
+                >删除人员</el-button
+              >
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -135,7 +148,11 @@
     <div class="job-division">
       <div class="job-division-header">
         <div class="tab-item">管理岗位</div>
-        <el-button size="large" @click="addPositionClick" :icon="CirclePlus"
+        <el-button
+          size="large"
+          v-permission="'add'"
+          @click="addPositionClick"
+          :icon="CirclePlus"
           >新建管理岗位</el-button
         >
       </div>
@@ -153,12 +170,20 @@
           :key="index"
           :prop="head.key"
           :label="head.name"
-        />
+        >
+          <template #default="scope">
+            <span v-if="head.key === 'permission'">{{
+              getPermission(scope.row['permission'])
+            }}</span>
+          </template>
+        </el-table-column>
+
         <el-table-column fixed="right" label="操作" width="220">
           <template #default="scope">
             <el-button
               type="text"
               size="small"
+              v-permission="'edit'"
               @click="addPositionClick(scope.row)"
               >编辑</el-button
             >
@@ -166,6 +191,7 @@
               @click="handlePositionClick(scope.row)"
               type="text"
               size="small"
+              v-permission="'delete'"
               >删除</el-button
             >
           </template>
@@ -202,15 +228,15 @@
             />
           </el-form-item>
           <el-form-item label="运营状态" prop="status">
-              <el-select
-                style="width: 100%"
-                v-model="operatingCompany.modal.operatingStatus"
-                placeholder="请选择合作状态"
-              >
-                <el-option label="运营中" value="0" />
-                <el-option label="已注销" value="1" />
-              </el-select>
-            </el-form-item>
+            <el-select
+              style="width: 100%"
+              v-model="operatingCompany.modal.operatingStatus"
+              placeholder="请选择合作状态"
+            >
+              <el-option label="运营中" value="0" />
+              <el-option label="已注销" value="1" />
+            </el-select>
+          </el-form-item>
           <el-form-item label="邮寄合同地址" prop="contractAddress">
             <el-input
               placeholder="请输入邮寄合同地址"
@@ -471,7 +497,13 @@
           </el-form-item>
 
           <el-form-item label="权限" prop="permission">
-            <el-tree-select check-strictly style="width: 100%" v-model="managementPosition.addModals.permission" :data="permissionData" multiple />
+            <el-tree-select
+              check-strictly
+              style="width: 100%"
+              v-model="managementPosition.addModals.permission"
+              :data="permissionData"
+              multiple
+            />
           </el-form-item>
         </el-form>
       </div>
@@ -699,6 +731,37 @@ const permissionData: any = [
     ]
   }
 ]
+const getPermission = (data: Array<any>): any => {
+  const result: any = []
+  if (data && data.length > 0 && typeof data === 'string') {
+    let newInfo = []
+    try {
+      newInfo = JSON.parse(data)
+    } catch (err) {
+      newInfo = []
+    }
+    newInfo.map((value: any) => {
+      for (let i = 0; i < permissionData.length; i++) {
+        if (value === permissionData[i].value) {
+          result.push(permissionData[i].label)
+          break
+        } else {
+          if (
+            permissionData[i].children &&
+            permissionData[i].children.length > 0
+          ) {
+            for (let j = 0; j < permissionData[i].children.length; j++) {
+              if (value === permissionData[i].children[j].value) {
+                result.push(permissionData[i].children[j].label)
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+  return result.join(',')
+}
 const headerData = [
   { name: '简称', key: 'shortName' },
   { name: '公司全名', key: 'fullName' },
@@ -1248,7 +1311,7 @@ export default defineComponent({
     // ==================================================
 
     // ===================管理岗位交互==========================
-    const managementPosition:any = reactive({
+    const managementPosition: any = reactive({
       data: [], // 后台人员列表
       managerPosts: [], // 岗位列表
       addModal: false, // 新增编辑弹窗
@@ -1258,7 +1321,12 @@ export default defineComponent({
           { required: true, message: '请输输入提成点数', trigger: 'blur' }
         ],
         permission: [
-          { required: true, type: 'array', message: '请输选择权限', trigger: 'change' }
+          {
+            required: true,
+            type: 'array',
+            message: '请输选择权限',
+            trigger: 'change'
+          }
         ]
       },
       addModals: {
@@ -1355,6 +1423,12 @@ export default defineComponent({
     const addDivisionModal = ref(false) // 新增分工弹窗
     const addDepartmentModal = ref(false) // 新建部门弹窗
 
+    // 按钮权限
+    // const route = useRoute()
+    // const store: any = useStore()
+    // const permissionList: any = []
+    // console.log(route.meta.permission, 'kk', store.state.userInfo.permission)
+
     return {
       designPostsFormRef,
       setRowStyle,
@@ -1393,7 +1467,8 @@ export default defineComponent({
       managementPositionFormRef,
       submitManagementPositionModal,
       handlePositionClick,
-      permissionData
+      permissionData,
+      getPermission
     }
   }
 })
@@ -1405,6 +1480,9 @@ export default defineComponent({
   padding-bottom: 20px;
   width: 100%;
   min-height: 500px;
+  .el-button + .el-button {
+    margin: 0 !important;
+  }
   .tab-item {
     width: 160px;
     height: 40px;

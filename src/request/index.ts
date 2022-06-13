@@ -402,9 +402,23 @@ export const saveManagePost = (data: any) => post('/api/managePost/save', data)
 /**
  * @description 管理岗位-编辑
  * */
-export const updateManagePost = (data: any) => post('/api/managePost/update', data)
+export const updateManagePost = (data: any) =>
+  post('/api/managePost/update', data)
 
 /**
  * @description 删除岗位
  * */
-export const logicDeleteManagePost = (id: string) => post('/api/managePost/logicDelete', { id })
+export const logicDeleteManagePost = (id: string) =>
+  post('/api/managePost/logicDelete', { id })
+
+/**
+ * @description 项目归档
+ * */
+export const archiveProject = (id: string) =>
+  post('/api/project/archiveProject', { id })
+
+/**
+ * @description 撤销归档
+ * */
+export const unArchiveProject = (id: string) =>
+  post('/api/project/unArchiveProject', { id })

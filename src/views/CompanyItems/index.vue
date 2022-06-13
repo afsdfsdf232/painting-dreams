@@ -39,6 +39,7 @@
     </div>
     <div class="table-content">
       <vxe-table
+        style="min-width: 100%"
         border
         :loading="tableLoading"
         :height="height"
@@ -49,7 +50,7 @@
         class="reverse-table"
       >
         <template v-for="(head, index) in tableHeaderData" :key="index">
-          <vxe-column :field="head.prop" :title="head.name">
+          <vxe-column :field="head.prop" :title="head.name" :width="head.width">
             <template #default="{ row }">
               <span v-if="head.prop === 'paymentStatus'">
                 {{
@@ -61,9 +62,9 @@
                 }}
               </span>
               <span v-else-if="head.prop === 'id'">{{ row.order }}</span>
-              <span v-else-if="head.prop === 'status'">{{
-                getStatus(row.status)
-              }}</span>
+              <span v-else-if="head.prop === 'status'">
+                {{ getStatus(row.status) }}</span
+              >
               <span v-else-if="head.prop === 'ppstatus'">{{
                 getPPstatus(row.ppstatus)
               }}</span>
@@ -72,7 +73,6 @@
                 <el-button
                   @click="showFile(head.prop === 'ckt' ? row.ckt : row.xqwd)"
                   type="text"
-                  link
                   >{{ head.prop === 'xqwd' ? '需求文档' : '参考图' }}</el-button
                 >
               </div>
@@ -93,7 +93,7 @@ import {
   getProjectCompanyProjectList
 } from '@/request/index'
 const tableHeaderData = [
-  { name: '序号', prop: 'id', width: 10 },
+  { name: '序号', prop: 'id', width: 80 },
   { name: '编号', prop: 'serialNumber', width: 160 },
   { name: '合作公司', prop: 'partyACompanyShortName', width: 160 },
   { name: '项目名', prop: 'name', width: 160 },
@@ -101,15 +101,15 @@ const tableHeaderData = [
   { name: '需求地址', prop: 'demandAddress', width: 160 },
   { name: '参考图', prop: 'ckt', width: 160 },
   { name: '需求文档', prop: 'xqwd', width: 160 },
-  { name: '项目群组（甲方/设计师）', prop: 'groupName', width: 160 },
+  { name: '项目群组（甲方/设计师）', prop: 'groupName', width: 190 },
   { name: '分工/天', prop: 'ppdays', width: 150 },
   { name: '单价', prop: 'ppunitPrice', width: 140 },
   { name: '排期', prop: 'pppq', width: 160 },
   { name: '设计师', prop: 'ppstaffName', width: 160 },
-  { name: '状态', prop: 'ppstatus', width: 160 },
+  { name: '状态', prop: 'status', width: 160 },
   { name: '总价', prop: 'totalPrice', width: 140 },
   { name: '收款状态', prop: 'paymentStatus', width: 160 },
-  { name: '发票状态', prop: 'status', width: 160 },
+  { name: '发票状态', prop: 'ppstatus', width: 160 },
   { name: '备注', prop: 'remark', width: 160 }
 ]
 

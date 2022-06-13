@@ -1,3 +1,10 @@
+<!--
+ * @Description:
+ * @Author: Author
+ * @Date: 2022-03-31 09:41:23
+ * @LastEditTime: 2022-06-13 16:37:17
+ * @LastEditors: Author
+-->
 <template>
   <div class="side-bar-container">
     <el-menu
@@ -10,7 +17,7 @@
     >
       <el-menu-item
         :class="{ 'is-active': route.name === currentPageName }"
-        v-for="route in routes.children"
+        v-for="route in routes"
         :key="route.path"
         :index="route.path"
       >
@@ -24,6 +31,7 @@
 <script lang="ts">
 import { defineComponent, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useStore } from 'vuex'
 import { Setting } from '@element-plus/icons-vue'
 
 export default defineComponent({
@@ -33,9 +41,43 @@ export default defineComponent({
   setup () {
     const router = useRouter()
     const route = useRoute()
-    const routes = computed(() =>
-      router.options.routes.find((route) => route.name === 'Layout')
-    )
+    const store = useStore()
+    const userInfo = store.state.userInfo
+    console.log('userInfo:', JSON.parse(userInfo.permission))
+
+    const routes = computed(() => {
+      const routers =
+        (router.options.routes.find((route) => route.name === 'Layout') || {})
+          .children || []
+      if (userInfo.type === '1') {
+        return routers
+      } else {
+        let menus: any = []
+        const menuRouters: any = []
+        if (
+          userInfo.permission &&
+          typeof userInfo.permission === 'string' &&
+          userInfo.permission.length > 0
+        ) {
+          try {
+            menus = JSON.parse(userInfo.permission)
+          } catch (err) {
+            menus = []
+          }
+        }
+        routers.map((route: any) => {
+          if (route.meta && route.meta.permission) {
+            const index = menus.findIndex(
+              (value: any) => value === route.meta.permission
+            )
+            if (index > -1) {
+              menuRouters.push(route)
+            }
+          }
+        })
+        return menuRouters
+      }
+    })
     const currentPageName = computed(() => route.name)
 
     return {
@@ -49,6 +91,7 @@ export default defineComponent({
 <style lang="less" scoped>
 .side-bar-container {
   width: 240px;
+  height: 100vh;
   max-height: calc(100vh - 80px);
   background-color: rgba(243, 245, 248, 100);
   overflow: auto;

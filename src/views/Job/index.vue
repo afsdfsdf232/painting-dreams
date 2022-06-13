@@ -39,6 +39,7 @@
         border
         :loading="tableLoading"
         :height="height"
+        style="min-width: 100%"
         :column-config="{ resizable: true }"
         :scroll-y="{ enabled: true }"
         :span-method="mergeRowMethod"
@@ -46,7 +47,7 @@
         class="reverse-table"
       >
         <template v-for="(head, index) in tableHeaderData" :key="index">
-          <vxe-column :field="head.prop" :title="head.name">
+          <vxe-column :field="head.prop" :title="head.name" :width="head.width">
             <template #default="{ row }">
               <span v-if="head.prop === 'status'">
                 {{
@@ -63,7 +64,7 @@
               </span>
               <div v-else-if="head.prop === 'projectFileList'">
                 <p v-for="file in row.projectFileList" :key="file.id">
-                  <el-button @click="showFile(file.url)" type="text" link>{{
+                  <el-button @click="showFile(file.url)" type="text">{{
                     file.type === '1' ? '需求文档' : '参考图'
                   }}</el-button>
                 </p>
@@ -82,7 +83,7 @@ import { defineComponent, ref, Ref, reactive, onMounted, nextTick } from 'vue'
 import { VxeTablePropTypes } from 'vxe-table'
 import { getplanProjectList, getDesignPost } from '@/request/index'
 const tableHeaderData = [
-  { name: '序号', prop: 'order' },
+  { name: '序号', prop: 'order', width: 80 },
   { name: '画师', prop: 'staffName', width: 100 },
   { name: '职位', prop: 'designPostName', width: 100 },
   { name: '公司-项目', prop: 'projectName', width: 120 },

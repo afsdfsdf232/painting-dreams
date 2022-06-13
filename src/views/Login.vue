@@ -171,6 +171,11 @@ export default defineComponent({
     border-radius: 5px;
     color: #454545;
   }
+  .el-input__wrapper {
+    width: 93%;
+    background: transparent;
+    box-shadow: 0 0 0 0;
+  }
 }
 </style>
 

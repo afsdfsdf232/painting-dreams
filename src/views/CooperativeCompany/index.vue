@@ -35,17 +35,29 @@
         >
           <template #default="scope">
             <template v-if="scope.column.property === 'status'">
-              {{scope.row[scope.column.property] === '0'? '待合作': '合作中'}}
+              {{
+                scope.row[scope.column.property] === '0' ? '待合作' : '合作中'
+              }}
             </template>
           </template>
         </el-table-column>
 
         <el-table-column fixed="right" label="操作" width="120">
           <template #default="scope">
-            <el-button type="text" size="small" @click="openAddModal(scope.row)"
-              >编辑</el-button
-            >
-            <el-button type="text" size="small" @click="deleteComp(scope.row.id)">删除</el-button>
+            <div style="width: 120px">
+              <el-button
+                type="text"
+                size="small"
+                @click="openAddModal(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                type="text"
+                size="small"
+                @click="deleteComp(scope.row.id)"
+                >删除</el-button
+              >
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -54,16 +66,24 @@
     <el-drawer
       size="50%"
       v-model="addCompanyModal"
-      :title="form.id?'编辑公司':'新增公司'"
+      :title="form.id ? '编辑公司' : '新增公司'"
       v-loading="modalLoading"
       :with-header="true"
     >
       <template #title>
-        <p class="t-c t-main-color f20">{{form.id?'编辑公司':'新增公司'}}</p>
+        <p class="t-c t-main-color f20">
+          {{ form.id ? '编辑公司' : '新增公司' }}
+        </p>
       </template>
       <div class="drawer-content d-flex d-f-row-bet">
         <div class="drawer-content-left">
-          <el-form size="large" ref="companyLeftRef" :rules="formRules" :model="form" label-width="110px">
+          <el-form
+            size="large"
+            ref="companyLeftRef"
+            :rules="formRules"
+            :model="form"
+            label-width="110px"
+          >
             <el-form-item label="简称" prop="shortName">
               <el-input placeholder="请输入简称" v-model="form.shortName" />
             </el-form-item>
@@ -81,10 +101,16 @@
               <el-input placeholder="请输入联系电话" v-model="form.phone" />
             </el-form-item>
             <el-form-item label="银行名称" prop="bankListName">
-              <el-input placeholder="请输入银行名称" v-model="form.bankListName" />
+              <el-input
+                placeholder="请输入银行名称"
+                v-model="form.bankListName"
+              />
             </el-form-item>
             <el-form-item label="银行账号" prop="bankListAccount">
-              <el-input placeholder="请输入银行账号" v-model="form.bankListAccount" />
+              <el-input
+                placeholder="请输入银行账号"
+                v-model="form.bankListAccount"
+              />
             </el-form-item>
             <el-form-item label="备注" prop="remark">
               <el-input
@@ -96,18 +122,30 @@
           </el-form>
         </div>
         <div class="drawer-content-right">
-          <el-form size="large" ref="companyRightRef" :rules="formRules" :model="form" label-width="130px">
+          <el-form
+            size="large"
+            ref="companyRightRef"
+            :rules="formRules"
+            :model="form"
+            label-width="130px"
+          >
             <el-form-item label="公司全名" prop="fullName">
               <el-input placeholder="请输入公司全名" v-model="form.fullName" />
             </el-form-item>
             <el-form-item label="合同地址" prop="contractAddress">
-              <el-input placeholder="请输入合同地址" v-model="form.contractAddress" />
+              <el-input
+                placeholder="请输入合同地址"
+                v-model="form.contractAddress"
+              />
             </el-form-item>
             <el-form-item label="税号" prop="taxId">
               <el-input placeholder="请输入税号" v-model="form.taxId" />
             </el-form-item>
             <el-form-item label="客户联系方式" prop="customerContactInfo">
-              <el-input placeholder="请输入客户联系方式" v-model="form.customerContactInfo" />
+              <el-input
+                placeholder="请输入客户联系方式"
+                v-model="form.customerContactInfo"
+              />
             </el-form-item>
           </el-form>
         </div>
@@ -119,7 +157,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="saveCompanyModal(companyLeftRef,companyRightRef)"
+            @click="saveCompanyModal(companyLeftRef, companyRightRef)"
             >保存</el-button
           >
         </div>
@@ -139,15 +177,15 @@ import {
   logicDeletePartyACompany
 } from '@/request/index'
 const tableHeaderData = [
-  { name: '简称', prop: 'shortName' },
-  { name: '公司全名', prop: 'fullName' },
-  { name: '合作状态', prop: 'status' },
+  { name: '简称', prop: 'shortName', width: 120 },
+  { name: '公司全名', prop: 'fullName', width: 160 },
+  { name: '合作状态', prop: 'status', width: 120 },
   { name: '邮寄合同地址', prop: 'contractAddress', width: 160 },
-  { name: '联系电话', prop: 'phone' },
-  { name: '税号', prop: 'taxId' },
+  { name: '联系电话', prop: 'phone', width: 160 },
+  { name: '税号', prop: 'taxId', width: 140 },
   { name: '银行账号/名称', prop: 'bankInfo', width: 160 },
   { name: '客户联系方式', prop: 'customerContactInfo', width: 160 },
-  { name: '备注', prop: 'remark' }
+  { name: '备注', prop: 'remark', width: 200 }
 ]
 export default defineComponent({
   setup () {
@@ -164,16 +202,28 @@ export default defineComponent({
     const tableData = ref([])
     const modalLoading = ref(false)
     const formRules = {
-      bankListName: [{ required: true, message: '请输入银行卡名称', trigger: 'blur' }], // 银行卡名称
-      bankListAccount: [{ required: true, message: '请输入银行卡名称', trigger: 'blur' }], // 银行卡账号
+      bankListName: [
+        { required: true, message: '请输入银行卡名称', trigger: 'blur' }
+      ], // 银行卡名称
+      bankListAccount: [
+        { required: true, message: '请输入银行卡名称', trigger: 'blur' }
+      ], // 银行卡账号
       fullName: [{ required: true, message: '请选择公司', trigger: 'change' }], // 公司全称
       phone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }], // 联系电话
       remark: [{ required: true, message: '请输入备注信息', trigger: 'blur' }], // 备注
-      shortName: [{ required: true, message: '请输入公司简称', trigger: 'blur' }], // 简称
-      status: [{ required: true, message: '请选择合作状态', trigger: 'change' }], // 合作状态 0待合作 1合作中
+      shortName: [
+        { required: true, message: '请输入公司简称', trigger: 'blur' }
+      ], // 简称
+      status: [
+        { required: true, message: '请选择合作状态', trigger: 'change' }
+      ], // 合作状态 0待合作 1合作中
       taxId: [{ required: true, message: '请输入税号', trigger: 'blur' }], // 税号
-      customerContactInfo: [{ required: true, message: '请输入客户联系电话', trigger: 'blur' }], // 客户联系电话
-      contractAddress: [{ required: true, message: '请输入合同地址', trigger: 'blur' }] // 合同地址
+      customerContactInfo: [
+        { required: true, message: '请输入客户联系电话', trigger: 'blur' }
+      ], // 客户联系电话
+      contractAddress: [
+        { required: true, message: '请输入合同地址', trigger: 'blur' }
+      ] // 合同地址
     }
     const form = reactive({
       id: '',
@@ -205,9 +255,9 @@ export default defineComponent({
         }
         const { code, data } = await getPartyACompanyList(query)
         if (code === 200) {
-          tableData.value = data.list.map((item:any) => {
+          tableData.value = data.list.map((item: any) => {
             // 获取银行信息
-            const bankInfo:any = item.bankList.map((bank:any) => {
+            const bankInfo: any = item.bankList.map((bank: any) => {
               return bank.name + '/' + bank.account
             })
             return { ...item, bankInfo: bankInfo.join(',') }
@@ -253,7 +303,10 @@ export default defineComponent({
       })
     }
     // 新增编辑保存
-    const saveCompanyModal = async (companyLeftRef: FormInstance | undefined, companyRightRef: FormInstance | undefined) => {
+    const saveCompanyModal = async (
+      companyLeftRef: FormInstance | undefined,
+      companyRightRef: FormInstance | undefined
+    ) => {
       // 新增编辑提交
       if (!companyLeftRef) return
       if (!companyRightRef) return
@@ -269,7 +322,7 @@ export default defineComponent({
           addCompanyModal.value = false
         }
       }
-      companyLeftRef.validate(async valid => {
+      companyLeftRef.validate(async (valid) => {
         if (valid) {
           console.log('companyLeftRef-ok')
           const query = {
@@ -281,7 +334,7 @@ export default defineComponent({
               }
             ]
           }
-          companyRightRef.validate(async rightValid => {
+          companyRightRef.validate(async (rightValid) => {
             if (rightValid) {
               if (!form.id) {
                 // 新增

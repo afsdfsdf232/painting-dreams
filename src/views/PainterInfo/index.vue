@@ -39,7 +39,9 @@
               <el-button
                 type="text"
                 size="small"
-                @click.prevent="downloadContractFileUrl(scope.row.contractFileUrl)"
+                @click.prevent="
+                  downloadContractFileUrl(scope.row.contractFileUrl)
+                "
               >
                 查看
               </el-button>
@@ -49,10 +51,17 @@
 
         <el-table-column fixed="right" label="操作" width="120">
           <template #default="scope">
-            <el-button type="text" size="small" @click="openMoadl(scope.row)"
-              >编辑</el-button
-            >
-            <el-button type="text" size="small" @click="deleteOutgoingPainter(scope.row.id)">删除</el-button>
+            <div style="width: 120px">
+              <el-button type="text" size="small" @click="openMoadl(scope.row)"
+                >编辑</el-button
+              >
+              <el-button
+                type="text"
+                size="small"
+                @click="deleteOutgoingPainter(scope.row.id)"
+                >删除</el-button
+              >
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -69,7 +78,13 @@
       </template>
       <div class="drawer-content d-flex d-f-row-bet">
         <div class="drawer-content-left">
-          <el-form size="large" :rules="formRuls" :model="form" ref="leftModalRef" label-width="110px">
+          <el-form
+            size="large"
+            :rules="formRuls"
+            :model="form"
+            ref="leftModalRef"
+            label-width="110px"
+          >
             <el-form-item label="姓名" prop="name">
               <el-input placeholder="请输入姓名" v-model="form.name" />
             </el-form-item>
@@ -77,29 +92,53 @@
               <el-input placeholder="请输入身份证号码" v-model="form.idCard" />
             </el-form-item>
             <el-form-item label="合同地址" prop="contractAddress">
-              <el-input placeholder="请输入合同地址" v-model="form.contractAddress" />
+              <el-input
+                placeholder="请输入合同地址"
+                v-model="form.contractAddress"
+              />
             </el-form-item>
+            <el-form-item label="外发价格" prop="amount">
+              <el-input placeholder="请输入外发价格" v-model="form.amount" />
+            </el-form-item>
+
             <el-form-item label="合同扫描件" prop="contractFileUrl">
               <div class="upload-content" v-if="!form.contractFileUrl">
                 <el-icon class="avatar-uploader-icon"><Plus /></el-icon>
-                <input class="file-input" type="file" @change="uploadFileChange">
+                <input
+                  class="file-input"
+                  type="file"
+                  @change="uploadFileChange"
+                />
               </div>
               <div v-else class="invoice-file">
-                <img :src="form.contractFileUrl" alt="" srcset="">
-                <el-icon :size="24" @click="deleteImg" class="delete"><CircleCloseFilled color="#F56C6C"/></el-icon>
+                <img :src="form.contractFileUrl" alt="" srcset="" />
+                <el-icon :size="24" @click="deleteImg" class="delete"
+                  ><CircleCloseFilled color="#F56C6C"
+                /></el-icon>
               </div>
             </el-form-item>
           </el-form>
         </div>
         <div class="drawer-content-right">
-          <el-form size="large" :model="form" :rules="formRuls" ref="rightModalRef" label-width="100px">
+          <el-form
+            size="large"
+            :model="form"
+            :rules="formRuls"
+            ref="rightModalRef"
+            label-width="100px"
+          >
             <el-form-item label="职位" prop="designPostId">
               <el-select
                 style="width: 100%"
                 v-model="form.designPostId"
                 placeholder="请选择职位"
               >
-                <el-option v-for="design in designPosts" :key="design.id" :label="design.name" :value="design.id" />
+                <el-option
+                  v-for="design in designPosts"
+                  :key="design.id"
+                  :label="design.name"
+                  :value="design.id"
+                />
               </el-select>
             </el-form-item>
 
@@ -133,7 +172,7 @@
             type="primary"
             style="width: 200px"
             size="large"
-            @click="savePainter(leftModalRef,rightModalRef)"
+            @click="savePainter(leftModalRef, rightModalRef)"
             >保存</el-button
           >
         </div>
@@ -157,13 +196,14 @@ import { Plus, CircleCloseFilled } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const tableHeaderData = [
-  { name: '姓名', prop: 'name' },
-  { name: '岗位', prop: 'designPostName' },
-  { name: '身份证', prop: 'idCard' },
+  { name: '姓名', prop: 'name', width: 160 },
+  { name: '岗位', prop: 'designPostName', width: 120 },
+  { name: '身份证', prop: 'idCard', width: 200 },
+  { name: '外发价格', prop: 'amount' },
   { name: '联系方式', prop: 'phone', width: 160 },
-  { name: '地址', prop: 'contractAddress' },
-  { name: '合同扫描件', prop: 'contractFileUrl' },
-  { name: '备注', prop: 'remark', width: 160 }
+  { name: '地址', prop: 'contractAddress', width: 160 },
+  { name: '合同扫描件', prop: 'contractFileUrl', width: 160 },
+  { name: '备注', prop: 'remark', width: 200 }
 ]
 
 export default defineComponent({
@@ -177,13 +217,13 @@ export default defineComponent({
     const rightModalRef = ref<FormInstance>()
     const leftModalRef = ref<FormInstance>()
     const tableLoading = ref(false)
-    const designPosts: Ref<Array<{
-      id: string
-      name: string
-    }>> = ref([])
-    const tabs = ref([
-      { name: '全部外发', id: -1 }
-    ])
+    const designPosts: Ref<
+      Array<{
+        id: string
+        name: string
+      }>
+    > = ref([])
+    const tabs = ref([{ name: '全部外发', id: -1 }])
     const activeTabIndex = ref(-1)
     const tableData = ref([])
 
@@ -228,8 +268,8 @@ export default defineComponent({
     const getDesignPosts = async () => {
       const { code, data } = await getDesignPost()
       if (code === 200 && data) {
-        designPosts.value = data;
-        (data || []).map((item: any) => {
+        designPosts.value = data
+        ;(data || []).map((item: any) => {
           tabs.value.push(item)
         })
       }
@@ -240,19 +280,22 @@ export default defineComponent({
       if (e.target.files && e.target.files[0]) {
         const { code, data } = await uploadFile(e.target.files[0])
         if (code === 200) {
-          form.contractFileUrl = data[0].url;
-          (leftModalRef.value as any).validateField(['invoiceFileUrl'])
+          form.contractFileUrl = data[0].url
+          ;(leftModalRef.value as any).validateField(['invoiceFileUrl'])
         }
       }
     }
 
     // 图片删除
     const deleteImg = async () => {
-      form.contractFileUrl = '';
-      (leftModalRef.value as any).validateField(['contractFileUrl'])
+      form.contractFileUrl = ''
+      ;(leftModalRef.value as any).validateField(['contractFileUrl'])
     }
     // 新增编辑提交
-    const savePainter = async (leftModalRef: FormInstance | undefined, rightModalRef: FormInstance | undefined) => {
+    const savePainter = async (
+      leftModalRef: FormInstance | undefined,
+      rightModalRef: FormInstance | undefined
+    ) => {
       if (!leftModalRef) return
       if (!rightModalRef) return
       const sucess = (code: number) => {
@@ -267,12 +310,12 @@ export default defineComponent({
           addOutgoingModal.value = false
         }
       }
-      leftModalRef.validate(async valid => {
+      leftModalRef.validate(async (valid) => {
         if (valid) {
           const query = {
             ...form
           }
-          rightModalRef.validate(async rightValid => {
+          rightModalRef.validate(async (rightValid) => {
             if (rightValid) {
               if (!form.id) {
                 // 新增
@@ -325,20 +368,36 @@ export default defineComponent({
       id: '',
       name: '', // 姓名
       idCard: '', // 身份证
+      amount: '', // 价格
       contractAddress: '', // 合同地址
       designPostId: '', // 职位id
       phone: '', // 电话号码
       status: '', // 合作状态
-      remark: ''// 备注
+      remark: '' // 备注
     })
 
     const formRuls = {
-      contractFileUrl: [{ required: true, message: '请上传合同扫描件', trigger: 'blur' }], // 扫描件 url
+      contractFileUrl: [
+        { required: true, message: '请上传合同扫描件', trigger: 'blur' }
+      ], // 扫描件 url
       id: '',
       name: [{ required: true, message: '请输入姓名', trigger: 'blur' }], // 姓名
-      idCard: [{ required: true, message: '请输入身份证号码', trigger: 'blur' }], // 身份证
-      contractAddress: [{ required: true, message: '数输入合同地址', trigger: 'blur' }], // 合同地址
-      designPostId: [{ required: true, message: '请选择职位', trigger: 'blur' }], // 职位id
+      idCard: [
+        { required: true, message: '请输入身份证号码', trigger: 'blur' }
+      ], // 身份证
+      contractAddress: [
+        { required: true, message: '数输入合同地址', trigger: 'blur' }
+      ], // 合同地址
+      amount: [
+        {
+          required: true,
+          message: '数输入外发价格',
+          trigger: 'blur'
+        }
+      ],
+      designPostId: [
+        { required: true, message: '请选择职位', trigger: 'blur' }
+      ], // 职位id
       phone: [{ required: true, message: '请输入电话号码', trigger: 'blur' }], // 电话号码
       status: [{ required: true, message: '请选择合作状态', trigger: 'blur' }], // 合作状态
       remark: [{ required: true, message: '请输入备注', trigger: 'blur' }] // 备注
@@ -437,6 +496,5 @@ export default defineComponent({
     color: #8c939d;
     text-align: center;
   }
-
 }
 </style>
