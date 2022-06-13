@@ -104,9 +104,9 @@ export default defineComponent({
   }
   &::-webkit-scrollbar {
     /*滚动条整体样式*/
-    width: 10px;
+    width: 8px;
     /*高宽分别对应横竖滚动条的尺寸*/
-    height: 10px;
+    height: 15px;
   }
   &::-webkit-scrollbar-thumb {
     /*滚动条里面小方块*/

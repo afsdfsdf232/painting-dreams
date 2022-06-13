@@ -19,7 +19,7 @@
         />
       </div>
       <div class="filtter-content-right">
-        <d-add text="添加发票" @click="openModal" />
+        <d-add text="添加发票" v-permission="'add'" @click="openModal" />
       </div>
     </div>
     <!-- 表格 -->
@@ -43,6 +43,7 @@
         />
         <template v-for="(head, index) in tableHeaderData" :key="index">
           <vxe-column
+            v-permission="'table'"
             v-if="head.prop === 'id'"
             fixed="right"
             field="id"
@@ -51,11 +52,12 @@
           >
             <template #default="{ row }">
               <div style="display: flex">
-                <el-button type="text" size="small" @click="openModal(row)"
+                <el-button v-permission="'edit'" type="text" size="small" @click="openModal(row)"
                   >编辑</el-button
                 >
                 <el-button
                   type="text"
+                  v-permission="'delete'"
                   @click="deleteReceipt(row.id)"
                   size="small"
                   >删除</el-button
@@ -80,12 +82,20 @@
                 }}
               </span>
               <div v-else-if="head.prop === 'skpz' || head.prop === 'fpsmj'">
-                <el-button
+                <!-- <el-button
                   @click="showFile(head.prop === 'skpz' ? row.skpz : row.fpsmj)"
                   type="text"
-                  link
-                  >查看</el-button
-                >
+                  style="width: 100px; overflow: hidden"
+                  >
+                  {{head.prop === 'skpz'? row.skpzName: row.fpsmjName}}
+                  </el-button
+                > -->
+                  <span
+                  class="link-btn"
+                  @click="showFile(head.prop === 'skpz' ? row.skpz : row.fpsmj)">
+                  <span v-if="head.prop === 'skpz'">{{row.skpzName? row.skpzName :'查看'}}</span>
+                  <span v-if="head.prop === 'fpsmj'">{{row.fpsmjName?row.fpsmjName: '查看'}}</span>
+                  </span>
                 <!-- {{ row }} -->
               </div>
               <span v-else>{{ row[head.prop] }} </span>
@@ -396,19 +406,23 @@ export default defineComponent({
           if (item.projectList && item.projectList.length > 0) {
             // 处理文件
             let fpsmj = ''
+            let fpsmjName = ''
             let skpz = ''
+            let skpzName = ''
             if (item.fileList && item.fileList) {
               item.fileList.map((file: any) => {
                 if (file.type === '1') {
                   skpz = file.url
+                  skpzName = file.originalFileName
                 }
                 if (file.type === '2') {
                   fpsmj = file.url
+                  fpsmjName = file.originalFileName
                 }
               })
             }
             item.projectList.map((citem: any) => {
-              const newItem = { ...item, fpsmj, skpz }
+              const newItem = { ...item, fpsmj, skpz, fpsmjName, skpzName }
               const { id, name, paymentAmount, paymentStatus, totalPrice } =
                 citem
               newItem.ppid = id
@@ -422,20 +436,26 @@ export default defineComponent({
             // 处理文件
             let fpsmj = ''
             let skpz = ''
+            let fpsmjName = ''
+            let skpzName = ''
             if (item.fileList && item.fileList) {
               item.fileList.map((file: any) => {
                 if (file.type === '1') {
                   skpz = file.url
+                  skpzName = file.originalFileName
                 }
                 if (file.type === '2') {
                   fpsmj = file.url
+                  fpsmjName = file.originalFileName
                 }
               })
             }
             const newItem = {
               ...item,
               fpsmj,
-              skpz
+              skpz,
+              fpsmjName,
+              skpzName
             }
             newData.push(newItem)
           }
@@ -594,6 +614,8 @@ export default defineComponent({
             paymentBankId, // 付款银行id
             projectList, // 项目列表 id
             contractFileUrl, // 发票扫描件
+            contractFileUrlOriginalFileName,
+            skpzOriginalFileName,
             skpz, // 收款凭证
             remark // 备注信息
           } = form.value
@@ -616,8 +638,10 @@ export default defineComponent({
             query.fileList.forEach((file: any) => {
               if (file.type === '1') {
                 file.url = skpz
+                file.originalFileName = skpzOriginalFileName
               } else if (file.type === '2') {
                 file.url = contractFileUrl
+                file.originalFileName = contractFileUrlOriginalFileName
               }
             })
           } else {
@@ -626,11 +650,13 @@ export default defineComponent({
               // 1收款凭证 2发票扫描件)
               {
                 type: '1',
+                originalFileName: skpzOriginalFileName,
                 url: skpz
               },
               {
                 type: '2',
-                url: contractFileUrl
+                url: contractFileUrl,
+                originalFileName: contractFileUrlOriginalFileName
               }
             ]
           }
@@ -663,6 +689,7 @@ export default defineComponent({
         const { code, data } = await uploadFile(e.target.files[0])
         if (code === 200) {
           form.value.contractFileUrl = data[0].url
+          form.value.contractFileUrlOriginalFileName = data[0].originalFileName
           ;(leftModalRef.value as any).validateField(['invoiceFileUrl'])
         }
       }
@@ -674,6 +701,7 @@ export default defineComponent({
         const { code, data } = await uploadFile(e.target.files[0])
         if (code === 200) {
           form.value.skpz = data[0].url
+          form.value.skpzOriginalFileName = data[0].originalFileName
           ;(rightModalRef.value as any).validateField(['skpz'])
         }
       }
@@ -683,9 +711,11 @@ export default defineComponent({
     const deleteImg = (type: string) => {
       if (type === 'con') {
         form.value.contractFileUrl = ''
+        form.value.contractFileUrlOriginalFileName = ''
         ;(leftModalRef.value as any).validateField(['contractFileUrl'])
       } else {
         form.value.skpz = ''
+        form.value.skpzOriginalFileName = ''
         ;(leftModalRef.value as any).validateField(['skpz'])
       }
     }
@@ -702,6 +732,8 @@ export default defineComponent({
       projectList: [], // 项目列表 id
       contractFileUrl: '', // 合同扫描件
       skpz: '', // 收款凭证
+      contractFileUrlOriginalFileName: '', // 合同扫描件名称
+      skpzOriginalFileName: '', // 收款凭证名称
       remark: '' // 备注信息
     })
     // 打开弹窗
@@ -715,7 +747,9 @@ export default defineComponent({
         // 处理文件
         // form.value.fileList = []
         form.value.skpz = newRow.skpz
+        form.value.skpzOriginalFileName = newRow.skpzName
         form.value.contractFileUrl = newRow.fpsmj
+        form.value.contractFileUrlOriginalFileName = newRow.fpsmjName
         // 处理项目
         const newProject: any = []
         if (newRow.projectList && newRow.projectList.length > 0) {
@@ -884,10 +918,14 @@ export default defineComponent({
       }
     }
   }
+  .link-btn {
+    cursor: pointer;
+    color: #409eff;
+  }
   /*滚动条整体部分*/
   .reverse-table ::-webkit-scrollbar {
     width: 8px;
-    height: 8px;
+    height: 15px;
   }
   /*滚动条的轨道*/
   .reverse-table ::-webkit-scrollbar-track {

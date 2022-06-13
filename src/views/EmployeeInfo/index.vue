@@ -24,7 +24,7 @@
         </template>
       </div>
       <div class="fillter-header-content-right">
-        <d-add text="添加职员" @click="openModal" />
+        <d-add text="添加职员" v-permission="'add'" @click="openModal" />
       </div>
     </div>
     <!-- 表格 -->
@@ -98,14 +98,15 @@
           />
         </template>
 
-        <el-table-column fixed="right" label="操作" width="120">
+        <el-table-column fixed="right" label="操作" width="120" v-permission="'table'">
           <template #default="scope">
             <div style="width: 120px">
-              <el-button type="text" size="small" @click="openModal(scope.row)"
+              <el-button type="text" v-permission="'edit'" size="small" @click="openModal(scope.row)"
                 >编辑</el-button
               >
               <el-button
                 type="text"
+                v-permission="'delete'"
                 @click="deleteEmployee(scope.row.id)"
                 size="small"
                 >删除</el-button

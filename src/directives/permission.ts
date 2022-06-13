@@ -13,7 +13,7 @@ export default (app: any) => {
       let permission: any = [] // 可控权限列表
       const userInfo: any = (store as any).state.userInfo
       const metaValue: any = (store as any).state.metaValue
-
+      if (userInfo.type === '1') return // 超级管理员
       if (userInfo.permission && userInfo.permission.length > 0) {
         try {
           permission = JSON.parse(userInfo.permission)
@@ -21,39 +21,21 @@ export default (app: any) => {
           permission = []
         }
       }
-
+      const editIndex = permission.findIndex((item: any) => item === `${metaValue}-edit`)
+      const addIndex = permission.findIndex((item: any) => item === `${metaValue}-add`)
+      const deleteIndex = permission.findIndex((item: any) => item === `${metaValue}-delete`)
       if (options.value === 'edit') {
         // 编辑按钮
-        const index = permission.findIndex(
-          (item: any) => item === `${metaValue}-edit`
-        )
-        if (index > -1) {
-          // 有按钮
-          el.style.display = 'block'
-        } else {
-          el.style.display = 'none'
-        }
+        el.style.display = editIndex > -1 ? 'block' : 'none'
       } else if (options.value === 'add') {
         // 新增按钮
-        const index = permission.findIndex(
-          (item: any) => item === `${metaValue}-add`
-        )
-        if (index > -1) {
-          // 有按钮
-          el.style.display = 'block'
-        } else {
-          el.style.display = 'none'
-        }
+        el.style.display = addIndex > -1 ? 'block' : 'none'
       } else if (options.value === 'delete') {
         // 删除按钮
-        const index = permission.findIndex(
-          (item: any) => item === `${metaValue}-delete`
-        )
-        if (index > -1) {
-          // 有按钮
-          el.style.display = 'block'
-        } else {
-          el.style.display = 'none'
+        el.style.display = deleteIndex > -1 ? 'block' : 'none'
+      } else if (options.value === 'table') {
+        if (editIndex === -1 && deleteIndex === -1) {
+          el.parentNode.removeChild(el)
         }
       }
     }

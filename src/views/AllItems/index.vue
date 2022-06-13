@@ -78,7 +78,7 @@
         </el-select>
       </div>
       <div class="fillter-content-right d-flex">
-        <d-add text="添加项目" @click="openModal" />
+        <d-add v-permission="'add'" text="添加项目" @click="openModal" />
         <el-popover
           placement="left"
           title="Title"
@@ -106,7 +106,30 @@
       >
         <template v-for="(head, index) in tableHeaderData" :key="index">
           <vxe-column
-            :fixed="head.prop === 'id' && 'right'"
+            v-if="head.prop === 'id'"
+            fixed="right"
+            v-permission="'table'"
+            :field="head.prop"
+            :width="head.width"
+            :title="head.name"
+          >
+            <template #default="{ row }">
+              <div  style="display: flex">
+                <el-button type="text" v-permission="'edit'" size="small" @click="openModal(row)"
+                  >编辑</el-button
+                >
+                <el-button
+                  type="text"
+                  v-permission="'delete'"
+                  @click="deleteOperatingCompany(row.id)"
+                  size="small"
+                  >删除</el-button
+                >
+              </div>
+            </template>
+          </vxe-column>
+          <vxe-column
+            v-else
             :field="head.prop"
             :width="head.width"
             :title="head.name"
@@ -147,11 +170,12 @@
                 >
               </div>
               <div v-else-if="head.prop === 'id'" style="display: flex">
-                <el-button type="text" size="small" @click="openModal(row)"
+                <el-button type="text" v-permission="'edit'" size="small" @click="openModal(row)"
                   >编辑</el-button
                 >
                 <el-button
                   type="text"
+                  v-permission="'delete'"
                   @click="deleteOperatingCompany(row.id)"
                   size="small"
                   >删除</el-button
@@ -160,7 +184,7 @@
               <span v-else>{{ row[head.prop] }} </span>
             </template>
           </vxe-column>
-        </template>
+        </template >
       </vxe-table>
     </div>
     <!-- 新增编辑 -->
@@ -1260,7 +1284,7 @@ export default defineComponent({
   /*滚动条整体部分*/
   .reverse-table ::-webkit-scrollbar {
     width: 8px;
-    height: 8px;
+    height: 15px;
   }
   /*滚动条的轨道*/
   .reverse-table ::-webkit-scrollbar-track {

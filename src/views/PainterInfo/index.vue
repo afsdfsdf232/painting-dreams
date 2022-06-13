@@ -12,7 +12,7 @@
         />
       </div>
       <div class="filter-right">
-        <d-add text="添加外发" @click="openMoadl" />
+        <d-add text="添加外发" v-permission="'add'" @click="openMoadl" />
       </div>
     </div>
     <!-- 表格 -->
@@ -49,15 +49,16 @@
           </el-table-column>
         </template>
 
-        <el-table-column fixed="right" label="操作" width="120">
+        <el-table-column fixed="right" label="操作" v-permission="'table'" width="120">
           <template #default="scope">
             <div style="width: 120px">
-              <el-button type="text" size="small" @click="openMoadl(scope.row)"
+              <el-button type="text" v-permission="'edit'" size="small" @click="openMoadl(scope.row)"
                 >编辑</el-button
               >
               <el-button
                 type="text"
                 size="small"
+                v-permission="'delete'"
                 @click="deleteOutgoingPainter(scope.row.id)"
                 >删除</el-button
               >

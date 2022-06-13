@@ -172,7 +172,10 @@ export default defineComponent({
                 if (citem.startDate) {
                   // 获取开始时间
                   const start = new Date(citem.startDate).getDate()
-                  for (let i = start; i <= dates; i++) {
+                  // 获取结束日期
+                  // const end = new Date('2022-06-18').getDate()
+                  const end = citem.endDate ? new Date(citem.endDate).getDate() : dates
+                  for (let i = start; i <= end; i++) {
                     items[`day-${i}`] = citem.projectName
                   }
                 }
@@ -274,7 +277,7 @@ export default defineComponent({
   /*滚动条整体部分*/
   .reverse-table ::-webkit-scrollbar {
     width: 8px;
-    height: 8px;
+    height: 15px;
   }
   /*滚动条的轨道*/
   .reverse-table ::-webkit-scrollbar-track {

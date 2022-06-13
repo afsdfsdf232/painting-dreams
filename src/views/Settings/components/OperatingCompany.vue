@@ -16,7 +16,7 @@
         :prop="head.key"
         :label="head.name"
       />
-      <el-table-column fixed="right" label="操作" width="160">
+      <el-table-column fixed="right" v-permission="'table'" label="操作" width="160">
         <template #default="scope">
           <el-button
             type="text"
@@ -62,7 +62,7 @@
             :prop="head.key"
             :label="head.name"
           />
-          <el-table-column fixed="right" label="操作" width="130">
+          <el-table-column fixed="right" v-permission="'table'" label="操作" width="130">
             <template #default="scope">
               <div style="width: 130px">
                 <el-button
@@ -113,7 +113,7 @@
           :prop="head.key"
           :label="head.name"
         />
-        <el-table-column fixed="right" label="操作" width="220">
+        <el-table-column fixed="right"  label="操作" width="220" v-permission="'table'">
           <template #default="scope">
             <div style="width: 220px">
               <el-button
@@ -178,7 +178,7 @@
           </template>
         </el-table-column>
 
-        <el-table-column fixed="right" label="操作" width="220">
+        <el-table-column fixed="right" v-permission="'table'" label="操作" width="220">
           <template #default="scope">
             <el-button
               type="text"

@@ -309,7 +309,7 @@ export default defineComponent({
   /*滚动条整体部分*/
   .reverse-table ::-webkit-scrollbar {
     width: 8px;
-    height: 8px;
+    height: 15px;
   }
   /*滚动条的轨道*/
   .reverse-table ::-webkit-scrollbar-track {

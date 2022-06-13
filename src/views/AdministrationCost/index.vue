@@ -14,7 +14,7 @@
           />
         </div>
         <div class="filter-right">
-          <d-add @click="openFixedCostsModal" text="添加成本" />
+          <d-add v-permission="'add'" @click="openFixedCostsModal" text="添加成本" />
         </div>
       </div>
       <div class="table-content">
@@ -43,17 +43,19 @@
               </template>
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" width="150">
+          <el-table-column fixed="right" v-permission="'table'" label="操作" width="150">
             <template #default="scope">
               <el-button
                 type="text"
                 size="small"
+                v-permission="'edit'"
                 @click="openFixedCostsModal(scope.row)"
                 >编辑</el-button
               >
               <el-button
                 type="text"
                 size="small"
+                v-permission="'delete'"
                 @click="deleteFixedCosts(scope.row.id)"
                 >删除</el-button
               >
@@ -77,7 +79,7 @@
           />
         </div>
         <div class="filter-right">
-          <d-add @click="openManagementModal" text="添加成本" />
+          <d-add @click="openManagementModal" v-permission="'add'" text="添加成本" />
         </div>
       </div>
       <div class="table-content">
@@ -96,17 +98,19 @@
             :prop="head.key"
             :label="head.name"
           />
-          <el-table-column fixed="right" label="操作" width="220">
+          <el-table-column fixed="right" v-permission="'table'" label="操作" width="220">
             <template #default="scope">
               <el-button
                 type="text"
                 size="small"
+                v-permission="'edit'"
                 @click="openManagementModal(scope.row)"
                 >编辑</el-button
               >
               <el-button
                 @click="managementRowDelete(scope.row.id)"
                 type="text"
+                v-permission="'delete'"
                 size="small"
                 >删除</el-button
               >
@@ -141,7 +145,7 @@
           />
         </div>
         <div class="filter-right">
-          <d-add @click="openEreimbursementsModal" text="添加报销" />
+          <d-add @click="openEreimbursementsModal" v-permission="'add'" text="添加报销" />
         </div>
       </div>
       <div class="table-content">
@@ -187,18 +191,20 @@
               <!-- <template v-else>{{ scope.row[scope.column.property] }}</template> -->
             </template>
           </el-table-column>
-          <el-table-column fixed="right" label="操作" width="120">
+          <el-table-column fixed="right" v-permission="'table'" label="操作" width="120">
             <template #default="scope">
               <div style="width: 120px">
                 <el-button
                   type="text"
                   size="small"
+                  v-permission="'edit'"
                   @click="openEreimbursementsModal(scope.row)"
                   >编辑</el-button
                 >
                 <el-button
                   type="text"
                   size="small"
+                  v-permission="'delete'"
                   @click="deleteReimbursements(scope.row.id)"
                   >删除</el-button
                 >
@@ -1252,7 +1258,7 @@ export default defineComponent({
 /*滚动条整体部分*/
 .reverse-table ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
+  height: 15px;
 } /*滚动条的轨道*/
 .reverse-table ::-webkit-scrollbar-track {
   background-color: #ffffff;

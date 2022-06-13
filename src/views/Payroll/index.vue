@@ -17,7 +17,7 @@
         </div>
       </div>
       <div class="header-filter-right">
-        <d-add @click="openModal" text="新增工资表" />
+        <d-add @click="openModal" v-permission="'add'" text="新增工资表" />
         <el-popover
           placement="left"
           title="Title"
@@ -64,12 +64,13 @@
         <el-table-column fixed="right" label="操作" width="120">
           <template #default="scope">
             <div style="width: 120px">
-              <el-button type="text" size="small" @click="openModal(scope.row)"
+              <el-button type="text" v-permission="'edit'" size="small" @click="openModal(scope.row)"
                 >编辑</el-button
               >
               <el-button
                 type="text"
                 size="small"
+                v-permission="'delete'"
                 @click="deleteWage(scope.row.id)"
                 >删除</el-button
               >
@@ -637,9 +638,9 @@ export default defineComponent({
   &:deep(.el-drawer__body) {
     &::-webkit-scrollbar {
       /*滚动条整体样式*/
-      width: 10px;
+      width: 8px;
       /*高宽分别对应横竖滚动条的尺寸*/
-      height: 10px;
+      height: 15px;
     }
     &::-webkit-scrollbar-thumb {
       /*滚动条里面小方块*/

@@ -12,7 +12,7 @@
         />
       </div>
       <div class="filter-right">
-        <d-add text="添加公司" @click="openAddModal" />
+        <d-add text="添加公司" v-permission="'add'" @click="openAddModal" />
       </div>
     </div>
     <!-- 表格 -->
@@ -42,18 +42,20 @@
           </template>
         </el-table-column>
 
-        <el-table-column fixed="right" label="操作" width="120">
+        <el-table-column fixed="right"  v-permission="'table'" label="操作" width="120">
           <template #default="scope">
             <div style="width: 120px">
               <el-button
                 type="text"
                 size="small"
+                v-permission="'edit'"
                 @click="openAddModal(scope.row)"
                 >编辑</el-button
               >
               <el-button
                 type="text"
                 size="small"
+                v-permission="'delete'"
                 @click="deleteComp(scope.row.id)"
                 >删除</el-button
               >
