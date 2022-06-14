@@ -52,7 +52,11 @@
           >
             <template #default="{ row }">
               <div style="display: flex">
-                <el-button v-permission="'edit'" type="text" size="small" @click="openModal(row)"
+                <el-button
+                  v-permission="'edit'"
+                  type="text"
+                  size="small"
+                  @click="openModal(row)"
                   >编辑</el-button
                 >
                 <el-button
@@ -90,12 +94,17 @@
                   {{head.prop === 'skpz'? row.skpzName: row.fpsmjName}}
                   </el-button
                 > -->
-                  <span
+                <span
                   class="link-btn"
-                  @click="showFile(head.prop === 'skpz' ? row.skpz : row.fpsmj)">
-                  <span v-if="head.prop === 'skpz'">{{row.skpzName? row.skpzName :'查看'}}</span>
-                  <span v-if="head.prop === 'fpsmj'">{{row.fpsmjName?row.fpsmjName: '查看'}}</span>
-                  </span>
+                  @click="showFile(head.prop === 'skpz' ? row.skpz : row.fpsmj)"
+                >
+                  <span v-if="head.prop === 'skpz'">{{
+                    row.skpzName ? row.skpzName : '查看'
+                  }}</span>
+                  <span v-if="head.prop === 'fpsmj'">{{
+                    row.fpsmjName ? row.fpsmjName : '查看'
+                  }}</span>
+                </span>
                 <!-- {{ row }} -->
               </div>
               <span v-else>{{ row[head.prop] }} </span>
@@ -488,7 +497,6 @@ export default defineComponent({
         page: 1
       })
       if (code === 200) {
-        console.log('project-list:', data)
         projectList.value = data.list || []
       }
     }
@@ -522,7 +530,6 @@ export default defineComponent({
         const index = aCompanyList.value.findIndex(
           (item: any) => item.id === form.value.partyACompanyId
         )
-        console.log(index, aCompanyList.value, aCompanyList.value[index])
         if (index > -1) {
           const banklit = aCompanyList.value[index].bankList
           companyBankList.value = banklit
@@ -774,7 +781,6 @@ export default defineComponent({
     }
     // 文件查看
     const showFile = (url: string) => {
-      console.log('url:', url)
       window.open(url, '_blank')
     }
     // 删除

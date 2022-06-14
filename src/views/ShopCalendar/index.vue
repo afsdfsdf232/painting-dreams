@@ -174,7 +174,9 @@ export default defineComponent({
                   const start = new Date(citem.startDate).getDate()
                   // 获取结束日期
                   // const end = new Date('2022-06-18').getDate()
-                  const end = citem.endDate ? new Date(citem.endDate).getDate() : dates
+                  const end = citem.endDate
+                    ? new Date(citem.endDate).getDate()
+                    : dates
                   for (let i = start; i <= end; i++) {
                     items[`day-${i}`] = citem.projectName
                   }
@@ -186,11 +188,7 @@ export default defineComponent({
             }
           })
         }
-        // rowspan(newData)
         tableData.value = newData
-        // demo3.tableData = newData
-        console.log('tableHeader.value:', tableHeader.value)
-        console.log('tableData:', tableData.value)
       }
     }
 

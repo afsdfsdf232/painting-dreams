@@ -2,7 +2,7 @@
  * @Description:
  * @Author: Author
  * @Date: 2022-03-31 09:41:23
- * @LastEditTime: 2022-06-13 18:01:19
+ * @LastEditTime: 2022-06-14 10:34:04
  * @LastEditors: Author
 -->
 <template>
@@ -22,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref, Ref, watchEffect } from 'vue'
+import { computed, defineComponent, watchEffect } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
 import Header from './components/Header.vue'
@@ -33,7 +33,6 @@ export default defineComponent({
     'side-bar': SideBar
   },
   setup () {
-    const page: Ref<number> = ref(1)
     const route = computed(() => useRoute())
     const store = useStore()
     watchEffect(() => {
@@ -41,9 +40,6 @@ export default defineComponent({
         store.commit('SET_META_VALUE', route.value.meta.permission)
       }
     })
-    return {
-      page
-    }
   }
 })
 </script>

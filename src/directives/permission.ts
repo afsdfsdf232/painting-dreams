@@ -2,10 +2,11 @@
  * @Description:
  * @Author: Author
  * @Date: 2022-06-13 16:44:32
- * @LastEditTime: 2022-06-13 18:07:28
+ * @LastEditTime: 2022-06-14 10:41:20
  * @LastEditors: Author
  */
 import store from '@/store/index'
+
 // 指令-控制按钮权限
 export default (app: any) => {
   app.directive('permission', {
@@ -21,9 +22,15 @@ export default (app: any) => {
           permission = []
         }
       }
-      const editIndex = permission.findIndex((item: any) => item === `${metaValue}-edit`)
-      const addIndex = permission.findIndex((item: any) => item === `${metaValue}-add`)
-      const deleteIndex = permission.findIndex((item: any) => item === `${metaValue}-delete`)
+      const editIndex = permission.findIndex(
+        (item: any) => item === `${metaValue}-edit`
+      )
+      const addIndex = permission.findIndex(
+        (item: any) => item === `${metaValue}-add`
+      )
+      const deleteIndex = permission.findIndex(
+        (item: any) => item === `${metaValue}-delete`
+      )
       if (options.value === 'edit') {
         // 编辑按钮
         el.style.display = editIndex > -1 ? 'block' : 'none'

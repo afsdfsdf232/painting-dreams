@@ -16,7 +16,12 @@
         :prop="head.key"
         :label="head.name"
       />
-      <el-table-column fixed="right" v-permission="'table'" label="操作" width="160">
+      <el-table-column
+        fixed="right"
+        v-permission="'table'"
+        label="操作"
+        width="160"
+      >
         <template #default="scope">
           <el-button
             type="text"
@@ -62,7 +67,12 @@
             :prop="head.key"
             :label="head.name"
           />
-          <el-table-column fixed="right" v-permission="'table'" label="操作" width="130">
+          <el-table-column
+            fixed="right"
+            v-permission="'table'"
+            label="操作"
+            width="130"
+          >
             <template #default="scope">
               <div style="width: 130px">
                 <el-button
@@ -113,7 +123,12 @@
           :prop="head.key"
           :label="head.name"
         />
-        <el-table-column fixed="right"  label="操作" width="220" v-permission="'table'">
+        <el-table-column
+          fixed="right"
+          label="操作"
+          width="220"
+          v-permission="'table'"
+        >
           <template #default="scope">
             <div style="width: 220px">
               <el-button
@@ -178,7 +193,12 @@
           </template>
         </el-table-column>
 
-        <el-table-column fixed="right" v-permission="'table'" label="操作" width="220">
+        <el-table-column
+          fixed="right"
+          v-permission="'table'"
+          label="操作"
+          width="220"
+        >
           <template #default="scope">
             <el-button
               type="text"
@@ -809,7 +829,6 @@ export default defineComponent({
   setup () {
     // 验证2次密码输入
     const validatorPassword2 = (rule: any, value: any, callback: any) => {
-      console.log(rule)
       if (!value) {
         callback('请输入确认密码')
       } else {
@@ -1152,7 +1171,6 @@ export default defineComponent({
       const { code, data } = await getDesignPost()
       if (code === 200) {
         designPosts.tableData = data || []
-        console.log('职位分工列表:', data)
       }
       designPosts.tableLoading = false
     }
@@ -1225,7 +1243,6 @@ export default defineComponent({
       if (!peopleTableFormRef) return
       peopleTableFormRef.validate(async (valid) => {
         if (valid) {
-          console.log('submit!')
           const { id, name, phone, managePostId, password } =
             peopleTable.addModal
           peopleTable.addModal.loading = true
@@ -1276,7 +1293,6 @@ export default defineComponent({
       if (!FormRef) return
       FormRef.validate(async (valid) => {
         if (valid) {
-          console.log('submit!')
           const { code } = await updateSysUserPassword({
             id: peopleTable.updatePwdModals.id,
             newPassword: md5Encode(peopleTable.updatePwdModals.password)
@@ -1422,12 +1438,6 @@ export default defineComponent({
     const addCompanyModal = ref(false) // 新增公司弹窗
     const addDivisionModal = ref(false) // 新增分工弹窗
     const addDepartmentModal = ref(false) // 新建部门弹窗
-
-    // 按钮权限
-    // const route = useRoute()
-    // const store: any = useStore()
-    // const permissionList: any = []
-    // console.log(route.meta.permission, 'kk', store.state.userInfo.permission)
 
     return {
       designPostsFormRef,

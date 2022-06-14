@@ -2,7 +2,7 @@
  * @Description:
  * @Author: Author
  * @Date: 2022-03-31 09:41:23
- * @LastEditTime: 2022-06-13 16:37:17
+ * @LastEditTime: 2022-06-14 10:43:11
  * @LastEditors: Author
 -->
 <template>
@@ -43,7 +43,6 @@ export default defineComponent({
     const route = useRoute()
     const store = useStore()
     const userInfo = store.state.userInfo
-    console.log('userInfo:', JSON.parse(userInfo.permission))
 
     const routes = computed(() => {
       const routers =

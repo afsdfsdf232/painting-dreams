@@ -42,7 +42,12 @@
           </template>
         </el-table-column>
 
-        <el-table-column fixed="right"  v-permission="'table'" label="操作" width="120">
+        <el-table-column
+          fixed="right"
+          v-permission="'table'"
+          label="操作"
+          width="120"
+        >
           <template #default="scope">
             <div style="width: 120px">
               <el-button
@@ -326,7 +331,6 @@ export default defineComponent({
       }
       companyLeftRef.validate(async (valid) => {
         if (valid) {
-          console.log('companyLeftRef-ok')
           const query = {
             ...form,
             bankList: [

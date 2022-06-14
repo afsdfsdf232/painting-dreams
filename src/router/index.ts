@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import { isLogin } from '@/utils'
 import Layout from '@/layout/index.vue'
+
 import store from '@/store'
 
 const routes: Array<RouteRecordRaw> = [
@@ -160,6 +161,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/login',
     name: 'Login',
     component: () => import(/* webpackChunkName: "login" */ '@/views/Login.vue')
+  },
+  {
+    path: '/404',
+    name: 'NotFound',
+    component: () =>
+      import(/* webpackChunkName: "NotFound" */ '@/views/NotFound/index.vue')
   }
 ]
 
@@ -169,11 +176,59 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if (to.name !== 'Login') {
+  const permissionInfo: any = store.state.userInfo
+  if (to.name === 'NotFound') {
+    next()
+  } else if (to.name !== 'Login') {
     // 需要验证登录状态
     if (isLogin()) {
       // 已经登录
-      next()
+      // 路由权限控制
+      if (
+        (permissionInfo && permissionInfo.type === '1') ||
+        !to.meta ||
+        !to.meta.permission
+      ) {
+        // 超管不需要鉴权，判断路由是否配置 permission，没有配置不需要鉴权
+        next()
+      } else {
+        // 获取权限列表
+        let permission: Array<any> = []
+        try {
+          permission = JSON.parse(permissionInfo.permission)
+        } catch (err) {
+          permission = []
+        }
+        if (permission.indexOf(to.meta.permission) > -1) {
+          next()
+        } else {
+          // 跳转第一个页面时候,需要判断当前页面是否存在权限，存在跳转，不存在去路由查找第一个有权限的页面
+          if (to.name === 'ShopCalendar') {
+            // 路由表查找
+            const layoutList = routes[0].children as Array<any>
+            let pageName = ''
+            for (let i = 0; i < layoutList.length; i++) {
+              if (
+                layoutList[i] &&
+                layoutList[i].meta &&
+                layoutList[i].meta.permission
+              ) {
+                if (permission.indexOf(layoutList[i].meta.permission) > -1) {
+                  pageName = layoutList[i].name
+                  break
+                }
+              }
+            }
+            if (pageName) {
+              next({ name: pageName })
+            } else {
+              next({ name: 'NotFound' })
+            }
+          } else {
+            next({ name: 'NotFound' })
+          }
+        }
+      }
     } else {
       // 没有登录
       next({ name: 'Login' })

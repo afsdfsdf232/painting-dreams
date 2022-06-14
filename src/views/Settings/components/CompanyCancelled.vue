@@ -1,21 +1,28 @@
+<!--
+ * @Description:
+ * @Author: Author
+ * @Date: 2022-05-20 09:32:48
+ * @LastEditTime: 2022-06-14 10:45:20
+ * @LastEditors: Author
+-->
 <template>
-      <el-table
-      border
-      :stripe="true"
-      v-loading="operatingCompany.tableLoading"
-      height="250"
-      size="large"
-      :data="operatingCompany.tableData"
-      style="width: 100%"
-    >
-      <el-table-column
-        align="center"
-        v-for="(head, index) in headerData"
-        :key="index"
-        :prop="head.key"
-        :label="head.name"
-      />
-    </el-table>
+  <el-table
+    border
+    :stripe="true"
+    v-loading="operatingCompany.tableLoading"
+    height="250"
+    size="large"
+    :data="operatingCompany.tableData"
+    style="width: 100%"
+  >
+    <el-table-column
+      align="center"
+      v-for="(head, index) in headerData"
+      :key="index"
+      :prop="head.key"
+      :label="head.name"
+    />
+  </el-table>
 </template>
 
 <script lang="ts">
@@ -37,9 +44,6 @@ export default defineComponent({
       tableData: Array<any>
       tableLoading: boolean
     }
-    const deleteOperatingCompany = (id: string) => {
-      console.log(id)
-    }
     const getOperatingCompanyLists = async () => {
       operatingCompany.tableLoading = true
       const { code, data } = await getOperatingCompanyList({
@@ -50,7 +54,11 @@ export default defineComponent({
 
       if (code === 200 && data) {
         operatingCompany.tableData = (data.list || []).map((item: any) => {
-          const { name = '', account = '', id = '' } = item.bankList ? item.bankList[0] ? item.bankList[0] : {} : {}
+          const {
+            name = '',
+            account = '',
+            id = ''
+          } = item.bankList ? (item.bankList[0] ? item.bankList[0] : {}) : {}
           item.bankName = name
           item.bankAccount = account
           item.bankId = id
@@ -68,13 +76,10 @@ export default defineComponent({
     })
     return {
       operatingCompany,
-      headerData,
-      deleteOperatingCompany
+      headerData
     }
   }
 })
 </script>
 
-<style lang="less" scoped>
-
-</style>
+<style lang="less" scoped></style>

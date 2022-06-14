@@ -259,7 +259,6 @@ export default defineComponent({
             newData.push(newDataItem)
           }
         })
-        console.log('newData:', newData)
         demo3.tableData = newData
       }
       tableLoading.value = false
